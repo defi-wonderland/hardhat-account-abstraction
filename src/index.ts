@@ -11,6 +11,12 @@ extendProvider((provider, config, networkName) => {
   log(`Extending provider for network ${networkName}`);
 
   const netConfig = config.networks[networkName];
+  // TODO: support mnemonics
+  if (!Array.isArray(netConfig.accounts)) {
+    log(`Mnemonics are not yet supported, skipping`);
+    return provider;
+  }
+  const signer: string = netConfig.accounts[0] as string;
 
   if (!("url" in netConfig)) {
     log(`Hardhat Network detected, skipping`);
@@ -23,5 +29,5 @@ extendProvider((provider, config, networkName) => {
     return provider;
   }
 
-  return new GaslessProvider(provider, sponsorUrl);
+  return new GaslessProvider(signer, provider, sponsorUrl);
 });

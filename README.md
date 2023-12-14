@@ -15,7 +15,7 @@ This plugin will help you with world domination by implementing a simple tic-tac
 <_A step-by-step guide on how to install the plugin_>
 
 ```bash
-npm install <your npm package name> [list of peer dependencies]
+yarn install <your npm package name> [list of peer dependencies]
 ```
 
 Import the plugin in your `hardhat.config.js`:

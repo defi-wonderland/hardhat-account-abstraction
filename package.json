@@ -15,11 +15,22 @@
     "hardhat-plugin"
   ],
   "scripts": {
-    "format": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}' README.md",
+    "format": "yarn run prettier:fix && yarn run lint:fix",
     "test": "mocha --exit --recursive 'test/**/*.test.ts'",
     "build": "tsc",
     "watch": "tsc -w",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "yarn lint:src && yarn lint:test",
+    "lint:fix": "yarn lint:src --fix && yarn lint:test --fix",
+    "lint:src": "eslint ./src",
+    "lint:test": "eslint ./test",
+    "prepare": "husky install",
+    "prettier": "prettier src test --check",
+    "prettier:fix": "yarn run prettier -- --write"
+  },
+  "lint-staged": {
+    "*.ts": "eslint --cache --fix",
+    "src/**/*.{js,ts,md}": "yarn run prettier:fix"
   },
   "files": [
     "dist/src/",
@@ -36,7 +47,13 @@
     "mocha": "10.2.0",
     "prettier": "3.1.0",
     "ts-node": "10.9.1",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "eslint": "8.34.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-prettier": "5.0.1",
+    "husky": "8.0.3",
+    "@typescript-eslint/eslint-plugin": "5.59.6",
+    "@typescript-eslint/parser": "5.59.6"
   },
   "peerDependencies": {
     "hardhat": "^2.19.0"

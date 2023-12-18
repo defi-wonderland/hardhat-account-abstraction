@@ -1,11 +1,11 @@
-import { extendProvider } from "hardhat/config";
+import { extendProvider } from 'hardhat/config';
 
-import init from "debug";
+import init from 'debug';
 
-const log = init("hardhat:plugin:gasless");
+const log = init('hardhat:plugin:gasless');
 
-import "./type-extensions";
-import { GaslessProvider } from "./gasless-provider";
+import './type-extensions';
+import { GaslessProvider } from './gasless-provider';
 
 extendProvider((provider, config, networkName) => {
   log(`Extending provider for network ${networkName}`);
@@ -18,7 +18,7 @@ extendProvider((provider, config, networkName) => {
   }
   const signer: string = netConfig.accounts[0] as string;
 
-  if (!("url" in netConfig)) {
+  if (!('url' in netConfig)) {
     log(`Hardhat Network detected, skipping`);
     return provider;
   }

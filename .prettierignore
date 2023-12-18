@@ -3,5 +3,4 @@ coverage
 public
 build
 dist
-
 src/constants.ts

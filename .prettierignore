@@ -1,0 +1,6 @@
+node_modules
+coverage
+public
+build
+dist
+src/constants.ts

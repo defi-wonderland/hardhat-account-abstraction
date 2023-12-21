@@ -1,4 +1,8 @@
 import { extendProvider } from 'hardhat/config';
+import { createPublicClient, http } from 'viem';
+import { createPimlicoPaymasterClient, createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+
+import 'dotenv/config';
 
 import init from 'debug';
 
@@ -7,7 +11,8 @@ const log = init('hardhat:plugin:gasless');
 import './type-extensions';
 import { GaslessProvider } from './gasless-provider';
 
-extendProvider((provider, config, networkName) => {
+// NOTE: Network name has to match how pimlico names the network in their API calls
+extendProvider(async (provider, config, networkName) => {
   log(`Extending provider for network ${networkName}`);
 
   const netConfig = config.networks[networkName];
@@ -16,18 +21,38 @@ extendProvider((provider, config, networkName) => {
     log(`Mnemonics are not yet supported, skipping`);
     return provider;
   }
-  const signer: string = netConfig.accounts[0] as string;
+  const signer = netConfig.accounts[0] as `0x${string}`;
 
   if (!('url' in netConfig)) {
     log(`Hardhat Network detected, skipping`);
     return provider;
   }
 
-  const sponsorUrl = netConfig.sponsorUrl;
-  if (sponsorUrl === undefined) {
+  const pimlicoApiKey = netConfig.pimlicoApiKey;
+  if (pimlicoApiKey === undefined) {
     log(`No sponsor url, skipping`);
     return provider;
   }
 
-  return new GaslessProvider(signer, provider, sponsorUrl);
+  const publicClient = createPublicClient({
+    transport: http(netConfig.url),
+  });
+
+  const bundlerClient = createPimlicoBundlerClient({
+    transport: http(`https://api.pimlico.io/v1/${networkName}/rpc?apikey=${pimlicoApiKey}`),
+  });
+
+  const paymasterClient = createPimlicoPaymasterClient({
+    transport: http(`https://api.pimlico.io/v2/${networkName}/rpc?apikey=${pimlicoApiKey}`),
+  });
+
+  return new GaslessProvider(
+    signer,
+    provider,
+    networkName,
+    pimlicoApiKey,
+    bundlerClient,
+    paymasterClient,
+    publicClient,
+  );
 });

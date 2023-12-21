@@ -42,19 +42,19 @@
     "@types/chai": "4.3.11",
     "@types/debug": "4.1.12",
     "@types/mocha": "5.2.6",
+    "@typescript-eslint/eslint-plugin": "5.59.6",
+    "@typescript-eslint/parser": "5.59.6",
     "chai": "4.3.10",
-    "hardhat": "2.19.0",
-    "mocha": "10.2.0",
-    "prettier": "3.1.0",
-    "ts-node": "10.9.1",
-    "typescript": "5.3.3",
     "eslint": "8.34.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-prettier": "5.0.1",
+    "hardhat": "2.19.0",
     "husky": "8.0.3",
-    "@typescript-eslint/eslint-plugin": "5.59.6",
-    "@typescript-eslint/parser": "5.59.6",
-    "lint-staged": "13.2.2"
+    "lint-staged": "13.2.2",
+    "mocha": "10.2.0",
+    "prettier": "3.1.0",
+    "ts-node": "10.9.1",
+    "typescript": "5.3.3"
   },
   "peerDependencies": {
     "hardhat": "^2.19.0"
@@ -62,6 +62,9 @@
   "dependencies": {
     "axios": "1.6.2",
     "debug": "4.3.4",
-    "ethers": "5.7.2"
+    "dotenv": "^16.3.1",
+    "ethers": "5.7.2",
+    "permissionless": "^0.0.16",
+    "viem": "^1.20.3"
   }
 }

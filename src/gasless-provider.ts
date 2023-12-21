@@ -2,8 +2,12 @@ import { ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import axios, { AxiosInstance } from 'axios';
-import { SIGNATURE_PROXY_ABI, SIGNATURE_PROXY_FACTORY_ADDRESS, SIGNATURE_PROXY_CHILD_INIT_CODE } from './constants';
+import { Address, createPublicClient, HttpTransport, concat, encodeFunctionData, Hex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { SafeSmartAccount } from 'permissionless/accounts';
+import { PimlicoBundlerClient, PimlicoPaymasterClient } from 'permissionless/clients/pimlico';
+import { UserOperation } from 'permissionless/types';
+import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -11,16 +15,55 @@ const log = init('hardhat:plugin:gasless');
 // TODO: Test this with value transfers
 // TODO: Test this with tx type 0, 1
 export class GaslessProvider extends ProviderWrapper {
-  private readonly _sponsorAPI: AxiosInstance;
+  private readonly _safeAccount: SafeSmartAccount<HttpTransport, undefined> | undefined;
+  private readonly _entryPoint: Address;
+  private _initCode: `0x${string}`;
+  private readonly _owner: ReturnType<typeof privateKeyToAccount>;
+  private _nonce: bigint;
+  private _simpleAccountFactoryAddress: Address;
+  public senderAddress: `0x${string}`;
 
   constructor(
-    protected readonly _signerPk: string,
+    protected readonly _signerPk: `0x${string}`,
     protected readonly _wrappedProvider: EIP1193Provider,
-    public readonly sponsorUrl: string,
+    public readonly chain: string,
+    protected readonly _pimlicoApiKey: string,
+    protected readonly bundlerClient: PimlicoBundlerClient,
+    protected readonly paymasterClient: PimlicoPaymasterClient,
+    protected readonly publicClient: ReturnType<typeof createPublicClient>,
   ) {
     super(_wrappedProvider);
 
-    this._sponsorAPI = axios.create({ baseURL: this.sponsorUrl });
+    // Hardcoded values for pimlico
+    this._simpleAccountFactoryAddress = '0x9406Cc6185a346906296840746125a0E44976454';
+    this._entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
+    this._owner = privateKeyToAccount(this._signerPk);
+
+    // Generate init code
+    // Uses a random salt each time to make sure sender address is unique
+    this._initCode = concat([
+      this._simpleAccountFactoryAddress,
+      encodeFunctionData({
+        abi: [
+          {
+            inputs: [
+              { name: 'owner', type: 'address' },
+              { name: 'salt', type: 'uint256' },
+            ],
+            name: 'createAccount',
+            outputs: [{ name: 'ret', type: 'address' }],
+            stateMutability: 'nonpayable',
+            type: 'function',
+          },
+        ],
+        args: [this._owner.address, getRandomBigInt(0n, 2n ** 256n)],
+      }),
+    ]);
+
+    // NOTE: Nonce currently does not get incremented because we use a unique sender address each time, when trying to use a cached sender we get an error
+    // NOTE: There is a linear task regarding this issue
+    this._nonce = 0n;
+    this.senderAddress = '0x';
   }
 
   public request(args: RequestArguments): Promise<unknown> {
@@ -32,47 +75,111 @@ export class GaslessProvider extends ProviderWrapper {
     return this._wrappedProvider.request(args);
   }
 
-  public async _sendGaslessTransaction(tx: string): Promise<string> {
-    const signer = new ethers.Wallet(this._signerPk);
-
+  private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
-    const { to, data } = ethers.utils.parseTransaction(tx);
 
-    const value = 0;
-    const chainId = await this.getChainId();
-    const proxyAddress = this.getProxyAddress(signer.address);
-    log('Signer computed proxy address', proxyAddress);
-
-    let nextNonce = 0;
-    const isProxyDeployed = await this.isContractDeployed(proxyAddress);
-    if (isProxyDeployed) {
-      nextNonce = await this.getProxyNextNonce(proxyAddress);
-      log(`Proxy is deployed and its next nonce is ${nextNonce}`);
-    }
-
-    log('Signing message for sponsoring', {
-      signer: signer.address,
-      to,
-      data,
-      value,
-      chainId,
-      nonce: nextNonce,
+    // Get sender
+    this.senderAddress = await getSenderAddress(this.publicClient, {
+      initCode: this._initCode,
+      entryPoint: this._entryPoint,
     });
-    const signature = await this.encodeMessage(signer, to as string, data, value, chainId, nextNonce);
 
-    // call the API
-    const request = {
-      from: signer.address,
-      to: to,
-      data: data,
-      value,
-      ...signature,
+    // Parse the transaction
+    const parsedTxn = ethers.utils.parseTransaction(tx);
+
+    // Get gas prices from pimlico
+    const gasPrices = await this.bundlerClient.getUserOperationGasPrice();
+
+    // Generate calldata
+    // This calldata is hardcoded as it is calldata for pimlico to execute
+    const callData = encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: 'dest', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'func', type: 'bytes' },
+          ],
+          name: 'execute',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+      ],
+      args: [parsedTxn.to as `0x${string}`, parsedTxn.value.toBigInt(), parsedTxn.data as `0x${string}`],
+    });
+
+    // Construct UserOperation
+    const userOperation = {
+      sender: this.senderAddress,
+      nonce: this._nonce,
+      initCode: this._initCode,
+      callData,
+      maxFeePerGas: gasPrices.fast.maxFeePerGas,
+      maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas,
+      // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
+      signature:
+        '0xa15569dd8f8324dbeabf8023fdec36d4b754f53ce5901e283c6de79af177dc94557fa3c9922cd7af2a96ca94402d35c39f266925ee6407aeb32b31d76978d4ba1c' as Hex,
     };
-    log('Sending request to sponsor', { sponsor: this.sponsorUrl, request });
-    const sponsorResponse = await this._sponsorAPI.post<string[]>('/tx-signature', [request]);
-    const txHash = sponsorResponse.data[0];
-    log('Received tx hash from sponsor', txHash);
 
+    // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
+    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation({
+      userOperation,
+      entryPoint: this._entryPoint,
+    });
+
+    const sponsoredUserOperation: UserOperation = {
+      ...userOperation,
+      preVerificationGas: sponsorUserOperationResult.preVerificationGas,
+      verificationGasLimit: sponsorUserOperationResult.verificationGasLimit,
+      callGasLimit: sponsorUserOperationResult.callGasLimit,
+      paymasterAndData: sponsorUserOperationResult.paymasterAndData,
+    };
+
+    // SIGN THE USER OPERATION
+    const signature = await signUserOperationHashWithECDSA({
+      account: this._owner,
+      userOperation: sponsoredUserOperation,
+      chainId: await this.getChainId(),
+      entryPoint: this._entryPoint,
+    });
+    sponsoredUserOperation.signature = signature;
+
+    log('Generated signature:', signature);
+
+    // SUBMIT THE USER OPERATION TO BE BUNDLED
+    const userOperationHash = await this.bundlerClient.sendUserOperation({
+      userOperation: sponsoredUserOperation,
+      entryPoint: this._entryPoint,
+    });
+
+    log('Received User Operation hash:', userOperationHash);
+
+    // let's also wait for the userOperation to be included, by continually querying for the receipts
+    log('Querying for receipts...');
+    const receipt = await this.bundlerClient.waitForUserOperationReceipt({ hash: userOperationHash });
+    const txHash = receipt.receipt.transactionHash;
+    log('Transaction hash:', txHash);
+
+    // Make a new init code for the next transaction
+    this._initCode = concat([
+      this._simpleAccountFactoryAddress,
+      encodeFunctionData({
+        abi: [
+          {
+            inputs: [
+              { name: 'owner', type: 'address' },
+              { name: 'salt', type: 'uint256' },
+            ],
+            name: 'createAccount',
+            outputs: [{ name: 'ret', type: 'address' }],
+            stateMutability: 'nonpayable',
+            type: 'function',
+          },
+        ],
+        args: [this._owner.address, getRandomBigInt(0n, 2n ** 256n)],
+      }),
+    ]);
     // return the tx hash
     return txHash;
   }
@@ -84,62 +191,12 @@ export class GaslessProvider extends ProviderWrapper {
     })) as string;
     return parseInt(rawChainId);
   }
-
-  private getProxyAddress(signer: string): string {
-    return ethers.utils.getCreate2Address(
-      SIGNATURE_PROXY_FACTORY_ADDRESS,
-      ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(['address'], [signer])),
-      ethers.utils.solidityKeccak256(['bytes'], [SIGNATURE_PROXY_CHILD_INIT_CODE]),
-    );
-  }
-
-  private async isContractDeployed(address: string): Promise<boolean> {
-    const code = await this._wrappedProvider.request({
-      method: 'eth_getCode',
-      params: [address, 'latest'],
-    });
-    return code !== '0x';
-  }
-
-  private async getProxyNextNonce(address: string): Promise<number> {
-    const proxy = new ethers.Contract(address, SIGNATURE_PROXY_ABI);
-    const populatedNonceFetch = await proxy.populateTransaction.nextNonce();
-    const rawNonce = (await this._wrappedProvider.request({
-      method: 'eth_call',
-      params: [populatedNonceFetch, 'latest'],
-    })) as string;
-    return parseInt(rawNonce);
-  }
-
-  private async encodeMessage(
-    signer: ethers.Wallet,
-    to: string,
-    data: string,
-    value: number,
-    chainId: number,
-    nonce: number,
-  ): Promise<{ r: string; s: string; v: number }> {
-    const encodedMessage = ethers.utils.defaultAbiCoder.encode(
-      ['address', 'bytes', 'uint256', 'uint256', 'uint256'],
-      [to, data, value, chainId, nonce],
-    );
-    log('Encoding message', {
-      to,
-      data,
-      value,
-      chainId,
-      nonce,
-    });
-    const digest = ethers.utils.keccak256(encodedMessage);
-    const rawSignature = await ethers.utils.joinSignature(
-      signer._signingKey().signDigest(toEthSignedMessageHash(digest)),
-    );
-    const { r, s, v } = ethers.utils.splitSignature(rawSignature);
-    return { r, s, v };
-  }
 }
 
-function toEthSignedMessageHash(messageHash: string): string {
-  const prefix = ethers.utils.toUtf8Bytes('\x19Ethereum Signed Message:\n32');
-  return ethers.utils.keccak256(ethers.utils.concat([prefix, messageHash]));
+function getRandomBigInt(min: bigint, max: bigint): bigint {
+  // The Math.random() function returns a floating-point, pseudo-random number in the range 0 to less than 1
+  // So, we need to adjust it to our desired range (min to max)
+  const range = max - min + BigInt(1);
+  const rand = BigInt(Math.floor(Number(range) * Math.random()));
+  return min + rand;
 }

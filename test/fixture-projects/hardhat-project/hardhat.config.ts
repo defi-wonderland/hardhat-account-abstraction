@@ -8,7 +8,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     localhost: {
-      sponsorUrl: 'foo',
+      pimlicoApiKey: 'foo',
     },
   },
 };

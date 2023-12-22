@@ -7,7 +7,7 @@ describe('Integration tests examples', function () {
     useEnvironment('hardhat-project');
 
     it('Should add the sponsoredUrl to the config', function () {
-      assert.equal(this.hre.config.networks.localhost.sponsorUrl, 'foo');
+      assert.equal(this.hre.config.networks.localhost.pimlicoApiKey, 'foo');
     });
   });
 });

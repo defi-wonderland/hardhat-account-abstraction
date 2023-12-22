@@ -78,11 +78,8 @@ export class GaslessProvider extends ProviderWrapper {
   private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
 
-    // Get sender
-    this.senderAddress = await getSenderAddress(this.publicClient, {
-      initCode: this._initCode,
-      entryPoint: this._entryPoint,
-    });
+    // Ensures sender has been cached, if it hasnt it caches it
+    this.isSenderCached();
 
     // Parse the transaction
     const parsedTxn = ethers.utils.parseTransaction(tx);
@@ -113,7 +110,7 @@ export class GaslessProvider extends ProviderWrapper {
     const userOperation = {
       sender: this.senderAddress,
       nonce: this._nonce,
-      initCode: this._initCode,
+      initCode: this._nonce === 0n ? this._initCode : '0x',
       callData,
       maxFeePerGas: gasPrices.fast.maxFeePerGas,
       maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas,
@@ -162,24 +159,7 @@ export class GaslessProvider extends ProviderWrapper {
     log('Transaction hash:', txHash);
 
     // Make a new init code for the next transaction
-    this._initCode = concat([
-      this._simpleAccountFactoryAddress,
-      encodeFunctionData({
-        abi: [
-          {
-            inputs: [
-              { name: 'owner', type: 'address' },
-              { name: 'salt', type: 'uint256' },
-            ],
-            name: 'createAccount',
-            outputs: [{ name: 'ret', type: 'address' }],
-            stateMutability: 'nonpayable',
-            type: 'function',
-          },
-        ],
-        args: [this._owner.address, getRandomBigInt(0n, 2n ** 256n)],
-      }),
-    ]);
+    this._nonce += 1n;
     // return the tx hash
     return txHash;
   }
@@ -190,6 +170,16 @@ export class GaslessProvider extends ProviderWrapper {
       params: [],
     })) as string;
     return parseInt(rawChainId);
+  }
+
+  // Checks if we have retrieved a sender address before, if we have does nothing, if we havent retrieves it
+  private async isSenderCached() {
+    if (this.senderAddress === '0x') {
+      this.senderAddress = await getSenderAddress(this.publicClient, {
+        initCode: this._initCode,
+        entryPoint: this._entryPoint,
+      });
+    }
   }
 }
 

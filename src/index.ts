@@ -30,7 +30,7 @@ extendProvider(async (provider, config, networkName) => {
 
   const pimlicoApiKey = netConfig.pimlicoApiKey;
   if (pimlicoApiKey === undefined) {
-    log(`No sponsor url, skipping`);
+    log(`No pimlico api key, skipping`);
     return provider;
   }
 

@@ -45,7 +45,7 @@ export class GaslessProvider extends ProviderWrapper {
     customEntryPoint: `0x${string}` | undefined,
   ) {
     const entryPoint = customEntryPoint !== undefined ? customEntryPoint : constants.entryPoint;
-    const simpleAccountFactoryAddress = '0x9406Cc6185a346906296840746125a0E44976454';
+    const simpleAccountFactoryAddress = constants.simpleAccountFactoryAddress;
     const owner = privateKeyToAccount(_signerPk);
 
     const initCode = concat([

@@ -17,7 +17,7 @@ jobs:
       - uses: wagoid/commitlint-github-action@v5
 
   lint:
-    name: Run Linters
+    name: Run build
     runs-on: ubuntu-latest
 
     strategy:

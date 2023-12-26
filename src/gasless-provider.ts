@@ -2,26 +2,18 @@ import { ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { Address, createPublicClient, HttpTransport, concat, encodeFunctionData, Hex } from 'viem';
+import { createPublicClient, concat, encodeFunctionData, Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { SafeSmartAccount } from 'permissionless/accounts';
 import { PimlicoBundlerClient, PimlicoPaymasterClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 
 const log = init('hardhat:plugin:gasless');
 
-// TODO: Using wallets with no ETH does not work
 // TODO: Test this with value transfers
 // TODO: Test this with tx type 0, 1
 export class GaslessProvider extends ProviderWrapper {
-  private readonly _safeAccount: SafeSmartAccount<HttpTransport, undefined> | undefined;
-  private readonly _entryPoint: Address;
-  private _initCode: `0x${string}`;
-  private readonly _owner: ReturnType<typeof privateKeyToAccount>;
   private _nonce: bigint;
-  private _simpleAccountFactoryAddress: Address;
-  public senderAddress: `0x${string}`;
 
   constructor(
     protected readonly _signerPk: `0x${string}`,
@@ -31,18 +23,31 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly bundlerClient: PimlicoBundlerClient,
     protected readonly paymasterClient: PimlicoPaymasterClient,
     protected readonly publicClient: ReturnType<typeof createPublicClient>,
+    protected readonly _initCode: `0x${string}`,
+    protected readonly senderAddress: `0x${string}`,
+    protected readonly _owner: ReturnType<typeof privateKeyToAccount>,
+    protected readonly _entryPoint: `0x${string}`,
   ) {
     super(_wrappedProvider);
 
-    // Hardcoded values for pimlico
-    this._simpleAccountFactoryAddress = '0x9406Cc6185a346906296840746125a0E44976454';
-    this._entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
-    this._owner = privateKeyToAccount(this._signerPk);
+    this._nonce = 0n;
+  }
 
-    // Generate init code
-    // Uses a random salt each time to make sure sender address is unique
-    this._initCode = concat([
-      this._simpleAccountFactoryAddress,
+  static async create(
+    _signerPk: `0x${string}`,
+    _wrappedProvider: EIP1193Provider,
+    chain: string,
+    _pimlicoApiKey: string,
+    bundlerClient: PimlicoBundlerClient,
+    paymasterClient: PimlicoPaymasterClient,
+    publicClient: ReturnType<typeof createPublicClient>,
+  ) {
+    const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
+    const simpleAccountFactoryAddress = '0x9406Cc6185a346906296840746125a0E44976454';
+    const owner = privateKeyToAccount(_signerPk);
+
+    const initCode = concat([
+      simpleAccountFactoryAddress,
       encodeFunctionData({
         abi: [
           {
@@ -56,14 +61,30 @@ export class GaslessProvider extends ProviderWrapper {
             type: 'function',
           },
         ],
-        args: [this._owner.address, getRandomBigInt(0n, 2n ** 256n)],
+        args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
       }),
     ]);
 
-    // NOTE: Nonce currently does not get incremented because we use a unique sender address each time, when trying to use a cached sender we get an error
-    // NOTE: There is a linear task regarding this issue
-    this._nonce = 0n;
-    this.senderAddress = '0x';
+    const senderAddress = await getSenderAddress(publicClient, {
+      initCode: initCode,
+      entryPoint: entryPoint,
+    });
+
+    const gaslessProvider = new GaslessProvider(
+      _signerPk,
+      _wrappedProvider,
+      chain,
+      _pimlicoApiKey,
+      bundlerClient,
+      paymasterClient,
+      publicClient,
+      initCode,
+      senderAddress,
+      owner,
+      entryPoint,
+    );
+
+    return gaslessProvider;
   }
 
   public request(args: RequestArguments): Promise<unknown> {
@@ -77,9 +98,6 @@ export class GaslessProvider extends ProviderWrapper {
 
   private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
-
-    // Ensures sender has been cached, if it hasnt it caches it
-    this.isSenderCached();
 
     // Parse the transaction
     const parsedTxn = ethers.utils.parseTransaction(tx);
@@ -127,10 +145,7 @@ export class GaslessProvider extends ProviderWrapper {
 
     const sponsoredUserOperation: UserOperation = {
       ...userOperation,
-      preVerificationGas: sponsorUserOperationResult.preVerificationGas,
-      verificationGasLimit: sponsorUserOperationResult.verificationGasLimit,
-      callGasLimit: sponsorUserOperationResult.callGasLimit,
-      paymasterAndData: sponsorUserOperationResult.paymasterAndData,
+      ...sponsorUserOperationResult,
     };
 
     // SIGN THE USER OPERATION
@@ -170,16 +185,6 @@ export class GaslessProvider extends ProviderWrapper {
       params: [],
     })) as string;
     return parseInt(rawChainId);
-  }
-
-  // Checks if we have retrieved a sender address before, if we have does nothing, if we havent retrieves it
-  private async isSenderCached() {
-    if (this.senderAddress === '0x') {
-      this.senderAddress = await getSenderAddress(this.publicClient, {
-        initCode: this._initCode,
-        entryPoint: this._entryPoint,
-      });
-    }
   }
 }
 

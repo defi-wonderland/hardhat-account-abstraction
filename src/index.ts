@@ -46,7 +46,7 @@ extendProvider(async (provider, config, networkName) => {
     transport: http(`https://api.pimlico.io/v2/${networkName}/rpc?apikey=${pimlicoApiKey}`),
   });
 
-  return new GaslessProvider(
+  return await GaslessProvider.create(
     signer,
     provider,
     networkName,

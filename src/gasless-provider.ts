@@ -7,6 +7,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient, PimlicoPaymasterClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
+import * as constants from '../src/constants';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -43,8 +44,8 @@ export class GaslessProvider extends ProviderWrapper {
     publicClient: ReturnType<typeof createPublicClient>,
     customEntryPoint: `0x${string}` | undefined,
   ) {
-    const entryPoint = customEntryPoint !== undefined ? customEntryPoint : '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
-    const simpleAccountFactoryAddress = '0x9406Cc6185a346906296840746125a0E44976454';
+    const entryPoint = customEntryPoint !== undefined ? customEntryPoint : constants.entryPoint;
+    const simpleAccountFactoryAddress = constants.simpleAccountFactoryAddress;
     const owner = privateKeyToAccount(_signerPk);
 
     const initCode = concat([
@@ -134,8 +135,7 @@ export class GaslessProvider extends ProviderWrapper {
       maxFeePerGas: gasPrices.fast.maxFeePerGas,
       maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas,
       // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
-      signature:
-        '0xa15569dd8f8324dbeabf8023fdec36d4b754f53ce5901e283c6de79af177dc94557fa3c9922cd7af2a96ca94402d35c39f266925ee6407aeb32b31d76978d4ba1c' as Hex,
+      signature: constants.dummySignature as Hex,
     };
 
     // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP

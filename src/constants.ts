@@ -1,0 +1,5 @@
+export const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
+
+export const simpleAccountFactoryAddress = '0x9406Cc6185a346906296840746125a0E44976454';
+
+export const dummySignature = '0xa15569dd8f8324dbeabf8023fdec36d4b754f53ce5901e283c6de79af177dc94557fa3c9922cd7af2a96ca94402d35c39f266925ee6407aeb32b31d76978d4ba1c';

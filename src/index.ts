@@ -54,6 +54,5 @@ extendProvider(async (provider, config, networkName) => {
     bundlerClient,
     paymasterClient,
     publicClient,
-    netConfig.entryPoint,
   );
 });

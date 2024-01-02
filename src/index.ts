@@ -30,7 +30,7 @@ extendProvider(async (provider, config, networkName) => {
 
   const sponsoredTransaction = netConfig.sponsoredTransaction;
   if (sponsoredTransaction === undefined) {
-    log(`No pimlico api key, skipping`);
+    log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
 

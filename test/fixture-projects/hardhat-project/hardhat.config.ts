@@ -8,7 +8,10 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     localhost: {
-      pimlicoApiKey: 'foo',
+      sponsoredTransaction: {
+        bundlerUrl: 'http://localhost:3000',
+        paymasterUrl: 'http://localhost:3001',
+      },
     },
   },
 };

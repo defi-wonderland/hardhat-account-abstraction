@@ -20,7 +20,6 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly _signerPk: `0x${string}`,
     protected readonly _wrappedProvider: EIP1193Provider,
     public readonly chain: string,
-    protected readonly _pimlicoApiKey: string,
     protected readonly bundlerClient: PimlicoBundlerClient,
     protected readonly paymasterClient: PimlicoPaymasterClient,
     protected readonly publicClient: ReturnType<typeof createPublicClient>,
@@ -38,7 +37,6 @@ export class GaslessProvider extends ProviderWrapper {
     _signerPk: `0x${string}`,
     _wrappedProvider: EIP1193Provider,
     chain: string,
-    _pimlicoApiKey: string,
     bundlerClient: PimlicoBundlerClient,
     paymasterClient: PimlicoPaymasterClient,
     publicClient: ReturnType<typeof createPublicClient>,
@@ -76,7 +74,6 @@ export class GaslessProvider extends ProviderWrapper {
       _signerPk,
       _wrappedProvider,
       chain,
-      _pimlicoApiKey,
       bundlerClient,
       paymasterClient,
       publicClient,
@@ -104,8 +101,8 @@ export class GaslessProvider extends ProviderWrapper {
     // Parse the transaction
     const parsedTxn = ethers.utils.parseTransaction(tx);
 
-    // Get gas prices from pimlico
-    const gasPrices = await this.bundlerClient.getUserOperationGasPrice();
+    // Get gas prices
+    const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
 
     // Generate calldata
     // This calldata is hardcoded as it is calldata for pimlico to execute
@@ -132,8 +129,8 @@ export class GaslessProvider extends ProviderWrapper {
       nonce: this._nonce,
       initCode: this._nonce === 0n ? this._initCode : '0x',
       callData,
-      maxFeePerGas: gasPrices.fast.maxFeePerGas,
-      maxPriorityFeePerGas: gasPrices.fast.maxPriorityFeePerGas,
+      maxFeePerGas: maxFeePerGas as bigint,
+      maxPriorityFeePerGas: maxPriorityFeePerGas as bigint,
       // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
       signature: constants.dummySignature as Hex,
     };

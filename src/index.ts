@@ -28,9 +28,9 @@ extendProvider(async (provider, config, networkName) => {
     return provider;
   }
 
-  const pimlicoApiKey = netConfig.pimlicoApiKey;
-  if (pimlicoApiKey === undefined) {
-    log(`No pimlico api key, skipping`);
+  const sponsoredTransaction = netConfig.sponsoredTransaction;
+  if (sponsoredTransaction === undefined) {
+    log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
 
@@ -39,20 +39,12 @@ extendProvider(async (provider, config, networkName) => {
   });
 
   const bundlerClient = createPimlicoBundlerClient({
-    transport: http(`https://api.pimlico.io/v1/${networkName}/rpc?apikey=${pimlicoApiKey}`),
+    transport: http(sponsoredTransaction.bundlerUrl),
   });
 
   const paymasterClient = createPimlicoPaymasterClient({
-    transport: http(`https://api.pimlico.io/v2/${networkName}/rpc?apikey=${pimlicoApiKey}`),
+    transport: http(sponsoredTransaction.paymasterUrl),
   });
 
-  return await GaslessProvider.create(
-    signer,
-    provider,
-    networkName,
-    pimlicoApiKey,
-    bundlerClient,
-    paymasterClient,
-    publicClient,
-  );
+  return await GaslessProvider.create(signer, provider, networkName, bundlerClient, paymasterClient, publicClient);
 });

@@ -3,10 +3,16 @@ import 'hardhat/types/runtime';
 
 declare module 'hardhat/types/config' {
   export interface HttpNetworkUserConfig {
-    pimlicoApiKey?: string;
+    sponsoredTransaction?: {
+      bundlerUrl: string;
+      paymasterUrl: string;
+    };
   }
 
   export interface HttpNetworkConfig {
-    pimlicoApiKey?: string;
+    sponsoredTransaction?: {
+      bundlerUrl: string;
+      paymasterUrl: string;
+    };
   }
 }

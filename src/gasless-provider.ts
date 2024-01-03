@@ -4,10 +4,11 @@ import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
 import { createPublicClient, concat, encodeFunctionData, Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { PimlicoBundlerClient, PimlicoPaymasterClient } from 'permissionless/clients/pimlico';
+import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 import * as constants from '../src/constants';
+import { BasePaymaster } from './paymasters';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -21,7 +22,7 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly _wrappedProvider: EIP1193Provider,
     public readonly chain: string,
     protected readonly bundlerClient: PimlicoBundlerClient,
-    protected readonly paymasterClient: PimlicoPaymasterClient,
+    protected readonly paymasterClient: BasePaymaster,
     protected readonly publicClient: ReturnType<typeof createPublicClient>,
     protected readonly _initCode: `0x${string}`,
     protected readonly senderAddress: `0x${string}`,
@@ -38,7 +39,7 @@ export class GaslessProvider extends ProviderWrapper {
     _wrappedProvider: EIP1193Provider,
     chain: string,
     bundlerClient: PimlicoBundlerClient,
-    paymasterClient: PimlicoPaymasterClient,
+    paymasterClient: BasePaymaster,
     publicClient: ReturnType<typeof createPublicClient>,
   ) {
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
@@ -136,10 +137,7 @@ export class GaslessProvider extends ProviderWrapper {
     };
 
     // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
-    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation({
-      userOperation,
-      entryPoint: this._entryPoint,
-    });
+    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
 
     const sponsoredUserOperation: UserOperation = {
       ...userOperation,

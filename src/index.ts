@@ -1,6 +1,7 @@
 import { extendProvider } from 'hardhat/config';
 import { createPublicClient, http } from 'viem';
-import { createPimlicoPaymasterClient, createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { createPaymasterClient } from './paymaster';
 
 import 'dotenv/config';
 
@@ -10,6 +11,7 @@ const log = init('hardhat:plugin:gasless');
 
 import './type-extensions';
 import { GaslessProvider } from './gasless-provider';
+import { PaymasterType } from './types';
 
 // NOTE: Network name has to match how pimlico names the network in their API calls
 extendProvider(async (provider, config, networkName) => {
@@ -42,9 +44,11 @@ extendProvider(async (provider, config, networkName) => {
     transport: http(sponsoredTransaction.bundlerUrl),
   });
 
-  const paymasterClient = createPimlicoPaymasterClient({
-    transport: http(sponsoredTransaction.paymasterUrl),
-  });
+  // TODO: Change this to use our Paymaster classes based on the paymasterType
+  const paymasterClient = createPaymasterClient(
+    sponsoredTransaction.paymasterType as PaymasterType,
+    sponsoredTransaction.paymasterUrl,
+  );
 
   return await GaslessProvider.create(signer, provider, networkName, bundlerClient, paymasterClient, publicClient);
 });

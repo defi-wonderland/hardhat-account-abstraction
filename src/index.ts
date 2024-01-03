@@ -44,7 +44,6 @@ extendProvider(async (provider, config, networkName) => {
     transport: http(sponsoredTransaction.bundlerUrl),
   });
 
-  // TODO: Change this to use our Paymaster classes based on the paymasterType
   const paymasterClient = createPaymasterClient(
     sponsoredTransaction.paymasterType as PaymasterType,
     sponsoredTransaction.paymasterUrl,

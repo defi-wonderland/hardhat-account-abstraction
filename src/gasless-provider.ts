@@ -4,7 +4,7 @@ import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
 import { createPublicClient, concat, encodeFunctionData, Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { PimlicoBundlerClient, PimlicoPaymasterClient } from 'permissionless/clients/pimlico';
+import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 import * as constants from '../src/constants';

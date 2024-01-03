@@ -13,5 +13,9 @@ describe('Integration tests examples', function () {
     it('Should add the paymasterUrl to the config', function () {
       assert.equal(this.hre.config.networks.localhost.sponsoredTransaction?.paymasterUrl, 'http://localhost:3001');
     });
+
+    it('Should add the paymasterType to the config', function () {
+      assert.equal(this.hre.config.networks.localhost.sponsoredTransaction?.paymasterType, 'pimlico');
+    });
   });
 });

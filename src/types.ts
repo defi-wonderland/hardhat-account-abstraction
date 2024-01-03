@@ -11,6 +11,7 @@ export type PartialUserOperation = {
 export enum PaymasterType {
   Pimlico = 'pimlico',
   Biconomy = 'biconomy',
+  Alchemy = 'alchemy',
 }
 
 export type PaymasterTypeLiteral = keyof {

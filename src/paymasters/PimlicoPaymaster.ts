@@ -15,12 +15,12 @@ export class PimlicoPaymaster extends BasePaymaster {
   }
 
   public async sponsorUserOperation(
-    userOp: PartialUserOperation,
-    arbitraryExtraObject: any | undefined,
+    userOperation: PartialUserOperation,
+    entryPoint: `0x${string}`,
   ): Promise<SponsorUserOperationReturnType> {
     return await this.paymasterClient.sponsorUserOperation({
-      userOperation: userOp,
-      entryPoint: arbitraryExtraObject,
+      userOperation,
+      entryPoint,
     });
   }
 }

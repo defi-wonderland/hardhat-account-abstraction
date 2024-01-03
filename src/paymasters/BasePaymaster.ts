@@ -7,7 +7,7 @@ export class BasePaymaster {
     this.endpoint = endpoint;
   }
 
-  public async sponsorUserOperation(userOp: PartialUserOperation, arbitraryExtraObject: any | undefined): Promise<any> {
+  public async sponsorUserOperation(userOp: PartialUserOperation, entryPoint: `0x${string}`): Promise<any> {
     throw new Error('This is a base class and should not be called directly.');
   }
 }

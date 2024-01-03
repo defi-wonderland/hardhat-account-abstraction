@@ -6,6 +6,8 @@ export function createPaymasterClient(paymasterType: PaymasterType, paymasterUrl
   switch (paymasterType) {
     case PaymasterType.Pimlico:
       return new Pm.PimlicoPaymaster(paymasterUrl);
+    case PaymasterType.StackUp:
+      return new Pm.StackUpPaymaster(paymasterUrl);
 
     default:
       throw new Error(`Unknown paymaster type ${paymasterType}`);

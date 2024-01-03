@@ -138,6 +138,10 @@ export class GaslessProvider extends ProviderWrapper {
       maxPriorityFeePerGas: maxPriorityFeePerGas as bigint,
       // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
       signature: constants.dummySignature as Hex,
+      callGasLimit: 0n, // dummy value
+      paymasterAndData: '0x', // dummy value
+      preVerificationGas: 0n, // dummy value
+      verificationGasLimit: 0n, // dummy value
     };
 
     const gasConfig = await this.bundlerClient.estimateUserOperationGas({
@@ -149,13 +153,8 @@ export class GaslessProvider extends ProviderWrapper {
     });
 
     // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
-    const paymasterAndData = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
-
-    const sponsoredUserOperation: UserOperation = {
-      ...userOperation,
-      ...gasConfig,
-      paymasterAndData,
-    };
+    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
+    const sponsoredUserOperation: UserOperation = Object.assign(userOperation, sponsorUserOperationResult);
 
     // SIGN THE USER OPERATION
     const signature = await signUserOperationHashWithECDSA({

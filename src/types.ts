@@ -12,6 +12,7 @@ export enum PaymasterType {
   Pimlico = 'pimlico',
   Biconomy = 'biconomy',
   Alchemy = 'alchemy',
+  StackUp = 'stackup',
 }
 
 export type PaymasterTypeLiteral = keyof {

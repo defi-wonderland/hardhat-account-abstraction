@@ -142,11 +142,7 @@ export class GaslessProvider extends ProviderWrapper {
 
     // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
     const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
-
-    const sponsoredUserOperation: UserOperation = {
-      ...userOperation,
-      ...sponsorUserOperationResult,
-    };
+    const sponsoredUserOperation: UserOperation = Object.assign(userOperation, sponsorUserOperationResult);
 
     // SIGN THE USER OPERATION
     const signature = await signUserOperationHashWithECDSA({

@@ -15,4 +15,5 @@ export class BasePaymaster {
   ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
     throw new Error('This is a base class and should not be called directly.');
   }
+  // eslint-enable
 }

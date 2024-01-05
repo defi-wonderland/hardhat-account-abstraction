@@ -9,6 +9,8 @@ import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 import * as constants from '../src/constants';
 import { BasePaymaster } from './paymasters';
+import { PartialBy } from 'viem/types/utils';
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -125,7 +127,10 @@ export class GaslessProvider extends ProviderWrapper {
     });
 
     // Construct UserOperation
-    const userOperation = {
+    const userOperation: PartialBy<
+      UserOperation,
+      'callGasLimit' | 'preVerificationGas' | 'verificationGasLimit' | 'paymasterAndData'
+    > = {
       sender: this.senderAddress,
       nonce: this._nonce,
       initCode: this._nonce === 0n ? this._initCode : '0x',
@@ -140,9 +145,22 @@ export class GaslessProvider extends ProviderWrapper {
       verificationGasLimit: 0n, // dummy value
     };
 
-    // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
-    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
-    const sponsoredUserOperation: UserOperation = Object.assign(userOperation, sponsorUserOperationResult);
+    const paymasterAndData: `0x${string}` | SponsorUserOperationReturnType =
+      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
+
+    let sponsoredUserOperation: UserOperation;
+
+    if (typeof paymasterAndData === 'string') {
+      // If our paymaster only returns its paymasterAndData and not the gas parameters, we need to estimate them ourselves
+      const gasConfig = await this.bundlerClient.estimateUserOperationGas({
+        userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
+        entryPoint: this._entryPoint,
+      });
+
+      sponsoredUserOperation = Object.assign(userOperation, gasConfig, { paymasterAndData: paymasterAndData });
+    } else {
+      sponsoredUserOperation = Object.assign(userOperation, paymasterAndData);
+    }
 
     // SIGN THE USER OPERATION
     const signature = await signUserOperationHashWithECDSA({

@@ -18,7 +18,7 @@ export class StackUpPaymaster extends BasePaymaster {
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
-  ): Promise<SponsorUserOperationReturnType> {
+  ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
     return await this.paymasterClient.sponsorUserOperation({
       userOperation,
       entryPoint,

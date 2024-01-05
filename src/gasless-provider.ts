@@ -10,6 +10,7 @@ import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless
 import * as constants from '../src/constants';
 import { BasePaymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -144,17 +145,22 @@ export class GaslessProvider extends ProviderWrapper {
       verificationGasLimit: 0n, // dummy value
     };
 
-    const gasConfig = await this.bundlerClient.estimateUserOperationGas({
-      userOperation: {
-        ...userOperation,
-        paymasterAndData: '0x',
-      },
-      entryPoint: this._entryPoint,
-    });
+    const paymasterAndData: `0x${string}` | SponsorUserOperationReturnType =
+      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
 
-    // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
-    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
-    const sponsoredUserOperation: UserOperation = Object.assign(userOperation, sponsorUserOperationResult);
+    let sponsoredUserOperation: UserOperation;
+
+    if (typeof paymasterAndData === 'string') {
+      // If our paymaster only returns its paymasterAndData and not the gas parameters, we need to estimate them ourselves
+      const gasConfig = await this.bundlerClient.estimateUserOperationGas({
+        userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
+        entryPoint: this._entryPoint,
+      });
+
+      sponsoredUserOperation = Object.assign(userOperation, gasConfig, { paymasterAndData: paymasterAndData });
+    } else {
+      sponsoredUserOperation = Object.assign(userOperation, paymasterAndData);
+    }
 
     // SIGN THE USER OPERATION
     const signature = await signUserOperationHashWithECDSA({
@@ -193,6 +199,16 @@ export class GaslessProvider extends ProviderWrapper {
       params: [],
     })) as string;
     return parseInt(rawChainId);
+  }
+
+  private handlePaymasterReturnType(
+    variable: `0x${string}` | SponsorUserOperationReturnType,
+  ): `0x${string}` | SponsorUserOperationReturnType {
+    if (typeof variable === 'string') {
+      return variable;
+    } else {
+      return variable as SponsorUserOperationReturnType;
+    }
   }
 }
 

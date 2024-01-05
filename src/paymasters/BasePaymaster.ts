@@ -1,3 +1,4 @@
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { PartialUserOperation } from '../types';
 
 export class BasePaymaster {
@@ -8,7 +9,10 @@ export class BasePaymaster {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async sponsorUserOperation(userOp: PartialUserOperation, entryPoint: `0x${string}`): Promise<`0x${string}`> {
+  public async sponsorUserOperation(
+    userOp: PartialUserOperation,
+    entryPoint: `0x${string}`,
+  ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
     throw new Error('This is a base class and should not be called directly.');
   }
 }

@@ -9,6 +9,7 @@ import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 import * as constants from '../src/constants';
 import { BasePaymaster } from './paymasters';
+import { PartialBy } from 'viem/types/utils';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -125,7 +126,10 @@ export class GaslessProvider extends ProviderWrapper {
     });
 
     // Construct UserOperation
-    const userOperation = {
+    const userOperation: PartialBy<
+      UserOperation,
+      'callGasLimit' | 'preVerificationGas' | 'verificationGasLimit' | 'paymasterAndData'
+    > = {
       sender: this.senderAddress,
       nonce: this._nonce,
       initCode: this._nonce === 0n ? this._initCode : '0x',
@@ -136,12 +140,21 @@ export class GaslessProvider extends ProviderWrapper {
       signature: constants.dummySignature as Hex,
     };
 
+    const gasConfig = await this.bundlerClient.estimateUserOperationGas({
+      userOperation: {
+        ...userOperation,
+        paymasterAndData: '0x',
+      },
+      entryPoint: this._entryPoint,
+    });
+
     // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
-    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
+    const paymasterAndData = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
 
     const sponsoredUserOperation: UserOperation = {
       ...userOperation,
-      ...sponsorUserOperationResult,
+      ...gasConfig,
+      paymasterAndData,
     };
 
     // SIGN THE USER OPERATION

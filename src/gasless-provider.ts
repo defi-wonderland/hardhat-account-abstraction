@@ -200,16 +200,6 @@ export class GaslessProvider extends ProviderWrapper {
     })) as string;
     return parseInt(rawChainId);
   }
-
-  private handlePaymasterReturnType(
-    variable: `0x${string}` | SponsorUserOperationReturnType,
-  ): `0x${string}` | SponsorUserOperationReturnType {
-    if (typeof variable === 'string') {
-      return variable;
-    } else {
-      return variable as SponsorUserOperationReturnType;
-    }
-  }
 }
 
 function getRandomBigInt(min: bigint, max: bigint): bigint {

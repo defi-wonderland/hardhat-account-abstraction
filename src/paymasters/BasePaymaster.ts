@@ -8,7 +8,7 @@ export class BasePaymaster {
     this.endpoint = endpoint;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line
   public async sponsorUserOperation(
     userOp: PartialUserOperation,
     entryPoint: `0x${string}`,

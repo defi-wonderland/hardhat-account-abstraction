@@ -9,7 +9,6 @@ export class Paymaster {
     this.endpoint = endpoint;
   }
 
-  // eslint-disable
   public async sponsorUserOperation(
     userOp: PartialUserOperation,
     entryPoint: `0x${string}`,
@@ -17,5 +16,4 @@ export class Paymaster {
   ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
     throw new Error('This is a base class and should not be called directly.');
   }
-  // eslint-enable
 }

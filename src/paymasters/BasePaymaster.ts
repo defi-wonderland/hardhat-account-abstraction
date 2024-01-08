@@ -68,6 +68,7 @@ export class BasePaymaster extends Paymaster {
   }
 
   // Helper function to convert bigints to hexadecimal strings, which is what base api expects
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private convertBigIntsToString(obj: any) {
     for (const key in obj) {
       if (typeof obj[key] === 'bigint') {

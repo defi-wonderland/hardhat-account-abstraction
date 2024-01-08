@@ -15,11 +15,14 @@ export class PimlicoPaymaster extends Paymaster {
     });
   }
 
+  // eslint-disable
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
     bundlerClient: PimlicoBundlerClient,
   ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
+    // eslint-enable
+
     return await this.paymasterClient.sponsorUserOperation({
       userOperation,
       entryPoint,

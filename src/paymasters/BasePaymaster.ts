@@ -53,17 +53,17 @@ export class BasePaymaster extends Paymaster {
       params: [Object.assign(userOp, stringifyGasConfig), entryPoint, chainId],
     };
 
-    const final_response = await fetch(this.endpoint, {
+    const finalResponse = await fetch(this.endpoint, {
       method: 'POST',
       body: JSON.stringify(finalCallData),
       headers: { 'Content-Type': 'application/json' },
     });
 
-    const final_json = await final_response.json();
+    const finalJson = await finalResponse.json();
 
     return {
       ...gasConfig,
-      paymasterAndData: final_json.result,
+      paymasterAndData: finalJson.result,
     };
   }
 

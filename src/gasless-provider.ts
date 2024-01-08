@@ -8,7 +8,7 @@ import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 import * as constants from '../src/constants';
-import { BasePaymaster } from './paymasters';
+import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 
@@ -24,7 +24,7 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly _wrappedProvider: EIP1193Provider,
     public readonly chain: string,
     protected readonly bundlerClient: PimlicoBundlerClient,
-    protected readonly paymasterClient: BasePaymaster,
+    protected readonly paymasterClient: Paymaster,
     protected readonly publicClient: ReturnType<typeof createPublicClient>,
     protected readonly _initCode: `0x${string}`,
     protected readonly senderAddress: `0x${string}`,
@@ -41,7 +41,7 @@ export class GaslessProvider extends ProviderWrapper {
     _wrappedProvider: EIP1193Provider,
     chain: string,
     bundlerClient: PimlicoBundlerClient,
-    paymasterClient: BasePaymaster,
+    paymasterClient: Paymaster,
     publicClient: ReturnType<typeof createPublicClient>,
   ) {
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
@@ -146,7 +146,7 @@ export class GaslessProvider extends ProviderWrapper {
     };
 
     const paymasterAndData: `0x${string}` | SponsorUserOperationReturnType =
-      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
+      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint, this.bundlerClient);
 
     let sponsoredUserOperation: UserOperation;
 

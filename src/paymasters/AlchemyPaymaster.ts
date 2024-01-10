@@ -18,14 +18,23 @@ export class AlchemyPaymaster extends Paymaster {
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
     bundlerClient: PimlicoBundlerClient,
-  ): Promise<SponsorUserOperationReturnType> {
+  ): Promise<`0x${string}`> {
     const userOp = convertBigIntsToString(userOperation);
+
+    // Delete the signature from the user operation
+    // delete userOp['signature'];
 
     const data = {
       id: 1,
       jsonrpc: '2.0',
       method: 'alchemy_requestPaymasterAndData',
-      params: [this.policyId, entryPoint, userOp],
+      params: [
+        {
+          policyId: this.policyId,
+          entryPoint: entryPoint,
+          userOperation: userOp,
+        },
+      ],
     };
 
     const response = await fetch(this.endpoint, {
@@ -34,20 +43,6 @@ export class AlchemyPaymaster extends Paymaster {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    const paymasterAndData = (await response.json()).result;
-
-    const gasConfig = await bundlerClient.estimateUserOperationGas({
-      userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
-      entryPoint,
-    });
-
-    // Adding gas headroom for safety margin to ensure paymaster signs for enough gas based on estimations
-    gasConfig.preVerificationGas = gasConfig.preVerificationGas + 2000n;
-    gasConfig.verificationGasLimit = gasConfig.verificationGasLimit + 4000n;
-
-    return {
-      ...gasConfig,
-      paymasterAndData: paymasterAndData,
-    };
+    return (await response.json()).result.paymasterAndData;
   }
 }

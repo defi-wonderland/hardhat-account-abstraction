@@ -10,7 +10,6 @@ export type PartialUserOperation = {
 
 export enum PaymasterType {
   Pimlico = 'pimlico',
-  Biconomy = 'biconomy',
   Base = 'base',
   StackUp = 'stackup',
   Alchemy = 'alchemy',

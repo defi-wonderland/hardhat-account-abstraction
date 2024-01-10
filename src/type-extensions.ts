@@ -4,18 +4,20 @@ import { PaymasterTypeLiteral } from './types';
 
 declare module 'hardhat/types/config' {
   export interface HttpNetworkUserConfig {
-    sponsoredTransaction?: {
+    sponsoredTransactions?: {
       bundlerUrl: string;
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
+      simpleAccountFactoryAddress?: `0x${string}`;
     };
   }
 
   export interface HttpNetworkConfig {
-    sponsoredTransaction?: {
+    sponsoredTransactions?: {
       bundlerUrl: string;
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
+      simpleAccountFactoryAddress?: `0x${string}`;
     };
   }
 }

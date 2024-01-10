@@ -2,6 +2,7 @@ import { extendProvider } from 'hardhat/config';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { createPaymasterClient } from './paymaster';
+import { simpleAccountFactoryAddress as constantSimpleAccoutnFactoryAddress } from './constants';
 
 import 'dotenv/config';
 
@@ -30,11 +31,14 @@ extendProvider(async (provider, config, networkName) => {
     return provider;
   }
 
-  const sponsoredTransaction = netConfig.sponsoredTransaction;
+  const sponsoredTransaction = netConfig.sponsoredTransactions;
   if (sponsoredTransaction === undefined) {
     log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
+
+  const simpleAccountFactoryAddress =
+    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccoutnFactoryAddress;
 
   const publicClient = createPublicClient({
     transport: http(netConfig.url),
@@ -49,5 +53,13 @@ extendProvider(async (provider, config, networkName) => {
     sponsoredTransaction.paymasterUrl,
   );
 
-  return await GaslessProvider.create(signer, provider, networkName, bundlerClient, paymasterClient, publicClient);
+  return await GaslessProvider.create(
+    signer,
+    provider,
+    networkName,
+    bundlerClient,
+    paymasterClient,
+    publicClient,
+    simpleAccountFactoryAddress,
+  );
 });

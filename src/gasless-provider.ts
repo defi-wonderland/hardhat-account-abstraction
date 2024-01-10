@@ -8,7 +8,9 @@ import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
 import * as constants from '../src/constants';
-import { BasePaymaster } from './paymasters';
+import { Paymaster } from './paymasters';
+import { PartialBy } from 'viem/types/utils';
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -22,7 +24,7 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly _wrappedProvider: EIP1193Provider,
     public readonly chain: string,
     protected readonly bundlerClient: PimlicoBundlerClient,
-    protected readonly paymasterClient: BasePaymaster,
+    protected readonly paymasterClient: Paymaster,
     protected readonly publicClient: ReturnType<typeof createPublicClient>,
     protected readonly _initCode: `0x${string}`,
     protected readonly senderAddress: `0x${string}`,
@@ -39,12 +41,12 @@ export class GaslessProvider extends ProviderWrapper {
     _wrappedProvider: EIP1193Provider,
     chain: string,
     bundlerClient: PimlicoBundlerClient,
-    paymasterClient: BasePaymaster,
+    paymasterClient: Paymaster,
     publicClient: ReturnType<typeof createPublicClient>,
+    simpleAccountFactoryAddress: `0x${string}`,
   ) {
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
-    const simpleAccountFactoryAddress = constants.simpleAccountFactoryAddress;
     const owner = privateKeyToAccount(_signerPk);
 
     const initCode = concat([
@@ -125,7 +127,10 @@ export class GaslessProvider extends ProviderWrapper {
     });
 
     // Construct UserOperation
-    const userOperation = {
+    const userOperation: PartialBy<
+      UserOperation,
+      'callGasLimit' | 'preVerificationGas' | 'verificationGasLimit' | 'paymasterAndData'
+    > = {
       sender: this.senderAddress,
       nonce: this._nonce,
       initCode: this._nonce === 0n ? this._initCode : '0x',
@@ -134,15 +139,28 @@ export class GaslessProvider extends ProviderWrapper {
       maxPriorityFeePerGas: maxPriorityFeePerGas as bigint,
       // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
       signature: constants.dummySignature as Hex,
+      callGasLimit: 0n, // dummy value
+      paymasterAndData: '0x', // dummy value
+      preVerificationGas: 0n, // dummy value
+      verificationGasLimit: 0n, // dummy value
     };
 
-    // REQUEST PIMLICO VERIFYING PAYMASTER SPONSORSHIP
-    const sponsorUserOperationResult = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
+    const paymasterAndData: `0x${string}` | SponsorUserOperationReturnType =
+      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint, this.bundlerClient);
 
-    const sponsoredUserOperation: UserOperation = {
-      ...userOperation,
-      ...sponsorUserOperationResult,
-    };
+    let sponsoredUserOperation: UserOperation;
+
+    if (typeof paymasterAndData === 'string') {
+      // If our paymaster only returns its paymasterAndData and not the gas parameters, we need to estimate them ourselves
+      const gasConfig = await this.bundlerClient.estimateUserOperationGas({
+        userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
+        entryPoint: this._entryPoint,
+      });
+
+      sponsoredUserOperation = Object.assign(userOperation, gasConfig, { paymasterAndData: paymasterAndData });
+    } else {
+      sponsoredUserOperation = Object.assign(userOperation, paymasterAndData);
+    }
 
     // SIGN THE USER OPERATION
     const signature = await signUserOperationHashWithECDSA({

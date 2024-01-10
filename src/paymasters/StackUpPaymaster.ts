@@ -1,16 +1,17 @@
 import { Paymaster } from './Paymaster';
 import { PartialUserOperation } from '../types';
 import { http } from 'viem';
-import { createPimlicoPaymasterClient } from 'permissionless/clients/pimlico';
-import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
+import { createStackupPaymasterClient } from 'permissionless/clients/stackup';
+import { SponsorUserOperationReturnType } from 'permissionless/actions/stackup';
+import { StackupPaymasterContext } from 'permissionless/types/stackup';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
-export class PimlicoPaymaster extends Paymaster {
-  public paymasterClient: ReturnType<typeof createPimlicoPaymasterClient>;
+export class StackUpPaymaster extends Paymaster {
+  public paymasterClient: ReturnType<typeof createStackupPaymasterClient>;
 
   constructor(endpoint: string) {
     super(endpoint);
-    this.paymasterClient = createPimlicoPaymasterClient({
+    this.paymasterClient = createStackupPaymasterClient({
       transport: http(endpoint),
     });
   }
@@ -23,6 +24,9 @@ export class PimlicoPaymaster extends Paymaster {
     return await this.paymasterClient.sponsorUserOperation({
       userOperation,
       entryPoint,
+      context: {
+        type: 'payg',
+      } as StackupPaymasterContext,
     });
   }
 }

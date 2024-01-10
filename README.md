@@ -1,85 +1,117 @@
-# hardhat-example-plugin
+# Sponsored Txns Hardhat Plugin
 
-_A one line description of the plugin_
+A plugin to send transactions to testnets without needing gas money!
 
-[Hardhat](https://hardhat.org) plugin example. 
 
 ## What
 
-<_A longer, one paragraph, description of the plugin_>
-
-This plugin will help you with world domination by implementing a simple tic-tac-toe in the terminal.
+This plugin sponsors any transaction the user sends through the power of account abstraction. Through seemless integration after the configuration is set just submit any transaction, and you can see it get mined on the testnets without costing the signer any gas! 
 
 ## Installation
 
-<_A step-by-step guide on how to install the plugin_>
+> **⚠ WARNING: Currently the package is not deployed and the installation steps will not work, these are the steps you would take when it is deployed**
+> Currently the package is not deployed and the installation will not work
+
+<br>
+
 
 ```bash
-yarn install <your npm package name> [list of peer dependencies]
+yarn install @defi-wonderland/sponsored-txs-hardhat-plugin [list of peer dependencies]
 ```
 
 Import the plugin in your `hardhat.config.js`:
 
 ```js
-require("<your plugin npm package name>");
+require("@defi-wonderland/sponsored-txs-hardhat-plugin");
 ```
 
 Or if you are using TypeScript, in your `hardhat.config.ts`:
 
 ```ts
-import "<your plugin npm package name>";
+import "@defi-wonderland/sponsored-txs-hardhat-plugin";
 ```
 
 
 ## Required plugins
 
-<_The list of all the required Hardhat plugins if there are any_>
 
-- [@nomiclabs/hardhat-web3](https://github.com/nomiclabs/hardhat/tree/master/packages/hardhat-web3)
+- [@nomicfoundation/hardhat-ethers](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-ethers)
 
 ## Tasks
 
-<_A description of each task added by this plugin. If it just overrides internal 
-tasks, this may not be needed_>
 
 This plugin creates no additional tasks.
 
-<_or_>
-
-This plugin adds the _example_ task to Hardhat:
-```
-output of `npx hardhat help example`
-```
 
 ## Environment extensions
 
-<_A description of each extension to the Hardhat Runtime Environment_>
-
-This plugin extends the Hardhat Runtime Environment by adding an `example` field
-whose type is `ExampleHardhatRuntimeEnvironmentField`.
+This plugin does not extend the hardhat runtime environment
 
 ## Configuration
 
-<_A description of each extension to the HardhatConfig or to its fields_>
-
-This plugin extends the `HardhatUserConfig`'s `ProjectPathsUserConfig` object with an optional
-`newPath` field.
+This plugin requires 3 new field inside a `sponsoredTransaction` object which will be nested inside each hardhat network that is set in the config
 
 This is an example of how to set it:
 
 ```js
-module.exports = {
-  paths: {
-    newPath: "new-path"
+const config: HardhatUserConfig = {
+  solidity: '0.8.19',
+  defaultNetwork: 'goerli',
+  networks: {
+    goerli: {
+      url: process.env.GOERLI_RPC_URL as string,
+      accounts: [process.env.PRIVATE_KEY as string],
+      sponsoredTransactions: {
+        bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
+        paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
+        paymasterType: 'pimlico' // The type of paymaster it is
+        simpleAccountFactoryAddress: 0x15Ba39375ee2Ab563E8873C8390be6f2E2F50232 // Optional parameter, this defaults to: 0x9406cc6185a346906296840746125a0e44976454
+      }
+    }
   }
 };
 ```
 
+### Supported Paymaster Types
+
+Currently we support 3 paymaster types which are the following:
+
+1. Pimlico which can be set as `pimlico`
+1. Stackup which can be set as `stackup`
+1. Base which can be set as `base`
+
+
+If you would like to add support for a new paymaster check out the guide [here](#adding-a-new-paymaster-to-the-plugin)
+
+### Supported Chains
+
+For a chain to be supported at the moment the only condition is the SimpleAccount Factory is deployed to the addres `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
+
+Currently the list of supported chains that is supported by is but not limited to the following:
+
+1. Ethereum Sepolia
+1. Ethereum  Goerli
+1. Polygon Mumbai
+1. Base Goerli
+1. Optimism Goerli
+1. Arbitrum Goerli
+
 ## Usage
 
-<_A description of how to use this plugin. How to use the tasks if there are any, etc._>
+After you have setup the configuration for the `sponsoredTransactions` and you are using a network that has them enable you are good to go, you can right a simple script below and your transactions will be mined on the testnet that you have configured!
 
-There are no additional steps you need to take for this plugin to work.
+```js
+const signer = await ethers.provider.getSigner();
+const testToken = new ethers.Contract('0x16F63C5036d3F48A239358656a8f123eCE85789C', TEST_TOKEN_ABI, signer);
+const amountToMint = ethers.parseEther('6.9');
+await testToken.mint(amountToMint);
+```
 
-Install it and access ethers through the Hardhat Runtime Environment anywhere
-you need it (tasks, scripts, tests, etc).
+## Adding a new paymaster to the plugin
+
+TODO when this functionallity is finalized
+
+
+## Licensing
+
+The primary license for Sponsored Transactions is MIT, see [`LICENSE`](./LICENSE).

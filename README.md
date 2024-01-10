@@ -1,6 +1,6 @@
 # Sponsored Txns Hardhat Plugin
 
-A plugin to send transactions to a testnets without needing gas money!
+A plugin to send transactions to testnets without needing gas money!
 
 
 ## What

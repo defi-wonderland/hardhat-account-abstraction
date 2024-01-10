@@ -40,7 +40,7 @@ export class GaslessProvider extends ProviderWrapper {
   }
 
   /**
-   * Asynchrnously creates a new GaslessProvider
+   * Asynchronously creates a new GaslessProvider
    * @param _signerPk The signer of the transactions that will be sent through the provider
    * @param _wrappedProvider The provider that we are wrapping
    * @param bundlerClient The bundler client we will submit bundles to
@@ -119,7 +119,6 @@ export class GaslessProvider extends ProviderWrapper {
    * @param tx The transactions that needs to be bundled and sponsored
    * @returns The transaction hash of the sponsored transaction
    */
-
   private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
 

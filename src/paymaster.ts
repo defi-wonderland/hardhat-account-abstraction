@@ -2,7 +2,11 @@ import { PaymasterType } from './types';
 import { Paymaster } from './paymasters/Paymaster';
 import * as Pm from './paymasters';
 
-export function createPaymasterClient(paymasterType: PaymasterType, paymasterUrl: string): Paymaster {
+export function createPaymasterClient(
+  paymasterType: PaymasterType,
+  paymasterUrl: string,
+  policyId?: string,
+): Paymaster {
   switch (paymasterType) {
     case PaymasterType.Pimlico:
       return new Pm.PimlicoPaymaster(paymasterUrl);
@@ -11,7 +15,7 @@ export function createPaymasterClient(paymasterType: PaymasterType, paymasterUrl
     case PaymasterType.Base:
       return new Pm.BasePaymaster(paymasterUrl);
     case PaymasterType.Alchemy:
-      return new Pm.AlchemyPaymaster(paymasterUrl);
+      return new Pm.AlchemyPaymaster(paymasterUrl, policyId);
 
     default:
       throw new Error(`Unknown paymaster type ${paymasterType}`);

@@ -3,11 +3,21 @@ import { PartialUserOperation } from '../types';
 import { Paymaster } from './Paymaster';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
+/**
+ * Paymaster for Base
+ */
 export class BasePaymaster extends Paymaster {
   constructor(endpoint: string) {
     super(endpoint);
   }
 
+  /**
+   * Sponsor a user operation.
+   * @param userOperation The user operation to sponsor
+   * @param entryPoint The entry point to use
+   * @param bundlerClient The bundler client to use
+   * @returns The paymasterAndData and gas information for the user operation
+   */
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,

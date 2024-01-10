@@ -3,18 +3,14 @@ import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { createPaymasterClient } from './paymaster';
 import { simpleAccountFactoryAddress as constantSimpleAccoutnFactoryAddress } from './constants';
-
-import 'dotenv/config';
-
+import { GaslessProvider } from './gasless-provider';
+import { PaymasterType } from './types';
 import init from 'debug';
+import 'dotenv/config';
+import './type-extensions';
 
 const log = init('hardhat:plugin:gasless');
 
-import './type-extensions';
-import { GaslessProvider } from './gasless-provider';
-import { PaymasterType } from './types';
-
-// NOTE: Network name has to match how pimlico names the network in their API calls
 extendProvider(async (provider, config, networkName) => {
   log(`Extending provider for network ${networkName}`);
 
@@ -56,7 +52,6 @@ extendProvider(async (provider, config, networkName) => {
   return await GaslessProvider.create(
     signer,
     provider,
-    networkName,
     bundlerClient,
     paymasterClient,
     publicClient,

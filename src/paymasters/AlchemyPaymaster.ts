@@ -17,7 +17,6 @@ export class AlchemyPaymaster extends Paymaster {
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
-    bundlerClient: PimlicoBundlerClient,
   ): Promise<SponsorUserOperationReturnType> {
     const userOp = convertBigIntsToString(userOperation);
 

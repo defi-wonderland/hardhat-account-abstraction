@@ -168,7 +168,7 @@ export class GaslessProvider extends ProviderWrapper {
     };
 
     const paymasterAndData: `0x${string}` | SponsorUserOperationReturnType =
-      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint, this.bundlerClient);
+      await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
 
     const sponsoredUserOperation: UserOperation = Object.assign(userOperation, paymasterAndData);
 

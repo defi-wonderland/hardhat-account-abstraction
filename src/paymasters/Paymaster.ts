@@ -22,7 +22,6 @@ export class Paymaster {
   public async sponsorUserOperation(
     userOp: PartialUserOperation,
     entryPoint: `0x${string}`,
-    bundlierClient: PimlicoBundlerClient,
   ): Promise<SponsorUserOperationReturnType> {
     throw new Error('This is a base class and should not be called directly.');
   }

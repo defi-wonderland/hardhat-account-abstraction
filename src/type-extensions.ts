@@ -8,6 +8,7 @@ declare module 'hardhat/types/config' {
       bundlerUrl: string;
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
+      simpleAccountFactoryAddress?: `0x${string}`;
     };
   }
 
@@ -16,6 +17,7 @@ declare module 'hardhat/types/config' {
       bundlerUrl: string;
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
+      simpleAccountFactoryAddress?: `0x${string}`;
     };
   }
 }

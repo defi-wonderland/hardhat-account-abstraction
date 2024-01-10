@@ -2,6 +2,7 @@ import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { PartialUserOperation } from '../types';
 import { Paymaster } from './Paymaster';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { convertBigIntsToString } from '../utils';
 
 /**
  * Paymaster for Base
@@ -23,7 +24,7 @@ export class BasePaymaster extends Paymaster {
     entryPoint: `0x${string}`,
     bundlerClient: PimlicoBundlerClient,
   ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
-    const userOp = this.convertBigIntsToString(userOperation);
+    const userOp = convertBigIntsToString(userOperation);
 
     const chainIdAsNumber = await bundlerClient.chainId();
     const chainId = '0x' + chainIdAsNumber.toString(16);
@@ -54,7 +55,7 @@ export class BasePaymaster extends Paymaster {
     gasConfig.preVerificationGas = gasConfig.preVerificationGas + 2000n;
     gasConfig.verificationGasLimit = gasConfig.verificationGasLimit + 4000n;
 
-    const stringifyGasConfig = this.convertBigIntsToString(gasConfig);
+    const stringifyGasConfig = convertBigIntsToString(gasConfig);
 
     const finalCallData = {
       id: 1,
@@ -75,19 +76,5 @@ export class BasePaymaster extends Paymaster {
       ...gasConfig,
       paymasterAndData: finalJson.result,
     };
-  }
-
-  // Helper function to convert bigints to hexadecimal strings, which is what base api expects
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private convertBigIntsToString(obj: any) {
-    for (const key in obj) {
-      if (typeof obj[key] === 'bigint') {
-        // Convert 0n to '0x', and other BigInts to their string representation
-        // NOTE: base expects gas values to be non-zero, but nonce might be zero so we need to be sure to exclude it
-        obj[key] = obj[key] === 0n && key !== 'nonce' ? '0x1' : '0x' + obj[key].toString(16);
-      }
-    }
-
-    return obj;
   }
 }

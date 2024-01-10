@@ -9,6 +9,7 @@ declare module 'hardhat/types/config' {
    * @property paymasterUrl  The URL of the paymaster
    * @property paymasterType  The type of the paymaster
    * @property simpleAccountFactoryAddress  The address of the simple account factory
+   * @property policyId The optional policy ID for the paymaster
    */
   export interface HttpNetworkUserConfig {
     sponsoredTransactions?: {
@@ -16,6 +17,7 @@ declare module 'hardhat/types/config' {
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
       simpleAccountFactoryAddress?: `0x${string}`;
+      policyId?: string;
     };
   }
 
@@ -25,6 +27,7 @@ declare module 'hardhat/types/config' {
    * @property paymasterUrl  The URL of the paymaster
    * @property paymasterType  The type of the paymaster
    * @property simpleAccountFactoryAddress  The address of the simple account factory
+   * @property policyId The optional policy ID for the paymaster
    */
   export interface HttpNetworkConfig {
     sponsoredTransactions?: {
@@ -32,6 +35,7 @@ declare module 'hardhat/types/config' {
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
       simpleAccountFactoryAddress?: `0x${string}`;
+      policyId?: string;
     };
   }
 }

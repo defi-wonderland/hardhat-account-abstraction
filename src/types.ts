@@ -28,6 +28,7 @@ export enum PaymasterType {
   Pimlico = 'pimlico',
   Base = 'base',
   StackUp = 'stackup',
+  Alchemy = 'alchemy',
 }
 
 /**

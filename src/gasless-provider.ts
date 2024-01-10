@@ -11,6 +11,7 @@ import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
+import { getRandomBigInt } from './utils';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -169,19 +170,7 @@ export class GaslessProvider extends ProviderWrapper {
     const paymasterAndData: `0x${string}` | SponsorUserOperationReturnType =
       await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint, this.bundlerClient);
 
-    let sponsoredUserOperation: UserOperation;
-
-    if (typeof paymasterAndData === 'string') {
-      // If our paymaster only returns its paymasterAndData and not the gas parameters, we need to estimate them ourselves
-      const gasConfig = await this.bundlerClient.estimateUserOperationGas({
-        userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
-        entryPoint: this._entryPoint,
-      });
-
-      sponsoredUserOperation = Object.assign(userOperation, gasConfig, { paymasterAndData: paymasterAndData });
-    } else {
-      sponsoredUserOperation = Object.assign(userOperation, paymasterAndData);
-    }
+    const sponsoredUserOperation: UserOperation = Object.assign(userOperation, paymasterAndData);
 
     // SIGN THE USER OPERATION
     const signature = await signUserOperationHashWithECDSA({
@@ -225,18 +214,4 @@ export class GaslessProvider extends ProviderWrapper {
     })) as string;
     return parseInt(rawChainId);
   }
-}
-
-/**
- * Generates a random BigInt between min and max (inclusive)
- * @param min The minimum value
- * @param max The maximum value
- * @returns A random BigInt between min and max (inclusive)
- */
-function getRandomBigInt(min: bigint, max: bigint): bigint {
-  // The Math.random() function returns a floating-point, pseudo-random number in the range 0 to less than 1
-  // So, we need to adjust it to our desired range (min to max)
-  const range = max - min + BigInt(1);
-  const rand = BigInt(Math.floor(Number(range) * Math.random()));
-  return min + rand;
 }

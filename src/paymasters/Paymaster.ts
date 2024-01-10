@@ -23,7 +23,7 @@ export class Paymaster {
     userOp: PartialUserOperation,
     entryPoint: `0x${string}`,
     bundlierClient: PimlicoBundlerClient,
-  ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
+  ): Promise<SponsorUserOperationReturnType> {
     throw new Error('This is a base class and should not be called directly.');
   }
 }

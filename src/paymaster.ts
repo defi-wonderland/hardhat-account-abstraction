@@ -2,6 +2,13 @@ import { PaymasterType } from './types';
 import { Paymaster } from './paymasters/Paymaster';
 import * as Pm from './paymasters';
 
+/**
+ * Creates a paymaster based on the paymaster type.
+ * @param paymasterType The type of paymaster to create
+ * @param paymasterUrl The url of the paymaster
+ * @param policyId The optional policy ID for the paymaster
+ * @returns A paymaster
+ */
 export function createPaymasterClient(
   paymasterType: PaymasterType,
   paymasterUrl: string,

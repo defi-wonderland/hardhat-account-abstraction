@@ -6,6 +6,9 @@ import { SponsorUserOperationReturnType } from 'permissionless/actions/stackup';
 import { StackupPaymasterContext } from 'permissionless/types/stackup';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
+/**
+ * Paymaster for StackUp.
+ */
 export class StackUpPaymaster extends Paymaster {
   public paymasterClient: ReturnType<typeof createStackupPaymasterClient>;
 
@@ -16,6 +19,13 @@ export class StackUpPaymaster extends Paymaster {
     });
   }
 
+  /**
+   * Sponsor a user operation.
+   * @param userOperation The user operation to sponsor
+   * @param entryPoint The entry point to use
+   * @param bundlerClient The bundler client to use
+   * @returns The paymasterAndData and gas information for the user operation
+   */
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,

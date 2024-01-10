@@ -5,6 +5,9 @@ import { createPimlicoPaymasterClient } from 'permissionless/clients/pimlico';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
+/**
+ * Paymaster for Pimlico.
+ */
 export class PimlicoPaymaster extends Paymaster {
   public paymasterClient: ReturnType<typeof createPimlicoPaymasterClient>;
 
@@ -15,6 +18,13 @@ export class PimlicoPaymaster extends Paymaster {
     });
   }
 
+  /**
+   * Sponsor a user operation.
+   * @param userOperation The user operation to sponsor
+   * @param entryPoint The entry point to use
+   * @param bundlerClient The bundler client to use
+   * @returns The paymasterAndData and gas information for the user operation
+   */
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,

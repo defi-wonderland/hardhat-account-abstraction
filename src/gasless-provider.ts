@@ -7,7 +7,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
-import * as constants from '../src/constants';
+import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
@@ -16,13 +16,16 @@ const log = init('hardhat:plugin:gasless');
 
 // TODO: Test this with value transfers
 // TODO: Test this with tx type 0, 1
+
+/**
+ * Gasless Provider class that routes transactions through a bundler and paymaster, based on the ERC 4337 standard
+ */
 export class GaslessProvider extends ProviderWrapper {
   private _nonce: bigint;
 
   constructor(
     protected readonly _signerPk: `0x${string}`,
     protected readonly _wrappedProvider: EIP1193Provider,
-    public readonly chain: string,
     protected readonly bundlerClient: PimlicoBundlerClient,
     protected readonly paymasterClient: Paymaster,
     protected readonly publicClient: ReturnType<typeof createPublicClient>,
@@ -36,10 +39,19 @@ export class GaslessProvider extends ProviderWrapper {
     this._nonce = 0n;
   }
 
+  /**
+   * Asynchronously creates a new GaslessProvider
+   * @param _signerPk The signer of the transactions that will be sent through the provider
+   * @param _wrappedProvider The provider that we are wrapping
+   * @param bundlerClient The bundler client we will submit bundles to
+   * @param paymasterClient The paymaster that will sponsor our transactions
+   * @param publicClient The public client that will be used to query for gas prices
+   * @param simpleAccountFactoryAddress The simple account factory address to use
+   * @returns A new GaslessProvider
+   */
   static async create(
     _signerPk: `0x${string}`,
     _wrappedProvider: EIP1193Provider,
-    chain: string,
     bundlerClient: PimlicoBundlerClient,
     paymasterClient: Paymaster,
     publicClient: ReturnType<typeof createPublicClient>,
@@ -76,7 +88,6 @@ export class GaslessProvider extends ProviderWrapper {
     const gaslessProvider = new GaslessProvider(
       _signerPk,
       _wrappedProvider,
-      chain,
       bundlerClient,
       paymasterClient,
       publicClient,
@@ -89,6 +100,11 @@ export class GaslessProvider extends ProviderWrapper {
     return gaslessProvider;
   }
 
+  /**
+   * Sends requests to the provider, if the request is a transaction, it will be sent through the bundler and paymaster
+   * @param args The arguments for the request
+   * @returns Unknown, as it depends on the request being made
+   */
   public request(args: RequestArguments): Promise<unknown> {
     if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
       const params = this._getParams(args);
@@ -98,6 +114,11 @@ export class GaslessProvider extends ProviderWrapper {
     return this._wrappedProvider.request(args);
   }
 
+  /**
+   * Sends a gasless transaction
+   * @param tx The transactions that needs to be bundled and sponsored
+   * @returns The transaction hash of the sponsored transaction
+   */
   private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
 
@@ -193,6 +214,10 @@ export class GaslessProvider extends ProviderWrapper {
     return txHash;
   }
 
+  /**
+   * Gets the chain ID for the provider we are wrapping
+   * @returns The chain ID
+   */
   private async getChainId(): Promise<number> {
     const rawChainId = (await this._wrappedProvider.request({
       method: 'eth_chainId',
@@ -202,6 +227,12 @@ export class GaslessProvider extends ProviderWrapper {
   }
 }
 
+/**
+ * Generates a random BigInt between min and max (inclusive)
+ * @param min The minimum value
+ * @param max The maximum value
+ * @returns A random BigInt between min and max (inclusive)
+ */
 function getRandomBigInt(min: bigint, max: bigint): bigint {
   // The Math.random() function returns a floating-point, pseudo-random number in the range 0 to less than 1
   // So, we need to adjust it to our desired range (min to max)

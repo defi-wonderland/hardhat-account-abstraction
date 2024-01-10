@@ -83,3 +83,7 @@ There are no additional steps you need to take for this plugin to work.
 
 Install it and access ethers through the Hardhat Runtime Environment anywhere
 you need it (tasks, scripts, tests, etc).
+
+## Licensing
+
+The primary license for Sponsored Transactions is MIT, see [`LICENSE`](./LICENSE).

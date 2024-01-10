@@ -8,8 +8,12 @@ import { convertBigIntsToString } from '../utils';
  * Paymaster for Base
  */
 export class BasePaymaster extends Paymaster {
-  constructor(endpoint: string) {
+  public bundlerClient: PimlicoBundlerClient;
+
+  constructor(endpoint: string, bundlerClient: PimlicoBundlerClient) {
     super(endpoint);
+
+    this.bundlerClient = bundlerClient;
   }
 
   /**
@@ -22,11 +26,10 @@ export class BasePaymaster extends Paymaster {
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
-    bundlerClient: PimlicoBundlerClient,
   ): Promise<SponsorUserOperationReturnType> {
     const userOp = convertBigIntsToString(userOperation);
 
-    const chainIdAsNumber = await bundlerClient.chainId();
+    const chainIdAsNumber = await this.bundlerClient.chainId();
     const chainId = '0x' + chainIdAsNumber.toString(16);
 
     const data = {
@@ -46,7 +49,7 @@ export class BasePaymaster extends Paymaster {
 
     const paymasterAndData = json.result;
 
-    const gasConfig = await bundlerClient.estimateUserOperationGas({
+    const gasConfig = await this.bundlerClient.estimateUserOperationGas({
       userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
       entryPoint,
     });

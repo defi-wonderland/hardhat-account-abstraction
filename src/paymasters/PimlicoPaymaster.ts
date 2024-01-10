@@ -28,7 +28,6 @@ export class PimlicoPaymaster extends Paymaster {
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
-    bundlerClient: PimlicoBundlerClient,
   ): Promise<SponsorUserOperationReturnType> {
     return await this.paymasterClient.sponsorUserOperation({
       userOperation,

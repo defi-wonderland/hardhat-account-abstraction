@@ -47,6 +47,7 @@ extendProvider(async (provider, config, networkName) => {
   const paymasterClient = createPaymasterClient(
     sponsoredTransaction.paymasterType as PaymasterType,
     sponsoredTransaction.paymasterUrl,
+    bundlerClient,
     sponsoredTransaction.policyId,
   );
 

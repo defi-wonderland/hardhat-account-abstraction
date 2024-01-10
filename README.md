@@ -10,7 +10,6 @@ This plugin sponsors any transaction the user sends through the power of account
 ## Installation
 
 > **⚠ WARNING: Currently the package is not deployed and the installation steps will not work, these are the steps you would take when it is deployed**
-> Currently the package is not deployed and the installation will not work
 
 <br>
 
@@ -87,7 +86,7 @@ If you would like to add support for a new paymaster check out the guide [here](
 
 For a chain to be supported at the moment the only condition is the SimpleAccount Factory is deployed to the addres `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
 
-Currently the list of supported chains that is supported by is but not limited to the following:
+Currently the list of supported chains is, but not limited to the following:
 
 1. Ethereum Sepolia
 1. Ethereum  Goerli

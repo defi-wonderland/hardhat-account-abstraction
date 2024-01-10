@@ -30,7 +30,7 @@ extendProvider(async (provider, config, networkName) => {
     return provider;
   }
 
-  const sponsoredTransaction = netConfig.sponsoredTransaction;
+  const sponsoredTransaction = netConfig.sponsoredTransactions;
   if (sponsoredTransaction === undefined) {
     log(`No configuration for sponsored transactions set, skipping`);
     return provider;

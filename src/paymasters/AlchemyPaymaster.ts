@@ -18,20 +18,18 @@ export class AlchemyPaymaster extends Paymaster {
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
     bundlerClient: PimlicoBundlerClient,
-  ): Promise<`0x${string}`> {
+  ): Promise<SponsorUserOperationReturnType> {
     const userOp = convertBigIntsToString(userOperation);
-
-    // Delete the signature from the user operation
-    // delete userOp['signature'];
 
     const data = {
       id: 1,
       jsonrpc: '2.0',
-      method: 'alchemy_requestPaymasterAndData',
+      method: 'alchemy_requestGasAndPaymasterAndData',
       params: [
         {
           policyId: this.policyId,
           entryPoint: entryPoint,
+          dummySignature: userOperation.signature,
           userOperation: userOp,
         },
       ],
@@ -43,6 +41,10 @@ export class AlchemyPaymaster extends Paymaster {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    return (await response.json()).result.paymasterAndData;
+    const gasAndPaymasterAndData = (await response.json()).result;
+
+    return {
+      ...gasAndPaymasterAndData,
+    };
   }
 }

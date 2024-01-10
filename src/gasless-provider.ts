@@ -43,10 +43,10 @@ export class GaslessProvider extends ProviderWrapper {
     bundlerClient: PimlicoBundlerClient,
     paymasterClient: Paymaster,
     publicClient: ReturnType<typeof createPublicClient>,
+    simpleAccountFactoryAddress: `0x${string}`,
   ) {
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
-    const simpleAccountFactoryAddress = constants.simpleAccountFactoryAddress;
     const owner = privateKeyToAccount(_signerPk);
 
     const initCode = concat([

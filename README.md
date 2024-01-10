@@ -65,6 +65,7 @@ const config: HardhatUserConfig = {
         bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
         paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
         paymasterType: 'pimlico' // The type of paymaster it is
+        simpleAccountFactoryAddress: 0x15Ba39375ee2Ab563E8873C8390be6f2E2F50232 // Optional parameter, this defaults to: 0x9406cc6185a346906296840746125a0e44976454
       }
     }
   }
@@ -82,6 +83,18 @@ Currently we support 3 paymaster types which are the following:
 
 If you would like to add support for a new paymaster check out the guide [here](#adding-a-new-paymaster-to-the-plugin)
 
+### Supported Chains
+
+For a chain to be supported at the moment the only condition is the SimpleAccount Factory is deployed to the addres `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
+
+Currently the list of supported chains that is supported by is but not limited to the following:
+
+1. Ethereum Sepolia
+1. Ethereum  Goerli
+1. Polygon Mumbai
+1. Base Goerli
+1. Optimism Goerli
+1. Arbitrum Goerli
 
 ## Usage
 

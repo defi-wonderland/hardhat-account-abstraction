@@ -29,7 +29,7 @@ export class PimlicoPaymaster extends Paymaster {
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
     bundlerClient: PimlicoBundlerClient,
-  ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
+  ): Promise<SponsorUserOperationReturnType> {
     return await this.paymasterClient.sponsorUserOperation({
       userOperation,
       entryPoint,

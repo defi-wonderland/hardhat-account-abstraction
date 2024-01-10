@@ -23,7 +23,7 @@ export class BasePaymaster extends Paymaster {
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
     bundlerClient: PimlicoBundlerClient,
-  ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
+  ): Promise<SponsorUserOperationReturnType> {
     const userOp = convertBigIntsToString(userOperation);
 
     const chainIdAsNumber = await bundlerClient.chainId();

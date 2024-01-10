@@ -1,4 +1,22 @@
-// Helper function to convert bigints to hexadecimal strings, which is what base api expects
+/**
+ * Generates a random BigInt between min and max (inclusive)
+ * @param min The minimum value
+ * @param max The maximum value
+ * @returns A random BigInt between min and max (inclusive)
+ */
+export function getRandomBigInt(min: bigint, max: bigint): bigint {
+  // The Math.random() function returns a floating-point, pseudo-random number in the range 0 to less than 1
+  // So, we need to adjust it to our desired range (min to max)
+  const range = max - min + BigInt(1);
+  const rand = BigInt(Math.floor(Number(range) * Math.random()));
+  return min + rand;
+}
+
+/**
+ * Converts all BigInts in an object to strings because the nonce
+ * @param obj An object that may contain BigInts
+ * @returns The object with all BigInts converted to strings in hexadecimal form
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertBigIntsToString(obj: any) {
   for (const key in obj) {

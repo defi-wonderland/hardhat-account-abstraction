@@ -14,6 +14,7 @@ export class StackUpPaymaster extends Paymaster {
 
   constructor(endpoint: string) {
     super(endpoint);
+
     this.paymasterClient = createStackupPaymasterClient({
       transport: http(endpoint),
     });
@@ -23,7 +24,6 @@ export class StackUpPaymaster extends Paymaster {
    * Sponsor a user operation.
    * @param userOperation The user operation to sponsor
    * @param entryPoint The entry point to use
-   * @param bundlerClient The bundler client to use
    * @returns The paymasterAndData and gas information for the user operation
    */
   public async sponsorUserOperation(

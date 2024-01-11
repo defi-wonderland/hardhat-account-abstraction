@@ -2,8 +2,10 @@ import { Paymaster } from './Paymaster';
 import { PartialUserOperation } from '../types';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { convertBigIntsToString } from '../utils';
-import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
+/**
+ * Paymaster for Alchemy
+ */
 export class AlchemyPaymaster extends Paymaster {
   public policyId: string;
 
@@ -14,33 +16,26 @@ export class AlchemyPaymaster extends Paymaster {
     this.policyId = policyId;
   }
 
+  /**
+   * Sponsor a user operation.
+   * @param userOperation The user operation to sponsor
+   * @param entryPoint The entry point to use
+   * @returns The paymasterAndData and gas information for the user operation
+   */
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
   ): Promise<SponsorUserOperationReturnType> {
     const userOp = convertBigIntsToString(userOperation);
 
-    const data = {
-      id: 1,
-      jsonrpc: '2.0',
-      method: 'alchemy_requestGasAndPaymasterAndData',
-      params: [
-        {
-          policyId: this.policyId,
-          entryPoint: entryPoint,
-          dummySignature: userOperation.signature,
-          userOperation: userOp,
-        },
-      ],
-    };
-
-    const response = await fetch(this.endpoint, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const gasAndPaymasterAndData = (await response.json()).result;
+    const gasAndPaymasterAndData = (await this.endpoint.send('alchemy_requestGasAndPaymasterAndData', [
+      {
+        policyId: this.policyId,
+        entryPoint: entryPoint,
+        dummySignature: userOperation.signature,
+        userOperation: userOp,
+      },
+    ])) as SponsorUserOperationReturnType;
 
     return {
       ...gasAndPaymasterAndData,

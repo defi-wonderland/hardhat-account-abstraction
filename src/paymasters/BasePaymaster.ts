@@ -20,7 +20,6 @@ export class BasePaymaster extends Paymaster {
    * Sponsor a user operation.
    * @param userOperation The user operation to sponsor
    * @param entryPoint The entry point to use
-   * @param bundlerClient The bundler client to use
    * @returns The paymasterAndData and gas information for the user operation
    */
   public async sponsorUserOperation(
@@ -32,25 +31,14 @@ export class BasePaymaster extends Paymaster {
     const chainIdAsNumber = await this.bundlerClient.chainId();
     const chainId = '0x' + chainIdAsNumber.toString(16);
 
-    const data = {
-      id: 1,
-      jsonrpc: '2.0',
-      method: 'eth_paymasterAndDataForEstimateGas',
-      params: [userOp, entryPoint, chainId],
-    };
-
-    const response = await fetch(this.endpoint, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const json = await response.json();
-
-    const paymasterAndData = json.result;
+    const paymasterAndDataForEstimateGas = (await this.endpoint.send('eth_paymasterAndDataForEstimateGas', [
+      userOp,
+      entryPoint,
+      chainId,
+    ])) as `0x${string}`;
 
     const gasConfig = await this.bundlerClient.estimateUserOperationGas({
-      userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndData }),
+      userOperation: Object.assign(userOperation, { paymasterAndData: paymasterAndDataForEstimateGas }),
       entryPoint,
     });
 
@@ -60,24 +48,15 @@ export class BasePaymaster extends Paymaster {
 
     const stringifyGasConfig = convertBigIntsToString(gasConfig);
 
-    const finalCallData = {
-      id: 1,
-      jsonrpc: '2.0',
-      method: 'eth_paymasterAndDataForUserOperation',
-      params: [Object.assign(userOp, stringifyGasConfig), entryPoint, chainId],
-    };
-
-    const finalResponse = await fetch(this.endpoint, {
-      method: 'POST',
-      body: JSON.stringify(finalCallData),
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const finalJson = await finalResponse.json();
+    const paymasterAndDataForUserOperation = (await this.endpoint.send('eth_paymasterAndDataForUserOperation', [
+      Object.assign(userOp, stringifyGasConfig),
+      entryPoint,
+      chainId,
+    ])) as `0x${string}`;
 
     return {
       ...gasConfig,
-      paymasterAndData: finalJson.result,
+      paymasterAndData: paymasterAndDataForUserOperation,
     };
   }
 }

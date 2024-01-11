@@ -1,3 +1,5 @@
+import { JsonRpcProvider } from '@ethersproject/providers';
+
 /**
  * Generates a random BigInt between min and max (inclusive)
  * @param min The minimum value
@@ -28,4 +30,16 @@ export function convertBigIntsToString(obj: any) {
   }
 
   return obj;
+}
+
+/**
+ * Calls a JSON RPC method
+ * @param rpcEndpoint The RPC endpoint to call
+ * @param method The method to call
+ * @param params The parameters to pass to the method
+ * @returns The result of the method call
+ */
+export async function callRpcMethod(rpcEndpoint: string, method: string, params: unknown[]): Promise<unknown> {
+  const jsonRpcProvider = new JsonRpcProvider(rpcEndpoint);
+  return await jsonRpcProvider.send(method, params);
 }

@@ -2,7 +2,7 @@ import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { PartialUserOperation } from '../types';
 import { Paymaster } from './Paymaster';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
-import { callRpcMethod, convertBigIntsToString } from '../utils';
+import { convertBigIntsToString } from '../utils';
 
 /**
  * Paymaster for Base
@@ -31,7 +31,7 @@ export class BasePaymaster extends Paymaster {
     const chainIdAsNumber = await this.bundlerClient.chainId();
     const chainId = '0x' + chainIdAsNumber.toString(16);
 
-    const paymasterAndDataForEstimateGas = (await callRpcMethod(this.endpoint, 'eth_paymasterAndDataForEstimateGas', [
+    const paymasterAndDataForEstimateGas = (await this.endpoint.send('eth_paymasterAndDataForEstimateGas', [
       userOp,
       entryPoint,
       chainId,
@@ -48,11 +48,11 @@ export class BasePaymaster extends Paymaster {
 
     const stringifyGasConfig = convertBigIntsToString(gasConfig);
 
-    const paymasterAndDataForUserOperation = (await callRpcMethod(
-      this.endpoint,
-      'eth_paymasterAndDataForUserOperation',
-      [Object.assign(userOp, stringifyGasConfig), entryPoint, chainId],
-    )) as `0x${string}`;
+    const paymasterAndDataForUserOperation = (await this.endpoint.send('eth_paymasterAndDataForUserOperation', [
+      Object.assign(userOp, stringifyGasConfig),
+      entryPoint,
+      chainId,
+    ])) as `0x${string}`;
 
     return {
       ...gasConfig,

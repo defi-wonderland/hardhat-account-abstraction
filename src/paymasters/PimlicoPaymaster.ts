@@ -13,6 +13,7 @@ export class PimlicoPaymaster extends Paymaster {
 
   constructor(endpoint: string) {
     super(endpoint);
+
     this.paymasterClient = createPimlicoPaymasterClient({
       transport: http(endpoint),
     });

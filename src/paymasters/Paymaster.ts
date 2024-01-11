@@ -1,15 +1,15 @@
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { PartialUserOperation } from '../types';
-import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { JsonRpcProvider } from '@ethersproject/providers';
 
 /**
  * Base class for paymasters.
  */
 export class Paymaster {
-  public endpoint: string;
+  public endpoint: JsonRpcProvider;
 
   constructor(endpoint: string) {
-    this.endpoint = endpoint;
+    this.endpoint = new JsonRpcProvider(endpoint);
   }
 
   /**

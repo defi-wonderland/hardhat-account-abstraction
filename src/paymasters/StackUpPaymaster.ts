@@ -14,6 +14,7 @@ export class StackUpPaymaster extends Paymaster {
 
   constructor(endpoint: string) {
     super(endpoint);
+
     this.paymasterClient = createStackupPaymasterClient({
       transport: http(endpoint),
     });

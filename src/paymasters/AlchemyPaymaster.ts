@@ -1,7 +1,7 @@
 import { Paymaster } from './Paymaster';
 import { PartialUserOperation } from '../types';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
-import { callRpcMethod, convertBigIntsToString } from '../utils';
+import { convertBigIntsToString } from '../utils';
 
 /**
  * Paymaster for Alchemy
@@ -28,7 +28,7 @@ export class AlchemyPaymaster extends Paymaster {
   ): Promise<SponsorUserOperationReturnType> {
     const userOp = convertBigIntsToString(userOperation);
 
-    const gasAndPaymasterAndData = (await callRpcMethod(this.endpoint, 'alchemy_requestGasAndPaymasterAndData', [
+    const gasAndPaymasterAndData = (await this.endpoint.send('alchemy_requestGasAndPaymasterAndData', [
       {
         policyId: this.policyId,
         entryPoint: entryPoint,

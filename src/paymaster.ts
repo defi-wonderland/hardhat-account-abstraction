@@ -19,7 +19,7 @@ export function createPaymasterClient(
 ): Paymaster {
   switch (paymasterType) {
     case PaymasterType.Pimlico:
-      return new Pm.PimlicoPaymaster(paymasterUrl);
+      return new Pm.PimlicoPaymaster(paymasterUrl, policyId);
     case PaymasterType.StackUp:
       return new Pm.StackUpPaymaster(paymasterUrl);
     case PaymasterType.Base:

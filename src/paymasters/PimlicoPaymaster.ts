@@ -10,13 +10,15 @@ import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
  */
 export class PimlicoPaymaster extends Paymaster {
   public paymasterClient: ReturnType<typeof createPimlicoPaymasterClient>;
+  public policyId: string | undefined;
 
-  constructor(endpoint: string) {
+  constructor(endpoint: string, policyId: string | undefined) {
     super(endpoint);
 
     this.paymasterClient = createPimlicoPaymasterClient({
       transport: http(endpoint),
     });
+    this.policyId = policyId;
   }
 
   /**
@@ -32,6 +34,7 @@ export class PimlicoPaymaster extends Paymaster {
     return await this.paymasterClient.sponsorUserOperation({
       userOperation,
       entryPoint,
+      sponsorshipPolicyId: this.policyId,
     });
   }
 }

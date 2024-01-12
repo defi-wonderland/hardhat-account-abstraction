@@ -1,17 +1,25 @@
-import { BasePaymaster } from './BasePaymaster';
+import { Paymaster } from './Paymaster';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { PartialUserOperation } from '../types';
+import { convertBigIntsToString } from '../utils';
+import { parse } from 'dotenv';
 
-export class BiconomyPaymaster extends BasePaymaster {
+export class BiconomyPaymaster extends Paymaster {
+  public string_endpoint: string;
   constructor(endpoint: string) {
     super(endpoint);
+    this.string_endpoint = endpoint;
   }
 
   public async sponsorUserOperation(
     userOperation: PartialUserOperation,
     entryPoint: `0x${string}`,
-  ): Promise<`0x${string}` | SponsorUserOperationReturnType> {
-    const userOp = this.convertBigIntsToString(userOperation);
+  ): Promise<SponsorUserOperationReturnType> {
+    const userOp = convertBigIntsToString(userOperation);
+    userOp.callGasLimit = '30000';
+    userOp.verificationGasLimit = '10000';
+    userOp.preVerificationGas = '10000';
+    console.log(userOp);
 
     const data = {
       jsonrpc: '2.0',
@@ -27,36 +35,22 @@ export class BiconomyPaymaster extends BasePaymaster {
             webhookData: {},
             smartAccountInfo: {
               name: 'BICONOMY',
-              version: '1.0.0',
+              version: '2.0.0',
             },
           },
         },
       ],
     };
 
-    const response = await fetch(this.endpoint, {
+    const response = await fetch(this.string_endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     });
 
     const json = await response.json();
-    if (json.error) {
-      throw new Error(json.error.message);
-    }
+
     console.log(json);
     return json.result;
-  }
-
-  private convertBigIntsToString(obj: any) {
-    for (const key in obj) {
-      if (typeof obj[key] === 'bigint') {
-        // Convert 0n to '0x', and other BigInts to their string representation
-        obj[key] = obj[key].toString();
-      }
-    }
-
-    console.log(obj);
-    return obj;
   }
 }

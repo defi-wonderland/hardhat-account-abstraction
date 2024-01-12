@@ -1,0 +1,27 @@
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
+import { PartialUserOperation } from '../types';
+import { JsonRpcProvider } from '@ethersproject/providers';
+
+/**
+ * Base class for paymasters.
+ */
+export class Paymaster {
+  public endpoint: JsonRpcProvider;
+
+  constructor(endpoint: string) {
+    this.endpoint = new JsonRpcProvider(endpoint);
+  }
+
+  /**
+   * Sponsor a user operation.
+   * @param userOperation The user operation to sponsor
+   * @param entryPoint The entry point to use
+   * @returns The paymasterAndData and gas information for the user operation or just the paymasterAndData depending on the implementation
+   */
+  public async sponsorUserOperation(
+    userOp: PartialUserOperation,
+    entryPoint: `0x${string}`,
+  ): Promise<SponsorUserOperationReturnType> {
+    throw new Error('This is a base class and should not be called directly.');
+  }
+}

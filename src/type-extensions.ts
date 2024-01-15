@@ -18,6 +18,7 @@ declare module 'hardhat/types/config' {
       paymasterType: PaymasterTypeLiteral;
       simpleAccountFactoryAddress?: `0x${string}`;
       policyId?: string;
+      smartAccount?: `0x${string}`;
     };
   }
 
@@ -36,6 +37,7 @@ declare module 'hardhat/types/config' {
       paymasterType: PaymasterTypeLiteral;
       simpleAccountFactoryAddress?: `0x${string}`;
       policyId?: string;
+      smartAccount?: `0x${string}`;
     };
   }
 }

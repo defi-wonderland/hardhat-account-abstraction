@@ -6,11 +6,10 @@ import { createPublicClient, concat, encodeFunctionData, Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
-import { getSenderAddress, signUserOperationHashWithECDSA } from 'permissionless';
+import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } from 'permissionless';
 import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { getRandomBigInt } from './utils';
 
 const log = init('hardhat:plugin:gasless');
@@ -22,8 +21,6 @@ const log = init('hardhat:plugin:gasless');
  * Gasless Provider class that routes transactions through a bundler and paymaster, based on the ERC 4337 standard
  */
 export class GaslessProvider extends ProviderWrapper {
-  private _nonce: bigint;
-
   constructor(
     protected readonly _signerPk: `0x${string}`,
     protected readonly _wrappedProvider: EIP1193Provider,
@@ -34,10 +31,9 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly senderAddress: `0x${string}`,
     protected readonly _owner: ReturnType<typeof privateKeyToAccount>,
     protected readonly _entryPoint: `0x${string}`,
+    protected _nonce: bigint,
   ) {
     super(_wrappedProvider);
-
-    this._nonce = 0n;
   }
 
   /**
@@ -57,32 +53,44 @@ export class GaslessProvider extends ProviderWrapper {
     paymasterClient: Paymaster,
     publicClient: ReturnType<typeof createPublicClient>,
     simpleAccountFactoryAddress: `0x${string}`,
+    smartAccount?: `0x${string}`,
   ) {
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
     const owner = privateKeyToAccount(_signerPk);
 
-    const initCode = concat([
-      simpleAccountFactoryAddress,
-      encodeFunctionData({
-        abi: [
-          {
-            inputs: [
-              { name: 'owner', type: 'address' },
-              { name: 'salt', type: 'uint256' },
-            ],
-            name: 'createAccount',
-            outputs: [{ name: 'ret', type: 'address' }],
-            stateMutability: 'nonpayable',
-            type: 'function',
-          },
-        ],
-        args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
-      }),
-    ]);
+    const initCode =
+      smartAccount === undefined
+        ? concat([
+            simpleAccountFactoryAddress,
+            encodeFunctionData({
+              abi: [
+                {
+                  inputs: [
+                    { name: 'owner', type: 'address' },
+                    { name: 'salt', type: 'uint256' },
+                  ],
+                  name: 'createAccount',
+                  outputs: [{ name: 'ret', type: 'address' }],
+                  stateMutability: 'nonpayable',
+                  type: 'function',
+                },
+              ],
+              args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
+            }),
+          ])
+        : '0x';
 
-    const senderAddress = await getSenderAddress(publicClient, {
-      initCode: initCode,
+    const senderAddress =
+      smartAccount === undefined
+        ? await getSenderAddress(publicClient, {
+            initCode: initCode,
+            entryPoint: entryPoint,
+          })
+        : smartAccount;
+
+    const nonce = await getAccountNonce(publicClient, {
+      sender: senderAddress,
       entryPoint: entryPoint,
     });
 
@@ -96,6 +104,7 @@ export class GaslessProvider extends ProviderWrapper {
       senderAddress,
       owner,
       entryPoint,
+      nonce,
     );
 
     return gaslessProvider;

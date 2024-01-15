@@ -58,5 +58,6 @@ extendProvider(async (provider, config, networkName) => {
     paymasterClient,
     publicClient,
     simpleAccountFactoryAddress,
+    sponsoredTransaction.smartAccount,
   );
 });

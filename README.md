@@ -63,8 +63,9 @@ const config: HardhatUserConfig = {
       sponsoredTransactions: {
         bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
         paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
-        paymasterType: 'pimlico' // The type of paymaster it is
-        simpleAccountFactoryAddress: 0x15Ba39375ee2Ab563E8873C8390be6f2E2F50232 // Optional parameter, this defaults to: 0x9406cc6185a346906296840746125a0e44976454
+        paymasterType: 'pimlico', // The type of paymaster it is
+        simpleAccountFactoryAddress: 0x15Ba39375ee2Ab563E8873C8390be6f2E2F50232, // Optional parameter, this defaults to: 0x9406cc6185a346906296840746125a0e44976454
+        smartAccount: 0x55045C3e428a5d32B60e5a5e05A657f3634fb93f // Optional parameter, add this if you would like to use an already deployed smart account for the scripts, by default we will deploy one for you
       }
     }
   }

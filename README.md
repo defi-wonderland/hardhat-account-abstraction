@@ -79,6 +79,7 @@ Currently we support 3 paymaster types which are the following:
 1. Pimlico which can be set as `pimlico`
 1. Stackup which can be set as `stackup`
 1. Base which can be set as `base`
+1. Alchemy which can be set as `alchemy`
 
 
 If you would like to add support for a new paymaster check out the guide [here](#adding-a-new-paymaster-to-the-plugin)

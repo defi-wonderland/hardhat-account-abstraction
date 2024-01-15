@@ -19,7 +19,9 @@ export class Paymaster {
    * @returns The paymasterAndData and gas information for the user operation or just the paymasterAndData depending on the implementation
    */
   public async sponsorUserOperation(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userOp: PartialUserOperation,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     entryPoint: `0x${string}`,
   ): Promise<SponsorUserOperationReturnType> {
     throw new Error('This is a base class and should not be called directly.');

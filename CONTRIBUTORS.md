@@ -20,7 +20,7 @@ import { Paymaster } from './Paymaster';
 /**
  * Example class for paymasters.
  */
-export class ExamplePaymaster {
+export class ExamplePaymaster extends Paymaster {
 
   constructor(endpoint: string) {
     super(endpoint);
@@ -57,7 +57,7 @@ export * from './ExamplePaymaster';
 
 <br>
 
-4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum, heres how we would do it with `ExamplePaymaster.ts`
+4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum and update the natspec to reflect the changes, heres how we would do it with `ExamplePaymaster.ts`
 
 <br>
 
@@ -67,6 +67,8 @@ export * from './ExamplePaymaster';
  * @property Pimlico for the Pimlico paymaster
  * @property Base for the Base paymaster
  * @property StackUp for the StackUp paymaster
+ * @property Alchemy for the Alchemy paymaster
+ * @property Example for the example paymaster
  */
 export enum PaymasterType {
   Pimlico = 'pimlico',
@@ -109,7 +111,9 @@ export function createPaymasterClient(
 
 <br>
 
-6. And thats it! In order to test that you have done the implementation correctly you can clone our [example repo found here](https://github.com/defi-wonderland/sponsored-txs-hardhat-example) and link it to your local plugin, see the simple guide below for steps on how to do that!
+6. Finally be sure to update the README's list of supported paymaster to reflect your changes, the table can be found [here](./README.md#supported-paymaster-types)
+
+7. And thats it! In order to test that you have done the implementation correctly you can clone our [example repo found here](https://github.com/defi-wonderland/sponsored-txs-hardhat-example) and link it to your local plugin, see the simple guide below for steps on how to do that!
 
 <br>
 
@@ -160,4 +164,4 @@ PRIVATE_KEY=YOUR_PK
 ```
 9. Now we can test everything by running `npx hardhat run scripts/deploy.ts`
 
-10. Assuming all goes well and you are done testing your implementation feel free to make a PR to the official plugin and we will do our best to review it in a timely manner!
+10. Assuming all goes well and you are done testing your implementation feel free to make a PR to the official plugin with a description on how the reviewer can test your new paymaster and we will do our best to review it in a timely manner!

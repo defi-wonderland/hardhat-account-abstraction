@@ -59,35 +59,33 @@ export class GaslessProvider extends ProviderWrapper {
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
     const owner = privateKeyToAccount(_signerPk);
 
-    const initCode =
-      smartAccount === undefined
-        ? concat([
-            simpleAccountFactoryAddress,
-            encodeFunctionData({
-              abi: [
-                {
-                  inputs: [
-                    { name: 'owner', type: 'address' },
-                    { name: 'salt', type: 'uint256' },
-                  ],
-                  name: 'createAccount',
-                  outputs: [{ name: 'ret', type: 'address' }],
-                  stateMutability: 'nonpayable',
-                  type: 'function',
-                },
-              ],
-              args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
-            }),
-          ])
-        : '0x';
+    const initCode = !smartAccount
+      ? concat([
+          simpleAccountFactoryAddress,
+          encodeFunctionData({
+            abi: [
+              {
+                inputs: [
+                  { name: 'owner', type: 'address' },
+                  { name: 'salt', type: 'uint256' },
+                ],
+                name: 'createAccount',
+                outputs: [{ name: 'ret', type: 'address' }],
+                stateMutability: 'nonpayable',
+                type: 'function',
+              },
+            ],
+            args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
+          }),
+        ])
+      : '0x';
 
-    const senderAddress =
-      smartAccount === undefined
-        ? await getSenderAddress(publicClient, {
-            initCode: initCode,
-            entryPoint: entryPoint,
-          })
-        : smartAccount;
+    const senderAddress = !smartAccount
+      ? await getSenderAddress(publicClient, {
+          initCode: initCode,
+          entryPoint: entryPoint,
+        })
+      : smartAccount;
 
     const nonce = await getAccountNonce(publicClient, {
       sender: senderAddress,

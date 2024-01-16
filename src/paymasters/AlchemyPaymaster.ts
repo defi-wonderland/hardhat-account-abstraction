@@ -12,7 +12,7 @@ export class AlchemyPaymaster extends Paymaster {
   constructor(endpoint: string, policyId: string | undefined) {
     super(endpoint);
 
-    if (policyId === undefined) throw new Error('Policy ID is required for Alchemy Paymaster');
+    if (!policyId) throw new Error('Policy ID is required for Alchemy Paymaster');
     this.policyId = policyId;
   }
 

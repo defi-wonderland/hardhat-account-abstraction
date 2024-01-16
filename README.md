@@ -52,7 +52,7 @@ This plugin requires 3 new field inside a `sponsoredTransaction` object which wi
 
 This is an example of how to set it:
 
-```js
+```ts
 const config: HardhatUserConfig = {
   solidity: '0.8.19',
   defaultNetwork: 'goerli',
@@ -118,10 +118,17 @@ const amountToMint = ethers.parseEther('6.9');
 await testToken.mint(amountToMint);
 ```
 
-## Adding a new paymaster to the plugin
+## Contributors
 
-TODO when this functionallity is finalized
+If you want to learn how to add support for your own paymaster implementation checkout our guide [here](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!
 
+<br>
+
+Sponsored Transaction was built with ❤️ by [Wonderland](https://defi.sucks).
+
+Wonderland the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
+
+[DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.
 
 ## Licensing
 

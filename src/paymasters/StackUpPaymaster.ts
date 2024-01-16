@@ -4,7 +4,6 @@ import { http } from 'viem';
 import { createStackupPaymasterClient } from 'permissionless/clients/stackup';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/stackup';
 import { StackupPaymasterContext } from 'permissionless/types/stackup';
-import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
 /**
  * Paymaster for StackUp.

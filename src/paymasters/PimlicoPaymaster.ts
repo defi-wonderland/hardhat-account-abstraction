@@ -3,7 +3,6 @@ import { PartialUserOperation } from '../types';
 import { http } from 'viem';
 import { createPimlicoPaymasterClient } from 'permissionless/clients/pimlico';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
-import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
 /**
  * Paymaster for Pimlico.

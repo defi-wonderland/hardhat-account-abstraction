@@ -61,24 +61,35 @@ const config: HardhatUserConfig = {
       url: process.env.GOERLI_RPC_URL as string,
       accounts: [process.env.PRIVATE_KEY as string],
       sponsoredTransactions: {
-        bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
-        paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
-        paymasterType: 'pimlico', // The type of paymaster it is
-        simpleAccountFactoryAddress: 0x15Ba39375ee2Ab563E8873C8390be6f2E2F50232, // Optional parameter, this defaults to: 0x9406cc6185a346906296840746125a0e44976454
-        policyId: 'example_example' // Optional parameter, can be set if your paymaster has a policy id
+        bundlerUrl: 'https://example.com',
+        paymasterUrl: 'https://example.com',
+        paymasterType: 'pimlico'
       }
     }
   }
 };
 ```
 
+### Options
+
+| Option                         | Description                                                                                          | Required | Default                                     |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------  |
+| `bundlerUrl`                   | The bundler that the UserOperations will be sent to                                                  | Yes      | No default                                  |
+| `paymasterUrl`                 | The paymaster API that will be used for sponsoring transactions                                      | Yes      | No default                                  |
+| `paymasterType`                | The type of paymaster                                                                                | Yes      | No default                                  |
+| `simpleAccountFactoryAddress`  | The simple account factory address you want to use                                                   | No       | 0x9406cc6185a346906296840746125a0e44976454  |
+| `smartAccount`                 | Address of a smart account to use in your scripts                                                    | No       | Will deploy one for you                     |
+| `policyId`                     | The policy id to use if your paymaster has one                                                       | No       | No default                                  | 
+
 ### Supported Paymaster Types
 
-Currently we support 3 paymaster types which are the following:
+| Paymaster | Value     |
+| --------- | --------- |
+| Pimlico   | 'pimlico' |
+| Base      | 'base'    |
+| Alchemy   | 'alchemy' |
+| Stackup   | 'stackup' |
 
-1. Pimlico which can be set as `pimlico`
-1. Stackup which can be set as `stackup`
-1. Base which can be set as `base`
 
 
 If you would like to add support for a new paymaster check out the guide [here](#adding-a-new-paymaster-to-the-plugin)

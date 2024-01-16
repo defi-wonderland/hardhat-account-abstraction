@@ -5,7 +5,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 /**
  * Base class for paymasters.
  */
-export class Paymaster {
+export abstract class Paymaster {
   public endpoint: JsonRpcProvider;
 
   constructor(endpoint: string) {
@@ -18,10 +18,10 @@ export class Paymaster {
    * @param entryPoint The entry point to use
    * @returns The paymasterAndData and gas information for the user operation or just the paymasterAndData depending on the implementation
    */
-  public async sponsorUserOperation(
+  abstract sponsorUserOperation(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userOp: PartialUserOperation,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     entryPoint: `0x${string}`,
-  ): Promise<SponsorUserOperationReturnType> {
-    throw new Error('This is a base class and should not be called directly.');
-  }
+  ): Promise<SponsorUserOperationReturnType>;
 }

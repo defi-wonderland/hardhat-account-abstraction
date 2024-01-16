@@ -28,7 +28,7 @@ extendProvider(async (provider, config, networkName) => {
   }
 
   const sponsoredTransaction = netConfig.sponsoredTransactions;
-  if (sponsoredTransaction === undefined) {
+  if (!sponsoredTransaction) {
     log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
@@ -58,5 +58,6 @@ extendProvider(async (provider, config, networkName) => {
     paymasterClient,
     publicClient,
     simpleAccountFactoryAddress,
+    sponsoredTransaction.smartAccount,
   );
 });

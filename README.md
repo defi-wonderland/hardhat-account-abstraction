@@ -107,167 +107,17 @@ const amountToMint = ethers.parseEther('6.9');
 await testToken.mint(amountToMint);
 ```
 
-## Adding a new paymaster to the plugin
+## Contributors
 
-### Adding the paymaster
-
-If you operate a paymaster and would like to add support for your paymaster into the plugin please follow the steps below
-
-1. located inside `src/paymasters` you will see all other paymasters please create a typescript file for this example we will call it `ExamplePaymaster.ts`
-
-1. Now inside `ExamplePaymaster.ts` we will need to inherit the `Paymaster` class and input the neccesarry types. Here is an example setup below. Some paymaster might need access to a bundler client or policy id, feel free to add those into the constructor of your class we will get to how those will be passed in a later step.
+If you want to learn how to add support for your own paymaster implementation checkout our guide [here](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!
 
 <br>
 
-```ts
-import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
-import { PartialUserOperation } from '../types';
-import { Paymaster } from './Paymaster';
+Sponsored Transaction was built with ❤️ by [Wonderland](https://defi.sucks).
 
-/**
- * Example class for paymasters.
- */
-export class ExamplePaymaster {
+Wonderland the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
 
-  constructor(endpoint: string) {
-    super(endpoint);
-  }
-
-  /**
-   * Sponsor a user operation.
-   * @param userOperation The user operation to sponsor
-   * @param entryPoint The entry point to use
-   * @returns The paymasterAndData and gas information for the user operation or just the paymasterAndData depending on the implementation
-   */
-  public async sponsorUserOperation(
-    userOp: PartialUserOperation,
-    entryPoint: `0x${string}`,
-  ): Promise<SponsorUserOperationReturnType> {
-    // Your logic for sponsorship
-  }
-}
-```
-<br>
-
-3. Now lets export your paymaster from the paymaster folder we will do this in the `index.ts` file located in `src/paymaster`, you can see from below how we would export `ExamplePaymaster.ts`
-
-<br>
-
-```ts
-export * from './Paymaster';
-export * from './PimlicoPaymaster';
-export * from './StackUpPaymaster';
-export * from './BasePaymaster';
-export * from './AlchemyPaymaster';
-export * from './ExamplePaymaster';
-```
-
-<br>
-
-4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum, heres how we would do it with `ExamplePaymaster.ts`
-
-<br>
-
-```ts
-/**
- * The type of paymaster class
- * @property Pimlico for the Pimlico paymaster
- * @property Base for the Base paymaster
- * @property StackUp for the StackUp paymaster
- */
-export enum PaymasterType {
-  Pimlico = 'pimlico',
-  Base = 'base',
-  StackUp = 'stackup',
-  Alchemy = 'alchemy',
-  Example = 'example'
-}
-```
-<br>
-
-5. Now we will go to `src/paymaster.ts` and add your paymaster to the switch statement, and optionally pass in the bundler client or policy id if your paymaster implementation needs them.
-
-<br>
-
-```ts
-export function createPaymasterClient(
-  paymasterType: PaymasterType,
-  paymasterUrl: string,
-  bundlerClient: PimlicoBundlerClient,
-  policyId?: string,
-): Paymaster {
-  switch (paymasterType) {
-    case PaymasterType.Pimlico:
-      return new Pm.PimlicoPaymaster(paymasterUrl, policyId);
-    case PaymasterType.StackUp:
-      return new Pm.StackUpPaymaster(paymasterUrl);
-    case PaymasterType.Base:
-      return new Pm.BasePaymaster(paymasterUrl, bundlerClient);
-    case PaymasterType.Alchemy:
-      return new Pm.AlchemyPaymaster(paymasterUrl, policyId);
-    case PaymasterType.Example:
-      return new Pm.ExamplePaymaster(paymasterUrl);
-
-    default:
-      throw new Error(`Unknown paymaster type ${paymasterType}`);
-  }
-}
-```
-
-<br>
-
-6. And thats it! In order to test that you have done the implementation correctly you can clone our [example repo found here](https://github.com/defi-wonderland/sponsored-txs-hardhat-example) and link it to your local plugin, see the simple guide below for steps on how to do that!
-
-<br>
-
-### Testing the paymaster locally
-
-1. Make sure you are in the sponsored transaction repo you forked and are ready to test your paymaster implementation
-
-1. run `yarn && yarn build`
-
-1. Run `yarn link`
-
-1. Clone the [example repo](https://github.com/defi-wonderland/sponsored-txs-hardhat-example) and `cd` into it
-
-1. run `yarn link @defi-wonderland/sponsored-txs-hardhat-plugin`
-
-1. Now open the example repo in your code editor of choice and navigate to the `hardhat.config.ts` file
-
-1. Here we need to set our `paymasterType` to the paymaster we just made! If your paymaster does not run on goerli feel free to change the network as well!
-
-<br>
-
-```ts
-const config: HardhatUserConfig = {
-  solidity: '0.8.19',
-  defaultNetwork: 'goerli',
-  networks: {
-    goerli: {
-      url: process.env.GOERLI_RPC_URL as string,
-      accounts: [process.env.PRIVATE_KEY as string],
-      sponsoredTransactions: {
-        bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
-        paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
-        paymasterType: 'example' // The type of paymaster it is
-      }
-    }
-  }
-};
-```
-<br>
-
-8. Next we need to set the environment variable in the `.env`
-
-<br>
-
-```
-GOERLI_RPC_URL=https://example_rpc
-PRIVATE_KEY=YOUR_PK
-```
-9. Now we can test everything by running `npx hardhat run scripts/deploy.ts`
-
-10. Assuming all goes well and you are done testing your implementation feel free to make a PR to the official plugin and we will do our best to review it in a timely manner!
+[DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.
 
 ## Licensing
 

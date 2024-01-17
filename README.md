@@ -92,7 +92,7 @@ const config: HardhatUserConfig = {
 
 
 
-If you would like to add support for a new paymaster check out the guide [here](#adding-a-new-paymaster-to-the-plugin)
+If you would like to add support for a new paymaster check out the [contributors guide](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin)
 
 ### Supported Chains
 

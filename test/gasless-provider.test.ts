@@ -15,6 +15,8 @@ import * as MockPermissionless from '../src/mock';
 describe('GaslessProvider', function () {
   let gaslessProvider: GaslessProvider;
 
+  // Create fake clients for testing
+
   const publicClient = createPublicClient({
     transport: http('http://localhost:3000'),
   });
@@ -30,14 +32,18 @@ describe('GaslessProvider', function () {
     undefined,
   );
 
+  // Random address for a mock smart account
   const account = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
 
+  // Mock provider
   const provider = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     request(args: RequestArguments): Promise<unknown> {
       return Promise.resolve();
     },
   } as EIP1193Provider;
+
+  // All the sinon stubs we need
 
   let supportedEntryPointsStub: SinonStub;
   let getAccontNonceStub: SinonStub;

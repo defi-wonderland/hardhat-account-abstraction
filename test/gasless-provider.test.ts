@@ -141,7 +141,7 @@ describe('GaslessProvider', function () {
       undefined,
     );
 
-    assert.exists(gaslessProvider);
+    assert.exists(newGaslessProvider);
     assert.isTrue(getSenderAddressStub.calledOnce);
     assert.isTrue(supportedEntryPointsStub.calledOnce);
     assert.isTrue(getAccontNonceStub.calledOnce);

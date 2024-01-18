@@ -39,9 +39,8 @@ describe('GaslessProvider', function () {
     },
   } as EIP1193Provider;
 
-  const supportedEntryPointsStub: SinonStub = stub(bundlerClient, 'supportedEntryPoints');
-  const getAccoutntNonceStub: SinonStub = stub(MockPermissionless, 'getAccountNonce');
-
+  let supportedEntryPointsStub: SinonStub;
+  let getAccontNonceStub: SinonStub;
   let sendUserOpStub: SinonStub;
   let sponsorUserOpStub: SinonStub;
   let chainIdStub: SinonStub;
@@ -49,10 +48,13 @@ describe('GaslessProvider', function () {
   let estimateFeesPerGasStub: SinonStub;
   let signOpStub: SinonStub;
   let waitForUserOperationReceiptStub: SinonStub;
+  let getSenderAddressStub: SinonStub;
 
   before(async function () {
-    supportedEntryPointsStub.resolves(['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']);
-    getAccoutntNonceStub.resolves(BigInt(0));
+    supportedEntryPointsStub = stub(bundlerClient, 'supportedEntryPoints').resolves([
+      '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+    ]);
+    getAccontNonceStub = stub(MockPermissionless, 'getAccountNonce').resolves(BigInt(0));
 
     gaslessProvider = await GaslessProvider.create(
       generatePrivateKey(),
@@ -65,10 +67,12 @@ describe('GaslessProvider', function () {
     );
 
     supportedEntryPointsStub.restore();
-    getAccoutntNonceStub.restore();
+    getAccontNonceStub.restore();
   });
 
   beforeEach(async function () {
+    supportedEntryPointsStub = stub(bundlerClient, 'supportedEntryPoints');
+    getAccontNonceStub = stub(MockPermissionless, 'getAccountNonce');
     sendUserOpStub = stub(bundlerClient, 'sendUserOperation');
     sponsorUserOpStub = stub(paymasterClient, 'sponsorUserOperation');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,6 +81,7 @@ describe('GaslessProvider', function () {
     estimateFeesPerGasStub = stub(publicClient, 'estimateFeesPerGas');
     signOpStub = stub(MockPermissionless, 'signUserOperationHashWithECDSA');
     waitForUserOperationReceiptStub = stub(bundlerClient, 'waitForUserOperationReceipt');
+    getSenderAddressStub = stub(MockPermissionless, 'getSenderAddress');
   });
 
   afterEach(async function () {
@@ -87,6 +92,9 @@ describe('GaslessProvider', function () {
     estimateFeesPerGasStub.restore();
     signOpStub.restore();
     waitForUserOperationReceiptStub.restore();
+    getSenderAddressStub.restore();
+    supportedEntryPointsStub.restore();
+    getAccontNonceStub.restore();
   });
 
   it('Should create a gasless provider', async function () {
@@ -113,9 +121,29 @@ describe('GaslessProvider', function () {
     assert.isTrue(sendUserOpStub.calledOnce);
     assert.isTrue(sponsorUserOpStub.calledOnce);
     assert.isTrue(chainIdStub.calledOnce);
-    assert.isTrue(providerRequestStub.calledOnce);
     assert.isTrue(estimateFeesPerGasStub.calledOnce);
     assert.isTrue(signOpStub.calledOnce);
     assert.isTrue(waitForUserOperationReceiptStub.calledOnce);
+  });
+
+  it('Creates a smart account if none is provided', async () => {
+    getSenderAddressStub.resolves(account);
+    supportedEntryPointsStub.resolves(['0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789']);
+    getAccontNonceStub.resolves(BigInt(0));
+
+    const newGaslessProvider = await GaslessProvider.create(
+      generatePrivateKey(),
+      provider,
+      bundlerClient,
+      paymasterClient,
+      publicClient,
+      constantSimpleAccountFactoryAddress,
+      undefined,
+    );
+
+    assert.exists(gaslessProvider);
+    assert.isTrue(getSenderAddressStub.calledOnce);
+    assert.isTrue(supportedEntryPointsStub.calledOnce);
+    assert.isTrue(getAccontNonceStub.calledOnce);
   });
 });

@@ -109,6 +109,8 @@ Currently the list of supported chains is, but not limited to the following:
 
 ## Usage
 
+> **⚠ WARNING: Any non-zero msg.value call will not work as intended as paymaster's dont sponsor this value, in order to use native transfers or interact with payable functions you will need the native token of your chain in the smart account wallet beforehand**
+
 After you have setup the configuration for the `sponsoredTransactions` and you are using a network that has them enable you are good to go, you can right a simple script below and your transactions will be mined on the testnet that you have configured!
 
 ```js

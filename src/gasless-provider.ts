@@ -182,7 +182,7 @@ export class GaslessProvider extends ProviderWrapper {
     const signature = await signUserOperationHashWithECDSA({
       account: this._owner,
       userOperation: sponsoredUserOperation,
-      chainId: await this.getChainId(),
+      chainId: await this.publicClient.getChainId(),
       entryPoint: this._entryPoint,
     });
     sponsoredUserOperation.signature = signature;
@@ -207,17 +207,5 @@ export class GaslessProvider extends ProviderWrapper {
     this._nonce += 1n;
     // return the tx hash
     return txHash;
-  }
-
-  /**
-   * Gets the chain ID for the provider we are wrapping
-   * @returns The chain ID
-   */
-  private async getChainId(): Promise<number> {
-    const rawChainId = (await this._wrappedProvider.request({
-      method: 'eth_chainId',
-      params: [],
-    })) as string;
-    return parseInt(rawChainId);
   }
 }

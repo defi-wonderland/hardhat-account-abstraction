@@ -49,12 +49,12 @@ describe('GaslessProvider', function () {
   let getAccontNonceStub: SinonStub;
   let sendUserOpStub: SinonStub;
   let sponsorUserOpStub: SinonStub;
-  let chainIdStub: SinonStub;
   let providerRequestStub: SinonStub;
   let estimateFeesPerGasStub: SinonStub;
   let signOpStub: SinonStub;
   let waitForUserOperationReceiptStub: SinonStub;
   let getSenderAddressStub: SinonStub;
+  let getChainIdStub: SinonStub;
 
   before(async function () {
     supportedEntryPointsStub = stub(bundlerClient, 'supportedEntryPoints').resolves([
@@ -81,10 +81,9 @@ describe('GaslessProvider', function () {
     getAccontNonceStub = stub(MockPermissionless, 'getAccountNonce');
     sendUserOpStub = stub(bundlerClient, 'sendUserOperation');
     sponsorUserOpStub = stub(paymasterClient, 'sponsorUserOperation');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    chainIdStub = stub(gaslessProvider, <any>'getChainId');
     providerRequestStub = stub(provider, 'request');
     estimateFeesPerGasStub = stub(publicClient, 'estimateFeesPerGas');
+    getChainIdStub = stub(publicClient, 'getChainId');
     signOpStub = stub(MockPermissionless, 'signUserOperationHashWithECDSA');
     waitForUserOperationReceiptStub = stub(bundlerClient, 'waitForUserOperationReceipt');
     getSenderAddressStub = stub(MockPermissionless, 'getSenderAddress');
@@ -93,9 +92,9 @@ describe('GaslessProvider', function () {
   afterEach(async function () {
     sendUserOpStub.restore();
     sponsorUserOpStub.restore();
-    chainIdStub.restore();
     providerRequestStub.restore();
     estimateFeesPerGasStub.restore();
+    getChainIdStub.restore();
     signOpStub.restore();
     waitForUserOperationReceiptStub.restore();
     getSenderAddressStub.restore();
@@ -116,7 +115,7 @@ describe('GaslessProvider', function () {
 
   it('Should sponsor the user operation if request is eth_sendRawTransaction', async () => {
     sendUserOpStub.resolves('0x');
-    chainIdStub.resolves(1);
+    getChainIdStub.resolves(1);
     sponsorUserOpStub.resolves(mockSponsorResult);
     estimateFeesPerGasStub.resolves({ maxFeePerGas: 1, maxPriorityFeePerGas: 1 });
     signOpStub.resolves(mockTxn);
@@ -126,7 +125,7 @@ describe('GaslessProvider', function () {
 
     assert.isTrue(sendUserOpStub.calledOnce);
     assert.isTrue(sponsorUserOpStub.calledOnce);
-    assert.isTrue(chainIdStub.calledOnce);
+    assert.isTrue(getChainIdStub.calledOnce);
     assert.isTrue(estimateFeesPerGasStub.calledOnce);
     assert.isTrue(signOpStub.calledOnce);
     assert.isTrue(waitForUserOperationReceiptStub.calledOnce);

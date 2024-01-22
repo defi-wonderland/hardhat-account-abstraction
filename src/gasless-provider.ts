@@ -6,7 +6,7 @@ import { createPublicClient, concat, encodeFunctionData, Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
-import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } from 'permissionless';
+import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } from './mock';
 import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';

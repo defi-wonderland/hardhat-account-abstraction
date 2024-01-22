@@ -2,7 +2,7 @@ import { extendProvider } from 'hardhat/config';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { createPaymasterClient } from './paymaster';
-import { simpleAccountFactoryAddress as constantSimpleAccoutnFactoryAddress } from './constants';
+import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from './constants';
 import { GaslessProvider } from './gasless-provider';
 import { PaymasterType } from './types';
 import init from 'debug';
@@ -34,7 +34,7 @@ extendProvider(async (provider, config, networkName) => {
   }
 
   const simpleAccountFactoryAddress =
-    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccoutnFactoryAddress;
+    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
 
   const publicClient = createPublicClient({
     transport: http(netConfig.url),

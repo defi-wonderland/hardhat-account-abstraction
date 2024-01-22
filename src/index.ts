@@ -48,10 +48,9 @@ extendProvider(async (provider, config, networkName) => {
   const bundlerChainId = await bundlerClient.chainId();
   const publicChainId = await publicClient.getChainId();
   if (bundlerChainId !== publicChainId) {
-    log(
-      `Bundler chain id ${bundlerChainId} does not match public chain id ${publicChainId} for network ${networkName}`,
-    );
-    return provider;
+    const message = `Bundler chain id ${bundlerChainId} does not match public chain id ${publicChainId} for network ${networkName}`;
+    log(message);
+    throw new Error(message);
   }
 
   const paymasterClient = createPaymasterClient(

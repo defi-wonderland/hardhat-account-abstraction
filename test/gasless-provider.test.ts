@@ -5,7 +5,7 @@ import { createPaymasterClient } from '../src/paymaster';
 import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from '../src/constants';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
-import { PaymasterType } from './types';
+import { PaymasterType } from '../src/types';
 import { generatePrivateKey } from 'viem/accounts';
 import { EIP1193Provider } from 'hardhat/types';
 import { RequestArguments } from 'hardhat/types';

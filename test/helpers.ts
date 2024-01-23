@@ -1,6 +1,10 @@
 import { resetHardhatContext } from 'hardhat/plugins-testing';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import path from 'path';
+import { Hex } from 'viem';
+import { dummySignature } from '../src/constants';
+import { PartialUserOperation } from '../src/types';
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 
 declare module 'mocha' {
   interface Context {
@@ -19,6 +23,26 @@ export const mockSponsorResult = {
   verificationGasLimit: 100000n,
   callGasLimit: 100000n,
 };
+
+export const mockUserOperation: PartialUserOperation = {
+  sender: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+  nonce: 0n,
+  initCode: '0x',
+  callData: '0x',
+  maxFeePerGas: 1n,
+  maxPriorityFeePerGas: 1n,
+  // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
+  signature: dummySignature as Hex,
+};
+
+export const mockSponsorReturnType: SponsorUserOperationReturnType = {
+  paymasterAndData: '0x',
+  preVerificationGas: 1n,
+  verificationGasLimit: 1n,
+  callGasLimit: 1n,
+};
+
+export const mockEntryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
 export function useEnvironment(fixtureProjectName: string) {
   beforeEach('Loading hardhat environment', function () {

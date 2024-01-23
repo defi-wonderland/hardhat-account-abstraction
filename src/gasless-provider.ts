@@ -189,11 +189,21 @@ export class GaslessProvider extends ProviderWrapper {
 
     log('Generated signature:', signature);
 
-    // SUBMIT THE USER OPERATION TO BE BUNDLED
-    const userOperationHash = await this.bundlerClient.sendUserOperation({
-      userOperation: sponsoredUserOperation,
-      entryPoint: this._entryPoint,
-    });
+    let userOperationHash;
+
+    try {
+      // SUBMIT THE USER OPERATION TO BE BUNDLED
+      userOperationHash = await this.bundlerClient.sendUserOperation({
+        userOperation: sponsoredUserOperation,
+        entryPoint: this._entryPoint,
+      });
+    } catch (e) {
+      // There are some bundler and paymaster combos that are incompatible due to certain bundlers requiring certain gas prices and paymasters might have a different minimum set for example
+      // We throw this error because if the scripts fail here its because of a combo incompatibility which is out of our control
+      throw new Error(
+        `Failed to send user operation! There might be an incompatibility with your bundle and paymaster, try changing one of them. The submission failed from the following error:\n ${e}`,
+      );
+    }
 
     log('Received User Operation hash:', userOperationHash);
 

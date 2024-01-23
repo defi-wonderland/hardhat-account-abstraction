@@ -44,6 +44,15 @@ extendProvider(async (provider, config, networkName) => {
     transport: http(sponsoredTransaction.bundlerUrl),
   });
 
+  // Check if bundler and public client share same chain Id
+  const bundlerChainId = await bundlerClient.chainId();
+  const publicChainId = await publicClient.getChainId();
+  if (bundlerChainId !== publicChainId) {
+    const message = `Bundler chain id ${bundlerChainId} does not match public chain id ${publicChainId} for network ${networkName}`;
+    log(message);
+    throw new Error(message);
+  }
+
   const paymasterClient = createPaymasterClient(
     sponsoredTransaction.paymasterType as PaymasterType,
     sponsoredTransaction.paymasterUrl,

@@ -4,7 +4,7 @@ import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { PaymasterType } from '../../src/types';
 import { BasePaymaster } from '../../src/paymasters/BasePaymaster';
 import { createPaymasterClient } from '../../src/paymaster';
-import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../helpers';
+import { mockUserOperation, mockEntryPoint } from '../helpers';
 import { stub, SinonStub } from 'sinon';
 import { convertBigIntsToString } from '../../src/utils';
 

@@ -47,8 +47,7 @@ describe('Base Paymaster', function () {
   it('Should sponsor a valid user operation', async function () {
     const paymasterAndData = '0x123';
 
-    paymasterSponsorStub.onFirstCall().resolves(paymasterAndData);
-    paymasterSponsorStub.onSecondCall().resolves(paymasterAndData);
+    paymasterSponsorStub.resolves(paymasterAndData);
     estimateUserOperationGasStub.resolves(mockGasConfig);
     chainIdStub.resolves(1);
 

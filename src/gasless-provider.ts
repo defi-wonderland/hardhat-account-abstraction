@@ -2,14 +2,15 @@ import { ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { createPublicClient, concat, encodeFunctionData, Hex } from 'viem';
+import { createPublicClient, encodeFunctionData, Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
-import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } from './mock';
+import { signUserOperationHashWithECDSA, getAccountNonce } from './mock';
 import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
+import { getSmartAccountData } from './utils';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -58,33 +59,12 @@ export class GaslessProvider extends ProviderWrapper {
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
     const owner = privateKeyToAccount(_signerPk);
 
-    const initCode = !smartAccount
-      ? concat([
-          simpleAccountFactoryAddress,
-          encodeFunctionData({
-            abi: [
-              {
-                inputs: [
-                  { name: 'owner', type: 'address' },
-                  { name: 'salt', type: 'uint256' },
-                ],
-                name: 'createAccount',
-                outputs: [{ name: 'ret', type: 'address' }],
-                stateMutability: 'nonpayable',
-                type: 'function',
-              },
-            ],
-            args: [owner.address, BigInt(owner.address)],
-          }),
-        ])
-      : '0x';
-
-    const senderAddress = !smartAccount
-      ? await getSenderAddress(publicClient, {
-          initCode: initCode,
-          entryPoint: entryPoint,
-        })
-      : smartAccount;
+    const { initCode, senderAddress } = !smartAccount
+      ? await getSmartAccountData(publicClient, simpleAccountFactoryAddress, owner.address, entryPoint)
+      : ({ initCode: '0x', senderAddress: smartAccount } as {
+          initCode: `0x${string}`;
+          senderAddress: `0x${string}`;
+        });
 
     const nonce = await getAccountNonce(publicClient, {
       sender: senderAddress,

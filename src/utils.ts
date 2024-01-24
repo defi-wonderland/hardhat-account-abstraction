@@ -1,3 +1,6 @@
+import { getSenderAddress } from './mock';
+import { concat, createPublicClient, encodeFunctionData } from 'viem';
+
 /**
  * Converts all BigInts in an object to strings because the nonce
  * @param obj An object that may contain BigInts
@@ -14,4 +17,51 @@ export function convertBigIntsToString(obj: any) {
   }
 
   return obj;
+}
+
+/**
+ * Determines the init code and sender address for a smart account already deployed or to be deployed
+ * @param publicClient The public client to use to query the sender address
+ * @param simpleAccountFactoryAddress The factory address to use
+ * @param owner The owner of the smart account
+ * @param entryPoint The entry point to use
+ * @returns A promise that resolves to the init code and sender address
+ */
+export async function getSmartAccountData(
+  publicClient: ReturnType<typeof createPublicClient>,
+  simpleAccountFactoryAddress: `0x${string}`,
+  owner: `0x${string}`,
+  entryPoint: `0x${string}`,
+): Promise<{
+  initCode: `0x${string}`;
+  senderAddress: `0x${string}`;
+}> {
+  const initCode = concat([
+    simpleAccountFactoryAddress,
+    encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: 'owner', type: 'address' },
+            { name: 'salt', type: 'uint256' },
+          ],
+          name: 'createAccount',
+          outputs: [{ name: 'ret', type: 'address' }],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+      ],
+      args: [owner, BigInt(owner)],
+    }),
+  ]);
+
+  const senderAddress = await getSenderAddress(publicClient, {
+    initCode: initCode,
+    entryPoint: entryPoint,
+  });
+
+  return {
+    initCode,
+    senderAddress,
+  };
 }

@@ -10,7 +10,6 @@ import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } fro
 import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { getRandomBigInt } from './utils';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -75,7 +74,7 @@ export class GaslessProvider extends ProviderWrapper {
                 type: 'function',
               },
             ],
-            args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
+            args: [owner.address, BigInt(owner.address)],
           }),
         ])
       : '0x';

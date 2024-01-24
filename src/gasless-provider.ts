@@ -75,7 +75,7 @@ export class GaslessProvider extends ProviderWrapper {
                 type: 'function',
               },
             ],
-            args: [owner.address, getRandomBigInt(0n, 2n ** 256n)],
+            args: [owner.address, BigInt(owner.address)],
           }),
         ])
       : '0x';

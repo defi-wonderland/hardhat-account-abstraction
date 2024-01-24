@@ -31,6 +31,7 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly senderAddress: `0x${string}`,
     protected readonly _owner: ReturnType<typeof privateKeyToAccount>,
     protected readonly _entryPoint: `0x${string}`,
+    protected readonly _simpleAccountFactoryAddress: `0x${string}`,
     protected _nonce: bigint,
   ) {
     super(_wrappedProvider);
@@ -81,6 +82,7 @@ export class GaslessProvider extends ProviderWrapper {
       senderAddress,
       owner,
       entryPoint,
+      simpleAccountFactoryAddress,
       nonce,
     );
 
@@ -196,5 +198,20 @@ export class GaslessProvider extends ProviderWrapper {
     this._nonce += 1n;
     // return the tx hash
     return txHash;
+  }
+
+  /**
+   * Determines address for a smart account already deployed or to be deployed
+   * @param owner The owner of the smart account
+   * @returns A promise that resolves to sender address
+   */
+  public async getSmartAccountAddress(owner: `0x${string}`): Promise<`0x${string}`> {
+    const { senderAddress } = await getSmartAccountData(
+      this.publicClient,
+      this._simpleAccountFactoryAddress,
+      owner,
+      this._entryPoint,
+    );
+    return senderAddress;
   }
 }

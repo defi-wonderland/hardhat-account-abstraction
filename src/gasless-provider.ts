@@ -10,7 +10,6 @@ import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } fro
 import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { getRandomBigInt } from './utils';
 
 const log = init('hardhat:plugin:gasless');
 

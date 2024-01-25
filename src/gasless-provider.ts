@@ -90,11 +90,17 @@ export class GaslessProvider extends ProviderWrapper {
   }
 
   /**
-   * Sends requests to the provider, if the request is a transaction, it will be sent through the bundler and paymaster
+   * Sends requests to the provider, if the request is a transaction, it will be sent through the bundler and paymaster.
+   * If the request is a smart contract address request, it will be queried from the public client and return the smart account address
    * @param args The arguments for the request
    * @returns Unknown, as it depends on the request being made
    */
   public request(args: RequestArguments): Promise<unknown> {
+    if (args.method === 'provider_getSmartAccountAddress' && args.params !== undefined) {
+      const params = this._getParams(args);
+      return this._getSmartAccountAddress(params[0]);
+    }
+
     if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
       const params = this._getParams(args);
       return this._sendGaslessTransaction(params[0]);
@@ -205,7 +211,7 @@ export class GaslessProvider extends ProviderWrapper {
    * @param owner The owner of the smart account
    * @returns A promise that resolves to sender address
    */
-  public async getSmartAccountAddress(owner: `0x${string}`): Promise<`0x${string}`> {
+  private async _getSmartAccountAddress(owner: `0x${string}`): Promise<`0x${string}`> {
     const { senderAddress } = await getSmartAccountData(
       this.publicClient,
       this._simpleAccountFactoryAddress,

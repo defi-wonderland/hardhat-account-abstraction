@@ -126,7 +126,7 @@ This plugin does adds additional JSON-RPC methods.
 
 - `sponsored_getSmartAccountAddress`: Returns the address for the smart account that would be used if we deploy one for you, the user does not provide a smart account address, this will be deterministically generated from the provided signer address:
   - Parameters: 
-    - `signerAddress: string` - The signer of the transactions
+    - `signerAddress: 0x${string}` - The signer of the transactions
   - Example: 
   ```js
   const smartAccountAddress = await network.provider.request({

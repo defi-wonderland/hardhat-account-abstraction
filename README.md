@@ -120,6 +120,20 @@ const amountToMint = ethers.parseEther('6.9');
 await testToken.mint(amountToMint);
 ```
 
+## Custom JSON API methods
+
+This plugin does adds additional JSON-RPC methods.
+
+- `sponsored_getSmartAccountAddress`: Returns the address of the smart account for the given signer:
+  
+```js
+const smartAccountAddress = await network.provider.request({
+    method: 'sponsored_getSmartAccountAddress',
+    params: [signer.address],
+  });
+  console.log(`Smart account address: ${smartAccountAddress}`);
+```
+
 ## Contributors
 
 If you want to learn how to add support for your own paymaster implementation checkout our guide [here](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!

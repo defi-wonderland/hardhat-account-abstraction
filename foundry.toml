@@ -11,9 +11,8 @@ multiline_func_header = 'params_first'
 [profile.default]
 solc = '0.8.19'
 src = './src/batch'
-out = './out'
+out = './src/abi'
 cache = true
 evm_version = 'london'
 auto_detect_solc = true
 optimizer = false
-remappings = ['libraries/=src/solidity/libraries']

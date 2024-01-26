@@ -122,7 +122,7 @@ await testToken.mint(amountToMint);
 
 ## Deploying Contracts
 
-Deploying contracts works just as any other transaction would, however due to the nature of account abstraction we deploy all contracts through the `CreateXFactory`, The `CreateXFactory` is deployed on **most** EVM compatible chains, if you would like to learn more about it or deploy it to your new chain you can do so by checking out [their repo]()
+Deploying contracts works just as any other transaction would, however due to the nature of account abstraction we deploy all contracts through the `CreateXFactory`, The `CreateXFactory` is deployed on **most** EVM compatible chains, if you would like to learn more about it or deploy it to your new chain you can do so by checking out [their repo](https://github.com/pcaversaccio/createx)
 
 ### What are the differences?
 
@@ -167,7 +167,7 @@ Deploying contracts works just as any other transaction would, however due to th
 
   const lockContractAddress = await network.provider.request({
     method: 'sponsored_getDeploymentFor',
-    params: [lockContract]
+    params: [lockContract.target]
   });
 
   console.log(lockContractAddress) // Correct address
@@ -195,7 +195,7 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
 
 **Description:** Returns the address of which a contract was deployed through our middleware, [to learn more about why this is needed click here](#deploying-contracts)
   - Parameters:
-    - `contract: Contract | 0x${string}`: Either a base contract, contract or address
+    - `contract: 0x${string}`: The contract address that you want to check the deployment for
   - Example:
   ```js
   const lock = await ethers.getContractFactory('Lock');
@@ -203,7 +203,7 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
 
   const lockContractAddress = await network.provider.request({
     method: 'sponsored_getDeploymentFor',
-    params: [lockContract.target] // This param also accept `lockContract` or `lockContract.address`
+    params: [lockContract.target] 
   });
   ```
 

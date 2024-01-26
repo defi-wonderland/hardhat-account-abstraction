@@ -1,20 +1,19 @@
-import { ethers, Transaction } from 'ethers';
+import { BytesLike, ethers, Transaction } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, getCreate2Address } from 'viem';
+import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, pad } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { signUserOperationHashWithECDSA, getAccountNonce } from './mock';
 import * as constants from './constants';
+import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/BatchDeployAndTransferOwnership.sol/BatchDeployAndTransferOwnership.json';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { bigintToPaddedHex, getSmartAccountData } from './utils';
+import { getSmartAccountData } from './utils';
 
 const log = init('hardhat:plugin:gasless');
-
-getCreate2Address;
 
 // TODO: Test this with value transfers
 // TODO: Test this with tx type 0, 1
@@ -122,14 +121,17 @@ export class GaslessProvider extends ProviderWrapper {
       const params = this._getParams(args);
 
       const newParams = params.map((tx) => {
+        // Check if the address being called to was deployed by us
         const deploymentFromCreateX = this._expectedDeploymentsToCreateXDeployments.get(
           tx.to?.toLowerCase() as `0x${string}`,
         );
 
+        // If it was deployed by us overrwrite tx.to with our address
         if (deploymentFromCreateX !== undefined) {
           tx.to = deploymentFromCreateX.toLowerCase();
         }
 
+        // Return the new transaction
         return tx;
       });
 
@@ -162,7 +164,7 @@ export class GaslessProvider extends ProviderWrapper {
       to = constants.createXFactory;
 
       // If it is a contract deployment we will simulate if the contract is ownable by transferring ownership to the smart account, if transferOwnership fails we will do nothing
-      const needsHandleOwnable = await this._simulateContractDeploymentIsOwnable(parsedTxn);
+      const needsHandleOwnable = await this._simulateContractDeploymentIsOwnable(originalCalldata);
 
       // Create the bytecode to deploy through the CreateXFactory and transfer ownership to the smart account if needed
       txnData = needsHandleOwnable
@@ -284,29 +286,34 @@ export class GaslessProvider extends ProviderWrapper {
 
   /**
    * Simulate a contract deployment and transferOwnership call to see if its ownable or not
-   * @param tx The deployment transaction that gets simulated
+   * @param data The calldata of the transaction
    * @returns If the contract is ownable
    */
-  private async _simulateContractDeploymentIsOwnable(tx: Transaction): Promise<boolean> {
-    const inputData = ethers.utils.defaultAbiCoder.encode(['bytes'], [tx.data]).slice(2);
-    tx.data = constants.batchDeployAndTransferOwnershipBytecode.concat(inputData);
+  private async _simulateContractDeploymentIsOwnable(data: `0x${string}`): Promise<boolean> {
+    const inputData = ethers.utils.defaultAbiCoder.encode(['bytes'], [data]).slice(2);
+    const callData = batchDeployAndTransferOwnershipBytecode.object.concat(inputData);
 
     try {
-      await this._wrappedProvider.request({
+      const response = await this._wrappedProvider.request({
         method: 'eth_call',
         params: [
           {
             from: this.senderAddress,
-            data: tx.data,
+            data: callData,
           },
           'latest',
         ],
       });
 
+      console.log(response);
+
+      const [decoded] = ethers.utils.defaultAbiCoder.decode(['address'], response as BytesLike);
+
+      if (decoded === ethers.constants.AddressZero) return false;
+
       return true;
     } catch (e) {
-      // If call fails return false as its not ownable
-      return false;
+      throw new Error(`Deployment simulation failed with error: ${e}`);
     }
   }
 
@@ -329,12 +336,12 @@ export class GaslessProvider extends ProviderWrapper {
           type: 'function',
         },
       ],
-      args: [bigintToPaddedHex(this._nonce), deploymentInitCode],
+      args: [pad(this._nonce.toString(16) as `0x${string}`), deploymentInitCode],
     });
   }
 
   /**
-   * Create the calldata for a traansaction to the CreateXFactory for deploying and transfering ownership
+   * Create the calldata for a transaction to the CreateXFactory for deploying and transfering ownership
    * @param deploymentInitCode The contract that we are deploying's init code
    * @param constructorAmount The value to send with our deployment
    * @returns The calldata to use for the user operation
@@ -385,7 +392,7 @@ export class GaslessProvider extends ProviderWrapper {
         },
       ],
       args: [
-        bigintToPaddedHex(this._nonce),
+        pad(this._nonce.toString(16) as `0x${string}`),
         deploymentInitCode,
         initFunction,
         { constructorAmount, initCallAmount: 0n },
@@ -398,22 +405,8 @@ export class GaslessProvider extends ProviderWrapper {
    * @param contract Either an object that has the `target` field (this is where ethers stores the address) or just the address
    * @returns The address that was deployed or undefined if no address was deployed
    */
-  private async _getDeploymentFor(contract: unknown): Promise<`0x${string}` | undefined> {
-    if (!contract) return undefined;
-
-    if (typeof contract === 'object' && 'target' in contract) {
-      return this._expectedDeploymentsToCreateXDeployments.get(
-        (contract.target as string).toLowerCase() as `0x${string}`,
-      );
-    } else if (typeof contract === 'string') {
-      return this._expectedDeploymentsToCreateXDeployments.get(contract.toLowerCase() as `0x${string}`);
-    } else if (typeof contract === 'object' && 'address' in contract) {
-      return this._expectedDeploymentsToCreateXDeployments.get(
-        (contract.address as string).toLowerCase() as `0x${string}`,
-      );
-    }
-
-    throw new Error('Invalid type for getting the contract deployment!');
+  private async _getDeploymentFor(contract: `0x${string}`): Promise<`0x${string}` | undefined> {
+    return this._expectedDeploymentsToCreateXDeployments.get(contract.toLowerCase() as `0x${string}`);
   }
 
   /*

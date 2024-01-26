@@ -170,6 +170,9 @@ export class GaslessProvider extends ProviderWrapper {
       txnData = needsHandleOwnable
         ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value.toBigInt())
         : this._createNonOwnableDeploymentBytecode(originalCalldata);
+    } else {
+      // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
+      txnData = this._checkCalldataForBadDeployments(originalCalldata);
     }
 
     // If "to" is a fake address that we deployed customly we will overwrite the "to" param
@@ -396,6 +399,25 @@ export class GaslessProvider extends ProviderWrapper {
         { constructorAmount, initCallAmount: 0n },
       ],
     });
+  }
+
+  private _checkCalldataForBadDeployments(calldata: `0x${string}`): `0x${string}` {
+    this._expectedDeploymentsToCreateXDeployments.forEach((value, key) => {
+      // Remove the 0x prefix
+      const badDeploymentAddress = key.slice(2);
+
+      let index = calldata.indexOf(badDeploymentAddress);
+      while (index !== -1) {
+        // Replace only the specific section where the badDeploymentAddress is found
+        calldata =
+          calldata.substring(0, index) + value.slice(2) + calldata.substring(index + badDeploymentAddress.length);
+
+        // Update the index for the next occurrence
+        index = calldata.indexOf(badDeploymentAddress, index + value.slice(2).length);
+      }
+    });
+
+    return calldata;
   }
 
   /**

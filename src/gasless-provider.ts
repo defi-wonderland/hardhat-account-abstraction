@@ -256,9 +256,10 @@ export class GaslessProvider extends ProviderWrapper {
     // If it was a deployment call we need to get the deployed to address from the logs
     if (!parsedTxn.to) {
       // NOTE: We need to always set the expectedDeployment in lowercase for consistency, our deployment can stay normal cased
-      const nonce = await this.publicClient.getTransactionCount({ address: receipt.receipt.from });
+      const deploymentTxn = await this.publicClient.getTransaction({ hash: receipt.receipt.transactionHash });
+      const nonce = deploymentTxn.nonce;
       const expectedDeployment = getCreateAddress({
-        nonce: BigInt(nonce - 1),
+        nonce: BigInt(nonce),
         from: receipt.receipt.from,
       }).toLowerCase() as `0x${string}`;
 

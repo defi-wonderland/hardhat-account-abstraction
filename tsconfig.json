@@ -9,7 +9,8 @@
     "strict": true,
     "rootDirs": ["./src", "./test"],
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "exclude": ["dist", "node_modules"],
   "include": [

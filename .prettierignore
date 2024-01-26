@@ -4,3 +4,4 @@ public
 build
 dist
 src/constants.ts
+src/abi/**

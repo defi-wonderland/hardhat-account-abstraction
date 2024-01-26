@@ -20,6 +20,30 @@ export function convertBigIntsToString(obj: any) {
 }
 
 /**
+ * Converts a bigint to a 32 byte padded hexadecimal string
+ * @param bigintValue The bigint value
+ * @returns The hexadecimal string
+ */
+
+export function bigintToPaddedHex(bigintValue: bigint): `0x${string}` {
+  // Convert the bigint to a hexadecimal string
+  let hexString = bigintValue.toString(16);
+
+  // Ensure the length is even to represent full bytes
+  if (hexString.length % 2 !== 0) {
+    hexString = '0' + hexString;
+  }
+
+  // Calculate the padding length (64 hex characters for 32 bytes)
+  const paddingLength = 64 - hexString.length;
+
+  // Pad the string with trailing zeros
+  hexString = hexString + '0'.repeat(paddingLength);
+
+  return ('0x' + hexString) as `0x${string}`;
+}
+
+/*
  * Determines the init code and sender address for a smart account already deployed or to be deployed
  * @param publicClient The public client to use to query the sender address
  * @param simpleAccountFactoryAddress The factory address to use

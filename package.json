@@ -17,11 +17,11 @@
   "scripts": {
     "format": "yarn run prettier:fix && yarn run lint:fix",
     "test": "mocha --exit --recursive 'test/**/*.test.ts'",
-    "build": "tsc",
+    "build": "forge compile && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "npm run build",
     "lint": "yarn lint:src && yarn lint:test",
-    "lint:fix": "yarn lint:src --fix && yarn lint:test --fix",
+    "lint:fix": "yarn lint:src --fix && yarn lint:test --fix && forge fmt",
     "lint:src": "eslint ./src",
     "lint:test": "eslint ./test",
     "prepare": "husky install",

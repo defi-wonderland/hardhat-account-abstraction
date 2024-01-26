@@ -1,13 +1,14 @@
-import { ethers } from 'ethers';
+import { BytesLike, ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { createPublicClient, encodeFunctionData, Hex } from 'viem';
+import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, pad } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
 import { signUserOperationHashWithECDSA, getAccountNonce } from './mock';
 import * as constants from './constants';
+import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/BatchDeployAndTransferOwnership.sol/BatchDeployAndTransferOwnership.json';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { getSmartAccountData } from './utils';
@@ -21,6 +22,8 @@ const log = init('hardhat:plugin:gasless');
  * Gasless Provider class that routes transactions through a bundler and paymaster, based on the ERC 4337 standard
  */
 export class GaslessProvider extends ProviderWrapper {
+  private _expectedDeploymentsToCreateXDeployments: Map<`0x${string}`, `0x${string}`>;
+
   constructor(
     protected readonly _signerPk: `0x${string}`,
     protected readonly _wrappedProvider: EIP1193Provider,
@@ -35,6 +38,8 @@ export class GaslessProvider extends ProviderWrapper {
     protected _nonce: bigint,
   ) {
     super(_wrappedProvider);
+
+    this._expectedDeploymentsToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
   }
 
   /**
@@ -106,6 +111,33 @@ export class GaslessProvider extends ProviderWrapper {
       return this._sendGaslessTransaction(params[0]);
     }
 
+    if (args.method === 'sponsored_getDeploymentFor' && args.params !== undefined) {
+      const params = this._getParams(args);
+      return this._getDeploymentFor(params[0]);
+    }
+
+    // We need to partially overwrite eth_call incase the 'to' field uses an address that was deployed from us
+    if (args.method === 'eth_call' && args.params !== undefined) {
+      const params = this._getParams(args);
+
+      const newParams = params.map((tx) => {
+        // Check if the address being called to was deployed by us
+        const deploymentFromCreateX = this._expectedDeploymentsToCreateXDeployments.get(
+          tx.to?.toLowerCase() as `0x${string}`,
+        );
+
+        // If it was deployed by us overrwrite tx.to with our address
+        if (deploymentFromCreateX !== undefined) {
+          tx.to = deploymentFromCreateX.toLowerCase();
+        }
+
+        // Return the new transaction
+        return tx;
+      });
+
+      return this._wrappedProvider.request({ method: 'eth_call', params: newParams });
+    }
+
     return this._wrappedProvider.request(args);
   }
 
@@ -123,6 +155,34 @@ export class GaslessProvider extends ProviderWrapper {
     // Get gas prices
     const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
 
+    const originalCalldata: `0x${string}` = parsedTxn.data as `0x${string}`;
+    let txnData: `0x${string}` = parsedTxn.data as `0x${string}`;
+    let to: `0x${string}` = parsedTxn.to as `0x${string}`;
+
+    // If parsedTxn.to doesnt exist it is a deployment transaction and needs special functionality of sending a transaction to a factory
+    if (!parsedTxn.to) {
+      to = constants.createXFactory;
+
+      // If it is a contract deployment we will simulate if the contract is ownable by transferring ownership to the smart account, if transferOwnership fails we will do nothing
+      const needsHandleOwnable = await this._simulateContractDeploymentIsOwnable(originalCalldata);
+
+      // Create the bytecode to deploy through the CreateXFactory and transfer ownership to the smart account if needed
+      txnData = needsHandleOwnable
+        ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value.toBigInt())
+        : this._createNonOwnableDeploymentBytecode(originalCalldata);
+    } else {
+      // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
+      txnData = this._checkCalldataForBadDeployments(originalCalldata);
+    }
+
+    // If "to" is a fake address that we deployed customly we will overwrite the "to" param
+    const potentialToAddress = this._expectedDeploymentsToCreateXDeployments.get(
+      parsedTxn.to?.toLowerCase() as `0x${string}`,
+    );
+    if (potentialToAddress !== undefined) {
+      to = potentialToAddress;
+    }
+
     // Generate calldata
     // This calldata is hardcoded as it is calldata for pimlico to execute
     const callData = encodeFunctionData({
@@ -139,7 +199,7 @@ export class GaslessProvider extends ProviderWrapper {
           type: 'function',
         },
       ],
-      args: [parsedTxn.to as `0x${string}`, parsedTxn.value.toBigInt(), parsedTxn.data as `0x${string}`],
+      args: [to, parsedTxn.value.toBigInt(), txnData],
     });
 
     // Construct UserOperation
@@ -197,6 +257,27 @@ export class GaslessProvider extends ProviderWrapper {
     // let's also wait for the userOperation to be included, by continually querying for the receipts
     log('Querying for receipts...');
     const receipt = await this.bundlerClient.waitForUserOperationReceipt({ hash: userOperationHash });
+
+    // If it was a deployment call we need to get the deployed to address from the logs
+    if (!parsedTxn.to) {
+      // NOTE: We need to always set the expectedDeployment in lowercase for consistency, our deployment can stay normal cased
+      const deploymentTxn = await this.publicClient.getTransaction({ hash: receipt.receipt.transactionHash });
+      const nonce = deploymentTxn.nonce;
+      const expectedDeployment = getCreateAddress({
+        nonce: BigInt(nonce),
+        from: receipt.receipt.from,
+      }).toLowerCase() as `0x${string}`;
+
+      receipt.logs.forEach((log) => {
+        if (log.address === to) {
+          // 1st index of topics is the deployed address
+          const paddedAddress = log.topics[1];
+          const deployment = ('0x' + paddedAddress.slice(-40)) as `0x${string}`;
+          this._expectedDeploymentsToCreateXDeployments.set(expectedDeployment, deployment);
+        }
+      });
+    }
+
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);
 
@@ -207,6 +288,148 @@ export class GaslessProvider extends ProviderWrapper {
   }
 
   /**
+   * Simulate a contract deployment and transferOwnership call to see if its ownable or not
+   * @param data The calldata of the transaction
+   * @returns If the contract is ownable
+   */
+  private async _simulateContractDeploymentIsOwnable(data: `0x${string}`): Promise<boolean> {
+    const inputData = ethers.utils.defaultAbiCoder.encode(['bytes'], [data]).slice(2);
+    const callData = batchDeployAndTransferOwnershipBytecode.object.concat(inputData);
+
+    try {
+      const response = await this._wrappedProvider.request({
+        method: 'eth_call',
+        params: [
+          {
+            from: this.senderAddress,
+            data: callData,
+          },
+          'latest',
+        ],
+      });
+
+      const [decoded] = ethers.utils.defaultAbiCoder.decode(['address'], response as BytesLike);
+
+      if (decoded === ethers.constants.AddressZero) return false;
+
+      return true;
+    } catch (e) {
+      throw new Error(`Deployment simulation failed with error: ${e}`);
+    }
+  }
+
+  /**
+   * Creates calldata for deploying through CreateXFactory
+   * @param deploymentInitCode The contract that we are deploying's init code
+   * @returns The calldata to use for the user operation
+   */
+  private _createNonOwnableDeploymentBytecode(deploymentInitCode: `0x${string}`): `0x${string}` {
+    return encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: 'salt', type: 'bytes32' },
+            { name: 'initCode', type: 'bytes' },
+          ],
+          name: 'deployCreate2',
+          outputs: [{ name: 'newContract', type: 'address' }],
+          stateMutability: 'payable',
+          type: 'function',
+        },
+      ],
+      args: [pad(this._nonce.toString(16) as `0x${string}`), deploymentInitCode],
+    });
+  }
+
+  /**
+   * Create the calldata for a transaction to the CreateXFactory for deploying and transfering ownership
+   * @param deploymentInitCode The contract that we are deploying's init code
+   * @param constructorAmount The value to send with our deployment
+   * @returns The calldata to use for the user operation
+   */
+  private _createOwnableDeploymentBytecode(
+    deploymentInitCode: `0x${string}`,
+    constructorAmount: bigint,
+  ): `0x${string}` {
+    const initFunction = encodeFunctionData({
+      abi: [
+        {
+          inputs: [{ name: 'newOwner', type: 'address' }],
+          name: 'transferOwnership',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+      ],
+      args: [this.senderAddress],
+    });
+
+    return encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: 'salt', type: 'bytes32' },
+            { name: 'initCode', type: 'bytes' },
+            { name: 'data', type: 'bytes' },
+            {
+              name: 'values',
+              type: 'tuple',
+              components: [
+                {
+                  name: 'constructorAmount',
+                  type: 'uint256',
+                },
+                {
+                  name: 'initCallAmount',
+                  type: 'uint256',
+                },
+              ],
+            },
+          ],
+          name: 'deployCreate2AndInit',
+          outputs: [{ name: 'newContract', type: 'address' }],
+          stateMutability: 'payable',
+          type: 'function',
+        },
+      ],
+      args: [
+        pad(this._nonce.toString(16) as `0x${string}`),
+        deploymentInitCode,
+        initFunction,
+        { constructorAmount, initCallAmount: 0n },
+      ],
+    });
+  }
+
+  private _checkCalldataForBadDeployments(calldata: `0x${string}`): `0x${string}` {
+    this._expectedDeploymentsToCreateXDeployments.forEach((value, key) => {
+      // Remove the 0x prefix
+      const badDeploymentAddress = key.slice(2);
+
+      let index = calldata.indexOf(badDeploymentAddress);
+      while (index !== -1) {
+        // Replace only the specific section where the badDeploymentAddress is found
+        calldata =
+          calldata.substring(0, index) + value.slice(2) + calldata.substring(index + badDeploymentAddress.length);
+
+        // Update the index for the next occurrence
+        index = calldata.indexOf(badDeploymentAddress, index + value.slice(2).length);
+      }
+    });
+
+    return calldata;
+  }
+
+  /**
+   * Gets the deployment for a given contract
+   * @param contract Either an object that has the `target` field (this is where ethers stores the address) or just the address
+   * @returns The address that was deployed or undefined if no address was deployed
+   */
+  private async _getDeploymentFor(contract: `0x${string}`): Promise<`0x${string}` | undefined> {
+    return this._expectedDeploymentsToCreateXDeployments.get(contract.toLowerCase() as `0x${string}`);
+  }
+
+  /*
    * Determines address for a smart account already deployed or to be deployed
    * @param owner The owner of the smart account
    * @returns A promise that resolves to sender address

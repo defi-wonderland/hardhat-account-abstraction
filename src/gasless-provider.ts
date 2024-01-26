@@ -1,4 +1,4 @@
-import { BytesLike, ethers, Transaction } from 'ethers';
+import { BytesLike, ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
@@ -304,8 +304,6 @@ export class GaslessProvider extends ProviderWrapper {
           'latest',
         ],
       });
-
-      console.log(response);
 
       const [decoded] = ethers.utils.defaultAbiCoder.decode(['address'], response as BytesLike);
 

@@ -6,7 +6,6 @@ interface IOwnableContract {
 }
 
 contract BatchDeployAndTransferOwnership {
-
   /**
    * @notice Simulates a deployment and transfer ownership as if this contract was a factory
    * @param _initCode The contract we are deploings init code
@@ -17,11 +16,12 @@ contract BatchDeployAndTransferOwnership {
 
     // Deploy the contract via CREATE2
     assembly {
-        _newContract := create2(callvalue(), add(_initCode, 0x20), mload(_initCode), _guardedSalt)
+      _newContract := create2(callvalue(), add(_initCode, 0x20), mload(_initCode), _guardedSalt)
     }
 
     // Attempt to transfer ownership to see if the function exists
-    try IOwnableContract(_newContract).transferOwnership(msg.sender) {} catch {
+    try IOwnableContract(_newContract).transferOwnership(msg.sender) {}
+    catch {
       _newContract = address(0);
     }
 

@@ -143,6 +143,10 @@ Deploying contracts works just as any other transaction would, however due to th
 
   const lockContract = await lock.deploy();
 
+  const originalOwner = await lockContract.owner();
+
+  console.log('Original owner set to: ', originalOwner); // Logs the smart account address
+
   await lockContract.transferOwnership("0xEB7cFd33CfEfFf98EF067F501B81D31C9a7077C3");
 
   const newOwner = await lockContract.owner();

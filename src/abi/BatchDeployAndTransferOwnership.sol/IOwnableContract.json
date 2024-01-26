@@ -60,9 +60,7 @@
       }
     },
     "settings": {
-      "remappings": [
-        "hardhat/=node_modules/hardhat/"
-      ],
+      "remappings": ["hardhat/=node_modules/hardhat/"],
       "optimizer": {
         "enabled": false,
         "runs": 200
@@ -91,12 +89,8 @@
     "absolutePath": "src/batch/BatchDeployAndTransferOwnership.sol",
     "id": 50,
     "exportedSymbols": {
-      "BatchDeployAndTransferOwnership": [
-        49
-      ],
-      "IOwnableContract": [
-        7
-      ]
+      "BatchDeployAndTransferOwnership": [49],
+      "IOwnableContract": [7]
     },
     "nodeType": "SourceUnit",
     "src": "32:1097:0",
@@ -106,12 +100,7 @@
         "nodeType": "PragmaDirective",
         "src": "32:24:0",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "=",
-          "0.8",
-          ".19"
-        ]
+        "literals": ["solidity", "=", "0.8", ".19"]
       },
       {
         "id": 7,
@@ -182,9 +171,7 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "linearizedBaseContracts": [
-          7
-        ],
+        "linearizedBaseContracts": [7],
         "name": "IOwnableContract",
         "nameLocation": "68:16:0",
         "scope": 50,
@@ -207,9 +194,7 @@
               "nodes": [],
               "statements": [
                 {
-                  "assignments": [
-                    14
-                  ],
+                  "assignments": [14],
                   "declarations": [
                     {
                       "constant": false,
@@ -245,9 +230,7 @@
                   "src": "410:20:0"
                 },
                 {
-                  "assignments": [
-                    17
-                  ],
+                  "assignments": [17],
                   "declarations": [
                     {
                       "constant": false,
@@ -641,9 +624,7 @@
                   "src": "690:114:0"
                 },
                 {
-                  "assignments": [
-                    40
-                  ],
+                  "assignments": [40],
                   "declarations": [
                     {
                       "constant": false,
@@ -925,9 +906,7 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          49
-        ],
+        "linearizedBaseContracts": [49],
         "name": "BatchDeployAndTransferOwnership",
         "nameLocation": "156:31:0",
         "scope": 50,

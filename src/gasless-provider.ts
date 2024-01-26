@@ -155,8 +155,10 @@ export class GaslessProvider extends ProviderWrapper {
     // Get gas prices
     const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
 
-    const originalCalldata: `0x${string}` = parsedTxn.data as `0x${string}`;
-    let txnData: `0x${string}` = parsedTxn.data as `0x${string}`;
+    // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
+    const originalCalldata: `0x${string}` = this._checkCalldataForBadDeployments(parsedTxn.data as `0x${string}`);
+
+    let txnData = originalCalldata;
     let to: `0x${string}` = parsedTxn.to as `0x${string}`;
 
     // If parsedTxn.to doesnt exist it is a deployment transaction and needs special functionality of sending a transaction to a factory
@@ -170,9 +172,6 @@ export class GaslessProvider extends ProviderWrapper {
       txnData = needsHandleOwnable
         ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value.toBigInt())
         : this._createNonOwnableDeploymentBytecode(originalCalldata);
-    } else {
-      // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
-      txnData = this._checkCalldataForBadDeployments(originalCalldata);
     }
 
     // If "to" is a fake address that we deployed customly we will overwrite the "to" param

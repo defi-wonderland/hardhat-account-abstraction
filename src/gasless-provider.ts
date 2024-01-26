@@ -2,15 +2,15 @@ import { ethers, Transaction } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { createPublicClient, concat, encodeFunctionData, Hex, getCreateAddress, getCreate2Address } from 'viem';
+import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, getCreate2Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
-import { getSenderAddress, signUserOperationHashWithECDSA, getAccountNonce } from './mock';
+import { signUserOperationHashWithECDSA, getAccountNonce } from './mock';
 import * as constants from './constants';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { bigintToPaddedHex } from './utils';
+import { bigintToPaddedHex, getSmartAccountData } from './utils';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -35,6 +35,7 @@ export class GaslessProvider extends ProviderWrapper {
     protected readonly senderAddress: `0x${string}`,
     protected readonly _owner: ReturnType<typeof privateKeyToAccount>,
     protected readonly _entryPoint: `0x${string}`,
+    protected readonly _simpleAccountFactoryAddress: `0x${string}`,
     protected _nonce: bigint,
   ) {
     super(_wrappedProvider);
@@ -65,33 +66,12 @@ export class GaslessProvider extends ProviderWrapper {
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
     const owner = privateKeyToAccount(_signerPk);
 
-    const initCode = !smartAccount
-      ? concat([
-          simpleAccountFactoryAddress,
-          encodeFunctionData({
-            abi: [
-              {
-                inputs: [
-                  { name: 'owner', type: 'address' },
-                  { name: 'salt', type: 'uint256' },
-                ],
-                name: 'createAccount',
-                outputs: [{ name: 'ret', type: 'address' }],
-                stateMutability: 'nonpayable',
-                type: 'function',
-              },
-            ],
-            args: [owner.address, BigInt(owner.address)],
-          }),
-        ])
-      : '0x';
-
-    const senderAddress = !smartAccount
-      ? await getSenderAddress(publicClient, {
-          initCode: initCode,
-          entryPoint: entryPoint,
-        })
-      : smartAccount;
+    const { initCode, senderAddress } = !smartAccount
+      ? await getSmartAccountData(publicClient, simpleAccountFactoryAddress, owner.address, entryPoint)
+      : ({ initCode: '0x', senderAddress: smartAccount } as {
+          initCode: `0x${string}`;
+          senderAddress: `0x${string}`;
+        });
 
     const nonce = await getAccountNonce(publicClient, {
       sender: senderAddress,
@@ -108,6 +88,7 @@ export class GaslessProvider extends ProviderWrapper {
       senderAddress,
       owner,
       entryPoint,
+      simpleAccountFactoryAddress,
       nonce,
     );
 
@@ -115,11 +96,17 @@ export class GaslessProvider extends ProviderWrapper {
   }
 
   /**
-   * Sends requests to the provider, if the request is a transaction, it will be sent through the bundler and paymaster
+   * Sends requests to the provider, if the request is a transaction, it will be sent through the bundler and paymaster.
+   * If the request is a smart contract address request, it will be queried from the public client and return the smart account address
    * @param args The arguments for the request
    * @returns Unknown, as it depends on the request being made
    */
   public request(args: RequestArguments): Promise<unknown> {
+    if (args.method === 'sponsored_getSmartAccountAddress' && args.params !== undefined) {
+      const params = this._getParams(args);
+      return this._getSmartAccountAddress(params[0]);
+    }
+
     if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
       const params = this._getParams(args);
       return this._sendGaslessTransaction(params[0]);
@@ -422,5 +409,20 @@ export class GaslessProvider extends ProviderWrapper {
     }
 
     throw new Error('Invalid type for getting the contract deployment!');
+  }
+
+  /*
+   * Determines address for a smart account already deployed or to be deployed
+   * @param owner The owner of the smart account
+   * @returns A promise that resolves to sender address
+   */
+  private async _getSmartAccountAddress(owner: `0x${string}`): Promise<`0x${string}`> {
+    const { senderAddress } = await getSmartAccountData(
+      this.publicClient,
+      this._simpleAccountFactoryAddress,
+      owner,
+      this._entryPoint,
+    );
+    return senderAddress;
   }
 }

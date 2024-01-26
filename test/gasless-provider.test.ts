@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import { GaslessProvider } from '../src/gasless-provider';
 import { stub, SinonStub } from 'sinon';
 import { createPaymasterClient } from '../src/paymaster';
-import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from './constants';
+import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from '../src/constants';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { PaymasterType } from '../src/types';

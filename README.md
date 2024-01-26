@@ -120,11 +120,62 @@ const amountToMint = ethers.parseEther('6.9');
 await testToken.mint(amountToMint);
 ```
 
+## Deploying Contracts
+
+Deploying contracts works just as any other transaction would, however due to the nature of account abstraction we deploy all contracts through the `CreateXFactory`, The `CreateXFactory` is deployed on **most** EVM compatible chains, if you would like to learn more about it or deploy it to your new chain you can do so by checking out [their repo]()
+
+### What are the differences?
+
+- **Ownable contracts**
+
+    We do support ownable contracts and the default `owner` of your contract will be the smart account you deployed with, the only condition is you must have a `transferOwnership(address)` function to make this work, if you have a custom implementation of `Ownable` and dont instantiate `owner` as `msg.sender` in the constructor it will also work.
+
+- **Contract addresses in scripts**
+
+    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#sponsored_getdeploymentfor)
+
+    <br>
+
+    Scripting will work as expected even with this incorrect address param, this is because our middleware overwrites any transaction being sent to the incorrect predicted address and routes it to the address we deployed. As you can see from this example below.
+
+  ```js
+  const lock = await ethers.getContractFactory('Lock');
+
+  const lockContract = await lock.deploy();
+
+  await lockContract.transferOwnership("0xEB7cFd33CfEfFf98EF067F501B81D31C9a7077C3");
+
+  const newOwner = await lockContract.owner();
+
+  console.log('New owner set to: ', newOwner); // Logs the 0xEB7... address
+  ```
+  <br>
+
+  However it is very important to remember that `lockContract` has the wrong address in its object so you need to use our custom method if you need this address for any interactions
+
+  <br>
+
+  ```js
+  const lock = await ethers.getContractFactory('Lock');
+  const lockContract = await lock.deploy();
+  
+  console.log(lockContract.target); // Wrong address
+
+  const lockContractAddress = await network.provider.request({
+    method: 'sponsored_getDeploymentFor',
+    params: [lockContract]
+  });
+
+  console.log(lockContractAddress) // Correct address
+  ```
+
 ## Custom JSON API methods
 
-This plugin does adds additional JSON-RPC methods.
+This plugin adds additional JSON-RPC methods to be able to interact and get data from our custom provider middleware.
 
-- `sponsored_getSmartAccountAddress`: Returns the address for the smart account that would be used if we deploy one for you, the user does not provide a smart account address, this will be deterministically generated from the provided signer address:
+### `sponsored_getSmartAccountAddress`
+
+**Description:** Returns the address for the smart account that would be used if we deploy one for you, the user does not provide a smart account address, this will be deterministically generated from the provided signer address:
   - Parameters: 
     - `signerAddress: 0x${string}` - The signer of the transactions
   - Example: 
@@ -134,6 +185,22 @@ This plugin does adds additional JSON-RPC methods.
       params: [signer.address],
     });
     console.log(`Smart account address: ${smartAccountAddress}`);
+  ```
+
+### `sponsored_getDeploymentFor`: 
+
+**Description:** Returns the address of which a contract was deployed through our middleware, [to learn more about why this is needed click here](#deploying-contracts)
+  - Parameters:
+    - `contract: Contract | 0x${string}`: Either a base contract, contract or address
+  - Example:
+  ```js
+  const lock = await ethers.getContractFactory('Lock');
+  const lockContract = await lock.deploy();
+
+  const lockContractAddress = await network.provider.request({
+    method: 'sponsored_getDeploymentFor',
+    params: [lockContract.target] // This param also accept `lockContract` or `lockContract.address`
+  });
   ```
 
 ## Contributors

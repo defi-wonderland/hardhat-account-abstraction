@@ -406,6 +406,10 @@ export class GaslessProvider extends ProviderWrapper {
       );
     } else if (typeof contract === 'string') {
       return this._expectedDeploymentsToCreateXDeployments.get(contract.toLowerCase() as `0x${string}`);
+    } else if (typeof contract === 'object' && 'address' in contract) {
+      return this._expectedDeploymentsToCreateXDeployments.get(
+        (contract.address as string).toLowerCase() as `0x${string}`,
+      );
     }
 
     throw new Error('Invalid type for getting the contract deployment!');

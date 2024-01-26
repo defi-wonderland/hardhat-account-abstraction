@@ -197,7 +197,7 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
 
 **Description:** Returns the address of which a contract was deployed through our middleware, [to learn more about why this is needed click here](#deploying-contracts)
   - Parameters:
-    - `contract: 0x${string}`: The contract address that you want to check the deployment for
+    - `hash: 0x${string}`: The contract address or transaction hash that you want to check the deployment for
   - Example:
   ```js
   const lock = await ethers.getContractFactory('Lock');

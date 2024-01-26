@@ -23,6 +23,7 @@ const log = init('hardhat:plugin:gasless');
  */
 export class GaslessProvider extends ProviderWrapper {
   private _expectedDeploymentsToCreateXDeployments: Map<`0x${string}`, `0x${string}`>;
+  private _txHashToCreateXDeployments: Map<`0x${string}`, `0x${string}`>;
 
   constructor(
     protected readonly _signerPk: `0x${string}`,
@@ -40,6 +41,7 @@ export class GaslessProvider extends ProviderWrapper {
     super(_wrappedProvider);
 
     this._expectedDeploymentsToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
+    this._txHashToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
   }
 
   /**
@@ -106,7 +108,10 @@ export class GaslessProvider extends ProviderWrapper {
       return this._getSmartAccountAddress(params[0]);
     }
 
-    if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
+    if (
+      (args.method === 'eth_sendRawTransaction' || args.method === 'eth_sendTransaction') &&
+      args.params !== undefined
+    ) {
       const params = this._getParams(args);
       return this._sendGaslessTransaction(params[0]);
     }
@@ -273,7 +278,12 @@ export class GaslessProvider extends ProviderWrapper {
           // 1st index of topics is the deployed address
           const paddedAddress = log.topics[1];
           const deployment = ('0x' + paddedAddress.slice(-40)) as `0x${string}`;
+
           this._expectedDeploymentsToCreateXDeployments.set(expectedDeployment, deployment);
+          this._txHashToCreateXDeployments.set(
+            receipt.receipt.transactionHash.toLowerCase() as `0x${string}`,
+            deployment,
+          );
         }
       });
     }
@@ -422,11 +432,14 @@ export class GaslessProvider extends ProviderWrapper {
 
   /**
    * Gets the deployment for a given contract
-   * @param contract Either an object that has the `target` field (this is where ethers stores the address) or just the address
+   * @param hash Either a transaction hash or address
    * @returns The address that was deployed or undefined if no address was deployed
    */
-  private async _getDeploymentFor(contract: `0x${string}`): Promise<`0x${string}` | undefined> {
-    return this._expectedDeploymentsToCreateXDeployments.get(contract.toLowerCase() as `0x${string}`);
+  private async _getDeploymentFor(hash: `0x${string}`): Promise<`0x${string}` | undefined> {
+    // Address length should be 42 as the 20 bytes is 40 and the prefix is 2, if its not that it is a transaction hash
+    return hash.length == 42
+      ? this._expectedDeploymentsToCreateXDeployments.get(hash.toLowerCase() as `0x${string}`)
+      : this._txHashToCreateXDeployments.get(hash.toLowerCase() as `0x${string}`);
   }
 
   /*

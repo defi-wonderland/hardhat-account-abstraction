@@ -155,7 +155,7 @@ Deploying contracts works just as any other transaction would, however due to th
   ```
   <br>
 
-  However it is very important to remember that `lockContract` has the wrong address in its object so you need to use our custom method if you need this address for any interactions
+  However it is very important to remember that `lockContract` has the wrong address, however using the address the contract computes will work as a parameter as you can see below
 
   <br>
 
@@ -171,6 +171,8 @@ Deploying contracts works just as any other transaction would, however due to th
   });
 
   console.log(lockContractAddress) // Correct address
+
+  lockContract.randomFunctionWithAddressAsParam(lockContract.target) // Will use the correct address
   ```
 
 ## Custom JSON API methods

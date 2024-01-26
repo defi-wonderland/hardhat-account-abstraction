@@ -2,7 +2,7 @@ import { resetHardhatContext } from 'hardhat/plugins-testing';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import path from 'path';
 import { Hex } from 'viem';
-import { dummySignature } from '../src/constants';
+import { dummySignature } from './constants';
 import { PartialUserOperation } from '../src/types';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 

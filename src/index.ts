@@ -2,7 +2,7 @@ import { extendProvider } from 'hardhat/config';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { createPaymasterClient } from './paymaster';
-import { simpleAccountFactoryAddress as constantSimpleAccoutnFactoryAddress } from './constants';
+import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from './constants';
 import { GaslessProvider } from './gasless-provider';
 import { PaymasterType } from './types';
 import init from 'debug';
@@ -34,7 +34,7 @@ extendProvider(async (provider, config, networkName) => {
   }
 
   const simpleAccountFactoryAddress =
-    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccoutnFactoryAddress;
+    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
 
   const publicClient = createPublicClient({
     transport: http(netConfig.url),
@@ -43,6 +43,15 @@ extendProvider(async (provider, config, networkName) => {
   const bundlerClient = createPimlicoBundlerClient({
     transport: http(sponsoredTransaction.bundlerUrl),
   });
+
+  // Check if bundler and public client share same chain Id
+  const bundlerChainId = await bundlerClient.chainId();
+  const publicChainId = await publicClient.getChainId();
+  if (bundlerChainId !== publicChainId) {
+    const message = `Bundler chain id ${bundlerChainId} does not match public chain id ${publicChainId} for network ${networkName}`;
+    log(message);
+    throw new Error(message);
+  }
 
   const paymasterClient = createPaymasterClient(
     sponsoredTransaction.paymasterType as PaymasterType,

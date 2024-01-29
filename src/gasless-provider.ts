@@ -116,15 +116,7 @@ export class GaslessProvider extends ProviderWrapper {
     }
 
     if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
-      console.log('here');
       const params = this._getParams(args);
-      return this._sendGaslessTransaction(params[0]);
-    }
-
-    if (args.method === 'eth_sendTransaction' && args.params !== undefined) {
-      console.log('viem compatible plz');
-      const params = this._getParams(args);
-      params[0].from = undefined;
       return this._sendGaslessTransaction(params[0]);
     }
 
@@ -337,8 +329,6 @@ export class GaslessProvider extends ProviderWrapper {
       userOperation: Object.assign(userOperation, { paymasterAndData: '0x' }),
       entryPoint: this._entryPoint,
     });
-
-    console.log(gasConfig.callGasLimit.toString(16) as `0x${string}`);
 
     return ('0x' + gasConfig.callGasLimit.toString(16)) as `0x${string}`;
   }

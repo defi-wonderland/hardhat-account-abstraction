@@ -2,7 +2,7 @@ import { BytesLike, Transaction, ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, pad } from 'viem';
+import { createPublicClient, encodeFunctionData, Hex, getCreateAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';

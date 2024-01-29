@@ -5,18 +5,18 @@ pragma solidity ^0.8.9;
 // import "hardhat/console.sol";
 
 contract OwnableContract {
-    event OwnerChanged(address);
+  event OwnerChanged(address);
 
-    address public owner;
+  address public owner;
 
-    constructor() {
-        owner = msg.sender;
-    }
+  constructor() {
+    owner = msg.sender;
+  }
 
-    function transferOwnership(address newOwner) external {
-        require(msg.sender == owner, "Only owner can transfer ownership");
-        owner = newOwner;
+  function transferOwnership(address newOwner) external {
+    require(msg.sender == owner, 'Only owner can transfer ownership');
+    owner = newOwner;
 
-        emit OwnerChanged(newOwner);
-    }
+    emit OwnerChanged(newOwner);
+  }
 }

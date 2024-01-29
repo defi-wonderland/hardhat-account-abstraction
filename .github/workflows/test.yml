@@ -31,8 +31,8 @@ jobs:
         run: yarn test:unit
 
   integration:
-      name: Run integration tests
-      runs-on: ubuntu-latest
+    name: Run integration tests
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out github repository

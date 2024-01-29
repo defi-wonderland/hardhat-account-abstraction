@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import { http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
-import { PaymasterType } from '../../src/types';
-import { StackUpPaymaster } from '../../src/paymasters/StackUpPaymaster';
-import { createPaymasterClient } from '../../src/paymaster';
-import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../helpers';
+import { PaymasterType } from '../../../src/types';
+import { StackUpPaymaster } from '../../../src/paymasters/StackUpPaymaster';
+import { createPaymasterClient } from '../../../src/paymaster';
+import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../../helpers';
 import { stub, SinonStub } from 'sinon';
 
 describe('StackUp Paymaster', function () {

@@ -45,13 +45,13 @@ export const mockSponsorReturnType: SponsorUserOperationReturnType = {
 export const mockEntryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
 export function useEnvironment(fixtureProjectName: string) {
-  beforeEach('Loading hardhat environment', function () {
+  before('Loading hardhat environment', function () {
     process.chdir(path.join(__dirname, 'fixture-projects', fixtureProjectName));
 
     this.hre = require('hardhat');
   });
 
-  afterEach('Resetting hardhat', function () {
+  after('Resetting hardhat', function () {
     resetHardhatContext();
   });
 }

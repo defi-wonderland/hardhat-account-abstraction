@@ -1,0 +1,46 @@
+import { assert } from 'chai';
+import { useEnvironment } from '../helpers';
+import 'dotenv/config';
+
+describe('Integration deployments', function () {
+  useEnvironment('integration');
+
+  it('Should deploy a non ownable contract', async function () {
+    const nonOwnableContract = await this.hre.ethers.deployContract('NonOwnableContract');
+
+    const deploymentAddress = await this.hre.network.provider.request({
+      method: 'sponsored_getDeploymentFor',
+      params: [nonOwnableContract.target],
+    });
+
+    console.log(deploymentAddress);
+
+    // Mock function in contract
+    const returns100 = await nonOwnableContract.returns100();
+
+    assert.equal(returns100, 100);
+    assert.isTrue(deploymentAddress !== undefined);
+  });
+
+  it('Should deploy an ownable contract', async function () {
+    const signer = await this.hre.ethers.provider.getSigner();
+
+    const smartAccount = await this.hre.network.provider.request({
+      method: 'sponsored_getSmartAccountAddress',
+      params: [await signer.getAddress()],
+    });
+
+    const ownableContract = await this.hre.ethers.deployContract('OwnableContract');
+
+    const deploymentAddress = await this.hre.network.provider.request({
+      method: 'sponsored_getDeploymentFor',
+      params: [ownableContract.target],
+    });
+    console.log(deploymentAddress);
+
+    const owner = await ownableContract.owner();
+
+    assert.equal(owner, smartAccount);
+    assert.isTrue(deploymentAddress !== undefined);
+  });
+});

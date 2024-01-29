@@ -1,10 +1,10 @@
 import { assert } from 'chai';
-import { createPaymasterClient } from '../src/paymaster';
-import { PaymasterType } from './types';
+import { createPaymasterClient } from '../../src/paymaster';
+import { PaymasterType } from '../types';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { http } from 'viem';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import * as Pm from '../src/paymasters';
+import * as Pm from '../../src/paymasters';
 
 describe('Paymaster Construction', function () {
   const bundlerClient = createPimlicoBundlerClient({

@@ -89,3 +89,15 @@ export async function getSmartAccountData(
     senderAddress,
   };
 }
+
+/**
+ * Gets a random 32 byte hexadecimal string
+ * @returns The hexadecimal string
+ */
+export function getRandomHex32ByteString(): `0x${string}` {
+  let hexString: `0x${string}` = '0x';
+  for (let i = 0; i < 64; i++) {
+    hexString += Math.floor(Math.random() * 16).toString(16);
+  }
+  return hexString;
+}

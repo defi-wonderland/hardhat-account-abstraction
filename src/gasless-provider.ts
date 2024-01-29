@@ -1,4 +1,4 @@
-import { BytesLike, ethers } from 'ethers';
+import { BytesLike, Transaction, ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
@@ -11,7 +11,7 @@ import * as constants from './constants';
 import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/BatchDeployAndTransferOwnership.sol/BatchDeployAndTransferOwnership.json';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { getSmartAccountData } from './utils';
+import { getSmartAccountData, getRandomHex32ByteString } from './utils';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -150,15 +150,13 @@ export class GaslessProvider extends ProviderWrapper {
     log('Transaction to be signed for sponsoring', tx);
 
     // Parse the transaction
-    const parsedTxn = ethers.utils.parseTransaction(tx);
+    const parsedTxn = Transaction.from(tx);
 
     // Get gas prices
     const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
 
-    // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
-    const originalCalldata: `0x${string}` = this._checkCalldataForBadDeployments(parsedTxn.data as `0x${string}`);
-
-    let txnData = originalCalldata;
+    const originalCalldata: `0x${string}` = parsedTxn.data as `0x${string}`;
+    let txnData: `0x${string}` = parsedTxn.data as `0x${string}`;
     let to: `0x${string}` = parsedTxn.to as `0x${string}`;
 
     // If parsedTxn.to doesnt exist it is a deployment transaction and needs special functionality of sending a transaction to a factory
@@ -170,8 +168,11 @@ export class GaslessProvider extends ProviderWrapper {
 
       // Create the bytecode to deploy through the CreateXFactory and transfer ownership to the smart account if needed
       txnData = needsHandleOwnable
-        ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value.toBigInt())
+        ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value)
         : this._createNonOwnableDeploymentBytecode(originalCalldata);
+    } else {
+      // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
+      txnData = this._checkCalldataForBadDeployments(originalCalldata);
     }
 
     // If "to" is a fake address that we deployed customly we will overwrite the "to" param
@@ -198,7 +199,7 @@ export class GaslessProvider extends ProviderWrapper {
           type: 'function',
         },
       ],
-      args: [to, parsedTxn.value.toBigInt(), txnData],
+      args: [to, parsedTxn.value, txnData],
     });
 
     // Construct UserOperation
@@ -280,7 +281,7 @@ export class GaslessProvider extends ProviderWrapper {
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);
 
-    // Make a new init code for the next transaction
+    // Increment nonce for the next transaction
     this._nonce += 1n;
     // return the tx hash
     return txHash;
@@ -292,7 +293,8 @@ export class GaslessProvider extends ProviderWrapper {
    * @returns If the contract is ownable
    */
   private async _simulateContractDeploymentIsOwnable(data: `0x${string}`): Promise<boolean> {
-    const inputData = ethers.utils.defaultAbiCoder.encode(['bytes'], [data]).slice(2);
+    const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+    const inputData = abiCoder.encode(['bytes'], [data]).slice(2);
     const callData = batchDeployAndTransferOwnershipBytecode.object.concat(inputData);
 
     try {
@@ -307,9 +309,9 @@ export class GaslessProvider extends ProviderWrapper {
         ],
       });
 
-      const [decoded] = ethers.utils.defaultAbiCoder.decode(['address'], response as BytesLike);
+      const [decoded] = abiCoder.decode(['address'], response as BytesLike);
 
-      if (decoded === ethers.constants.AddressZero) return false;
+      if (decoded === ethers.ZeroAddress) return false;
 
       return true;
     } catch (e) {
@@ -336,7 +338,7 @@ export class GaslessProvider extends ProviderWrapper {
           type: 'function',
         },
       ],
-      args: [pad(this._nonce.toString(16) as `0x${string}`), deploymentInitCode],
+      args: [getRandomHex32ByteString(), deploymentInitCode],
     });
   }
 
@@ -391,12 +393,7 @@ export class GaslessProvider extends ProviderWrapper {
           type: 'function',
         },
       ],
-      args: [
-        pad(this._nonce.toString(16) as `0x${string}`),
-        deploymentInitCode,
-        initFunction,
-        { constructorAmount, initCallAmount: 0n },
-      ],
+      args: [getRandomHex32ByteString(), deploymentInitCode, initFunction, { constructorAmount, initCallAmount: 0n }],
     });
   }
 

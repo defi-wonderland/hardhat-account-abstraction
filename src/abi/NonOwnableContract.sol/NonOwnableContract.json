@@ -1,0 +1,259 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "returns100",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608060405234801561001057600080fd5b50606460008190555060b3806100276000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80633fba859614602d575b600080fd5b60336047565b604051603e91906064565b60405180910390f35b60005481565b6000819050919050565b605e81604d565b82525050565b6000602082019050607760008301846057565b9291505056fea2646970667358221220320f7b3deb3fb94affaef6f993193d7ea8c6d6b3b081d837d166acd62deaeca864736f6c63430008130033",
+    "sourceMap": "140:115:0:-:0;;;206:47;;;;;;;;;;243:3;230:10;:16;;;;140:115;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80633fba859614602d575b600080fd5b60336047565b604051603e91906064565b60405180910390f35b60005481565b6000819050919050565b605e81604d565b82525050565b6000602082019050607760008301846057565b9291505056fea2646970667358221220320f7b3deb3fb94affaef6f993193d7ea8c6d6b3b081d837d166acd62deaeca864736f6c63430008130033",
+    "sourceMap": "140:115:0:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;174:25;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;;;;;:::o;7:77:2:-;44:7;73:5;62:16;;7:77;;;:::o;90:118::-;177:24;195:5;177:24;:::i;:::-;172:3;165:37;90:118;;:::o;214:222::-;307:4;345:2;334:9;330:18;322:26;;358:71;426:1;415:9;411:17;402:6;358:71;:::i;:::-;214:222;;;;:::o",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "returns100()": "3fba8596"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"returns100\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"test/fixture-projects/integration/contracts/NonOwnableContract.sol\":\"NonOwnableContract\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[\":hardhat/=node_modules/hardhat/\"]},\"sources\":{\"test/fixture-projects/integration/contracts/NonOwnableContract.sol\":{\"keccak256\":\"0xae36339b79984eaf99c59a8fc0aee7421fc38d45035a86f81a4caa678816c5e8\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://b274f0f65db948b5eb9781ded1dcb9570fca582be09770be1df47a2a1200b7e5\",\"dweb:/ipfs/QmbbKGR6umNHWd48skttzUhJ3t7iwAGj9fk7XsDr6QJCQJ\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "returns100",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        "hardhat/=node_modules/hardhat/"
+      ],
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "test/fixture-projects/integration/contracts/NonOwnableContract.sol": "NonOwnableContract"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "test/fixture-projects/integration/contracts/NonOwnableContract.sol": {
+        "keccak256": "0xae36339b79984eaf99c59a8fc0aee7421fc38d45035a86f81a4caa678816c5e8",
+        "urls": [
+          "bzz-raw://b274f0f65db948b5eb9781ded1dcb9570fca582be09770be1df47a2a1200b7e5",
+          "dweb:/ipfs/QmbbKGR6umNHWd48skttzUhJ3t7iwAGj9fk7XsDr6QJCQJ"
+        ],
+        "license": "UNLICENSED"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "test/fixture-projects/integration/contracts/NonOwnableContract.sol",
+    "id": 13,
+    "exportedSymbols": {
+      "NonOwnableContract": [
+        12
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:217:0",
+    "nodes": [
+      {
+        "id": 1,
+        "nodeType": "PragmaDirective",
+        "src": "39:23:0",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".9"
+        ]
+      },
+      {
+        "id": 12,
+        "nodeType": "ContractDefinition",
+        "src": "140:115:0",
+        "nodes": [
+          {
+            "id": 3,
+            "nodeType": "VariableDeclaration",
+            "src": "174:25:0",
+            "nodes": [],
+            "constant": false,
+            "functionSelector": "3fba8596",
+            "mutability": "mutable",
+            "name": "returns100",
+            "nameLocation": "189:10:0",
+            "scope": 12,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 2,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "174:7:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 11,
+            "nodeType": "FunctionDefinition",
+            "src": "206:47:0",
+            "nodes": [],
+            "body": {
+              "id": 10,
+              "nodeType": "Block",
+              "src": "220:33:0",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 8,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 6,
+                      "name": "returns100",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3,
+                      "src": "230:10:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "hexValue": "313030",
+                      "id": 7,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "243:3:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_100_by_1",
+                        "typeString": "int_const 100"
+                      },
+                      "value": "100"
+                    },
+                    "src": "230:16:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 9,
+                  "nodeType": "ExpressionStatement",
+                  "src": "230:16:0"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 4,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "217:2:0"
+            },
+            "returnParameters": {
+              "id": 5,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "220:0:0"
+            },
+            "scope": 12,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "NonOwnableContract",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          12
+        ],
+        "name": "NonOwnableContract",
+        "nameLocation": "149:18:0",
+        "scope": 13,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 0
+}

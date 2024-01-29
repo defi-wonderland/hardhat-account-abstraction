@@ -12,6 +12,7 @@ import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/Batch
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { getSmartAccountData, getRandomHex32ByteString } from './utils';
+import { EstimateGasTxn } from './types';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -116,6 +117,11 @@ export class GaslessProvider extends ProviderWrapper {
       return this._getDeploymentFor(params[0]);
     }
 
+    if (args.method === 'eth_estimateGas' && args.params !== undefined) {
+      const params = this._getParams(args);
+      return this._estimateGas(params[0]);
+    }
+
     // We need to partially overwrite eth_call incase the 'to' field uses an address that was deployed from us
     if (args.method === 'eth_call' && args.params !== undefined) {
       const params = this._getParams(args);
@@ -152,74 +158,8 @@ export class GaslessProvider extends ProviderWrapper {
     // Parse the transaction
     const parsedTxn = Transaction.from(tx);
 
-    // Get gas prices
-    const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
-
-    const originalCalldata: `0x${string}` = parsedTxn.data as `0x${string}`;
-    let txnData: `0x${string}` = parsedTxn.data as `0x${string}`;
-    let to: `0x${string}` = parsedTxn.to as `0x${string}`;
-
-    // If parsedTxn.to doesnt exist it is a deployment transaction and needs special functionality of sending a transaction to a factory
-    if (!parsedTxn.to) {
-      to = constants.createXFactory;
-
-      // If it is a contract deployment we will simulate if the contract is ownable by transferring ownership to the smart account, if transferOwnership fails we will do nothing
-      const needsHandleOwnable = await this._simulateContractDeploymentIsOwnable(originalCalldata);
-
-      // Create the bytecode to deploy through the CreateXFactory and transfer ownership to the smart account if needed
-      txnData = needsHandleOwnable
-        ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value)
-        : this._createNonOwnableDeploymentBytecode(originalCalldata);
-    } else {
-      // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
-      txnData = this._checkCalldataForBadDeployments(originalCalldata);
-    }
-
-    // If "to" is a fake address that we deployed customly we will overwrite the "to" param
-    const potentialToAddress = this._expectedDeploymentsToCreateXDeployments.get(
-      parsedTxn.to?.toLowerCase() as `0x${string}`,
-    );
-    if (potentialToAddress !== undefined) {
-      to = potentialToAddress;
-    }
-
-    // Generate calldata
-    // This calldata is hardcoded as it is calldata for pimlico to execute
-    const callData = encodeFunctionData({
-      abi: [
-        {
-          inputs: [
-            { name: 'dest', type: 'address' },
-            { name: 'value', type: 'uint256' },
-            { name: 'func', type: 'bytes' },
-          ],
-          name: 'execute',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-      ],
-      args: [to, parsedTxn.value, txnData],
-    });
-
-    // Construct UserOperation
-    const userOperation: PartialBy<
-      UserOperation,
-      'callGasLimit' | 'preVerificationGas' | 'verificationGasLimit' | 'paymasterAndData'
-    > = {
-      sender: this.senderAddress,
-      nonce: this._nonce,
-      initCode: this._nonce === 0n ? this._initCode : '0x',
-      callData,
-      maxFeePerGas: maxFeePerGas as bigint,
-      maxPriorityFeePerGas: maxPriorityFeePerGas as bigint,
-      // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
-      signature: constants.dummySignature as Hex,
-      callGasLimit: 0n, // dummy value
-      paymasterAndData: '0x', // dummy value
-      preVerificationGas: 0n, // dummy value
-      verificationGasLimit: 0n, // dummy value
-    };
+    // Create the user operation
+    const { userOperation, to } = await this._createUserOperation(tx);
 
     const paymasterAndData = await this.paymasterClient.sponsorUserOperation(userOperation, this._entryPoint);
 
@@ -233,8 +173,6 @@ export class GaslessProvider extends ProviderWrapper {
       entryPoint: this._entryPoint,
     });
     sponsoredUserOperation.signature = signature;
-
-    log('Generated signature:', signature);
 
     let userOperationHash;
 
@@ -285,6 +223,103 @@ export class GaslessProvider extends ProviderWrapper {
     this._nonce += 1n;
     // return the tx hash
     return txHash;
+  }
+
+  /**
+   * Creates a user operation from a transaction
+   * @param tx The transaction as a string
+   * @returns The user operation and the address that the smart account is calling to
+   */
+  private async _createUserOperation(tx: string | EstimateGasTxn): Promise<{
+    userOperation: PartialBy<
+      UserOperation,
+      'callGasLimit' | 'preVerificationGas' | 'verificationGasLimit' | 'paymasterAndData'
+    >;
+    to: `0x${string}`;
+  }> {
+    // Parse the transaction
+    const parsedTxn = typeof tx === 'string' ? Transaction.from(tx) : tx;
+
+    // Get gas prices
+    const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
+
+    const originalCalldata: `0x${string}` = parsedTxn.data as `0x${string}`;
+    let txnData: `0x${string}` = parsedTxn.data as `0x${string}`;
+    let to: `0x${string}` = parsedTxn.to as `0x${string}`;
+
+    // If parsedTxn.to doesnt exist it is a deployment transaction and needs special functionality of sending a transaction to a factory
+    if (!parsedTxn.to) {
+      to = constants.createXFactory;
+
+      // If it is a contract deployment we will simulate if the contract is ownable by transferring ownership to the smart account, if transferOwnership fails we will do nothing
+      const needsHandleOwnable = await this._simulateContractDeploymentIsOwnable(originalCalldata);
+
+      // Create the bytecode to deploy through the CreateXFactory and transfer ownership to the smart account if needed
+      txnData = needsHandleOwnable
+        ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value ?? 0n)
+        : this._createNonOwnableDeploymentBytecode(originalCalldata);
+    } else {
+      // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
+      txnData = this._checkCalldataForBadDeployments(originalCalldata);
+    }
+
+    // If "to" is a fake address that we deployed customly we will overwrite the "to" param
+    const potentialToAddress = this._expectedDeploymentsToCreateXDeployments.get(
+      parsedTxn.to?.toLowerCase() as `0x${string}`,
+    );
+    if (potentialToAddress !== undefined) {
+      to = potentialToAddress;
+    }
+
+    // Generate calldata
+    // This calldata is hardcoded as it is calldata for pimlico to execute
+    const callData = encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: 'dest', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'func', type: 'bytes' },
+          ],
+          name: 'execute',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+      ],
+      args: [to, parsedTxn.value ?? 0n, txnData],
+    });
+
+    // Construct UserOperation
+    const userOperation: PartialBy<
+      UserOperation,
+      'callGasLimit' | 'preVerificationGas' | 'verificationGasLimit' | 'paymasterAndData'
+    > = {
+      sender: this.senderAddress,
+      nonce: this._nonce,
+      initCode: this._nonce === 0n ? this._initCode : '0x',
+      callData,
+      maxFeePerGas: maxFeePerGas as bigint,
+      maxPriorityFeePerGas: maxPriorityFeePerGas as bigint,
+      // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
+      signature: constants.dummySignature as Hex,
+      callGasLimit: 0n, // dummy value
+      paymasterAndData: '0x', // dummy value
+      preVerificationGas: 0n, // dummy value
+      verificationGasLimit: 0n, // dummy value
+    };
+
+    return { userOperation, to };
+  }
+
+  private async _estimateGas(tx: string): Promise<`0x${string}`> {
+    const { userOperation } = await this._createUserOperation(tx);
+    const gasConfig = await this.bundlerClient.estimateUserOperationGas({
+      userOperation: Object.assign(userOperation, { paymasterAndData: '0x' }),
+      entryPoint: this._entryPoint,
+    });
+
+    return gasConfig.callGasLimit.toString(16) as `0x${string}`;
   }
 
   /**
@@ -397,6 +432,11 @@ export class GaslessProvider extends ProviderWrapper {
     });
   }
 
+  /**
+   * Checks the calldata for bad deployments and replaces them with the correct deployment address
+   * @param calldata The calldata to check
+   * @returns The modified calldata
+   */
   private _checkCalldataForBadDeployments(calldata: `0x${string}`): `0x${string}` {
     this._expectedDeploymentsToCreateXDeployments.forEach((value, key) => {
       // Remove the 0x prefix

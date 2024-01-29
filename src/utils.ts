@@ -1,5 +1,7 @@
+import { GetUserOperationReceiptReturnType, UserOperation } from 'permissionless';
 import { getSenderAddress } from './mock';
 import { concat, createPublicClient, encodeFunctionData } from 'viem';
+import fs from 'fs';
 
 /**
  * Converts all BigInts in an object to strings because the nonce
@@ -13,6 +15,11 @@ export function convertBigIntsToString(obj: any) {
       // Convert 0n to '0x', and other BigInts to their string representation
       // NOTE: base expects gas values to be non-zero, but nonce might be zero so we need to be sure to exclude it
       obj[key] = obj[key] === 0n && key !== 'nonce' ? '0x1' : '0x' + obj[key].toString(16);
+    }
+
+    // Recursively convert BigInts in nested objects
+    if (typeof obj[key] === 'object') {
+      obj[key] = convertBigIntsToString(obj[key]);
     }
   }
 
@@ -88,4 +95,39 @@ export async function getSmartAccountData(
     initCode,
     senderAddress,
   };
+}
+
+/**
+ * Saves the deployment data to a JSON file
+ * @param sponsoredUserOperation The sponsored user operation
+ * @param receipt The receipt returned by the bundler
+ */
+export async function deploymentToJson(
+  sponsoredUserOperation: UserOperation,
+  receipt: GetUserOperationReceiptReturnType,
+): Promise<void> {
+  const deploymentData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
+
+  // Create folder if doesn't exist
+  const folderName = './deployments';
+  try {
+    // If successfull, folder should not be created
+    await fs.promises.access(folderName);
+  } catch {
+    await fs.promises.mkdir(folderName);
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const fileName = `${folderName}/sponsored_${timestamp}.json`;
+  const latestFileName = `${folderName}/sponsored_latest.json`;
+
+  // Create the file with timestamp
+  await fs.promises.writeFile(fileName, JSON.stringify(deploymentData, null, 2), {
+    flag: 'w',
+  });
+
+  // Create the file with latest
+  await fs.promises.writeFile(latestFileName, JSON.stringify(deploymentData, null, 2), {
+    flag: 'w',
+  });
 }

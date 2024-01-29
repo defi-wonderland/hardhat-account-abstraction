@@ -5,4 +5,4 @@ build
 dist
 src/constants.ts
 src/abi/**
-test/fixture-projects/artifacts/**
+test/fixture-projects/integrations/artifacts/**

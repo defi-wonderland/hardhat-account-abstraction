@@ -2,7 +2,7 @@ import { BytesLike, Transaction, ethers } from 'ethers';
 import { ProviderWrapper } from 'hardhat/plugins';
 import { EIP1193Provider, RequestArguments } from 'hardhat/types';
 import init from 'debug';
-import { createPublicClient, encodeFunctionData, Hex, getCreateAddress } from 'viem';
+import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, TransactionReceipt } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
@@ -24,6 +24,7 @@ const log = init('hardhat:plugin:gasless');
  */
 export class GaslessProvider extends ProviderWrapper {
   private _expectedDeploymentsToCreateXDeployments: Map<`0x${string}`, `0x${string}`>;
+  private _latestDeploymentAddress: `0x${string}` | null;
 
   constructor(
     protected readonly _signerPk: `0x${string}`,
@@ -41,6 +42,7 @@ export class GaslessProvider extends ProviderWrapper {
     super(_wrappedProvider);
 
     this._expectedDeploymentsToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
+    this._latestDeploymentAddress = null;
   }
 
   /**
@@ -107,8 +109,22 @@ export class GaslessProvider extends ProviderWrapper {
       return this._getSmartAccountAddress(params[0]);
     }
 
-    if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
+    // Need to override this for plugins that check receipt for deployment addresses
+    if (args.method === 'eth_getTransactionReceipt' && args.params !== undefined) {
       const params = this._getParams(args);
+      return this._getTransactionReceipt(params[0]);
+    }
+
+    if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
+      console.log('here');
+      const params = this._getParams(args);
+      return this._sendGaslessTransaction(params[0]);
+    }
+
+    if (args.method === 'eth_sendTransaction' && args.params !== undefined) {
+      console.log('viem compatible plz');
+      const params = this._getParams(args);
+      params[0].from = undefined;
       return this._sendGaslessTransaction(params[0]);
     }
 
@@ -212,6 +228,9 @@ export class GaslessProvider extends ProviderWrapper {
           const paddedAddress = log.topics[1];
           const deployment = ('0x' + paddedAddress.slice(-40)) as `0x${string}`;
           this._expectedDeploymentsToCreateXDeployments.set(expectedDeployment, deployment);
+
+          // Set this so receipt fetchers will be able to see it in eth_getTransactionReceipt
+          this._latestDeploymentAddress = deployment;
         }
       });
     }
@@ -319,7 +338,22 @@ export class GaslessProvider extends ProviderWrapper {
       entryPoint: this._entryPoint,
     });
 
-    return gasConfig.callGasLimit.toString(16) as `0x${string}`;
+    console.log(gasConfig.callGasLimit.toString(16) as `0x${string}`);
+
+    return ('0x' + gasConfig.callGasLimit.toString(16)) as `0x${string}`;
+  }
+
+  private async _getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
+    const receipt: TransactionReceipt = (await this._wrappedProvider.request({
+      method: 'eth_getTransactionReceipt',
+      params: [hash],
+    })) as TransactionReceipt;
+    receipt.contractAddress = this._latestDeploymentAddress;
+
+    // Incase this is called for normal transactions too we want to reset this to null
+    this._latestDeploymentAddress = null;
+
+    return receipt;
   }
 
   /**

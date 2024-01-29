@@ -13,8 +13,6 @@ describe('Integration deployments', function () {
       params: [nonOwnableContract.target],
     });
 
-    console.log(deploymentAddress);
-
     // Mock function in contract
     const returns100 = await nonOwnableContract.returns100();
 
@@ -36,7 +34,6 @@ describe('Integration deployments', function () {
       method: 'sponsored_getDeploymentFor',
       params: [ownableContract.target],
     });
-    console.log(deploymentAddress);
 
     const owner = await ownableContract.owner();
 

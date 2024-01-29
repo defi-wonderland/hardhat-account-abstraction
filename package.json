@@ -17,6 +17,8 @@
   "scripts": {
     "format": "yarn run prettier:fix && yarn run lint:fix",
     "test": "mocha --exit --recursive 'test/**/*.test.ts'",
+    "test:unit": "mocha --exit --recursive 'test/unit/**/*.test.ts'",
+    "test:integration": "mocha --exit --recursive 'test/integration/**/*.test.ts'",
     "build": "forge compile && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "npm run build",

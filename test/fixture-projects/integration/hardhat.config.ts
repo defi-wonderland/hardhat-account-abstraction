@@ -1,7 +1,6 @@
 // We load the plugin here.
 import { HardhatUserConfig } from 'hardhat/types';
 import { generatePrivateKey } from 'viem/accounts';
-import 'dotenv/config';
 import '@nomicfoundation/hardhat-ethers';
 import '../../../src/index';
 

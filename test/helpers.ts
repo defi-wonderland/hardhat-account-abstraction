@@ -62,9 +62,9 @@ export function useEnvironment(fixtureProjectName: string) {
   });
 }
 
-function compileHardhatProject(): Promise<string> {
+async function compileHardhatProject(): Promise<void> {
   return new Promise((resolve) => {
-    exec('npx hardhat compile', (error, stdout, stderr) => {
+    exec('npx hardhat compile', (error, _, stderr) => {
       if (error) {
         throw new Error(`exec error: ${error}`);
       }
@@ -73,7 +73,7 @@ function compileHardhatProject(): Promise<string> {
         throw new Error(`stderr: ${stderr}`);
       }
 
-      resolve(stdout);
+      resolve();
     });
   });
 }

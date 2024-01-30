@@ -183,3 +183,5 @@ export const TEST_TOKEN_ABI = [
     type: 'function',
   },
 ];
+
+export const tokenAddr = '0x8A59017aF01F5bC6c73CFB6DeD9e162a5fFaA634';

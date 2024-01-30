@@ -9,7 +9,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'sepolia',
   networks: {
     sepolia: {
-      url: 'https://ethereum-sepolia.publicnode.com',
+      url: process.env.E2E_SEPOLIA_RPC as string,
       accounts: [generatePrivateKey()],
       sponsoredTransactions: {
         bundlerUrl: process.env.E2E_BUNDLER_URL as string,

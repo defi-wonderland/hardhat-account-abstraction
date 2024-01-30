@@ -1,13 +1,12 @@
 import { assert } from 'chai';
 import { useEnvironment } from '../helpers';
-import { TEST_TOKEN_ABI } from '../test-token-abi';
+import { TEST_TOKEN_ABI, tokenAddr } from '../test-constants';
 import 'dotenv/config';
 
 describe('Integration transactions', function () {
   useEnvironment('integration');
 
   it('Should send a transaction', async function () {
-    const tokenAddr = '0x8A59017aF01F5bC6c73CFB6DeD9e162a5fFaA634';
     const signer = await this.hre.ethers.provider.getSigner();
     const smartAccount = await this.hre.network.provider.request({
       method: 'sponsored_getSmartAccountAddress',

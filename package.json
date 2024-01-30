@@ -29,7 +29,7 @@
     "prepare": "husky install",
     "prettier": "prettier src test --check",
     "prettier:fix": "yarn run prettier -- --write",
-    "compile:integration": "cd test && cd fixture-projects && cd integration && npx hardhat compile"
+    "compile:integration": "cd test/fixture-projects/integration && npx hardhat compile"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix",

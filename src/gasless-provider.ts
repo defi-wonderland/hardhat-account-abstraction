@@ -25,6 +25,7 @@ const log = init('hardhat:plugin:gasless');
 export class GaslessProvider extends ProviderWrapper {
   private _expectedDeploymentsToCreateXDeployments: Map<`0x${string}`, `0x${string}`>;
   private _latestDeploymentAddress: `0x${string}` | null;
+  private _runTimestamp: number;
 
   constructor(
     protected readonly _signerPk: `0x${string}`,
@@ -43,6 +44,8 @@ export class GaslessProvider extends ProviderWrapper {
 
     this._expectedDeploymentsToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
     this._latestDeploymentAddress = null;
+    // Save the current timestamp to be used when generating the run folder
+    this._runTimestamp = Math.floor(Date.now() / 1000);
   }
 
   /**
@@ -230,7 +233,7 @@ export class GaslessProvider extends ProviderWrapper {
       });
     }
 
-    await txToJson(sponsoredUserOperation, receipt, this._latestDeploymentAddress);
+    await txToJson(sponsoredUserOperation, receipt, this._latestDeploymentAddress, this._runTimestamp);
 
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);
@@ -504,7 +507,7 @@ export class GaslessProvider extends ProviderWrapper {
     return this._expectedDeploymentsToCreateXDeployments.get(contract.toLowerCase() as `0x${string}`);
   }
 
-  /*
+  /**
    * Determines address for a smart account already deployed or to be deployed
    * @param owner The owner of the smart account
    * @returns A promise that resolves to sender address

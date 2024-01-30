@@ -99,15 +99,30 @@ export async function getSmartAccountData(
 }
 
 /**
+ * Creates a folder if it doesn't exist
+ * @param folderName The name of the folder to create
+ */
+export async function createFolderIfNotExists(folderName: string): Promise<void> {
+  try {
+    // If successfull, folder should not be created
+    await fs.promises.access(folderName);
+  } catch {
+    await fs.promises.mkdir(folderName);
+  }
+}
+
+/**
  * Saves the tx data to a JSON file
  * @param sponsoredUserOperation The sponsored user operation
  * @param receipt The receipt returned by the bundler
  * @param contractAddress If not null, the contract address to override the receipt's contractAddress field
+ * @param runTimestamp The timestamp of the run
  */
 export async function txToJson(
   sponsoredUserOperation: UserOperation,
   receipt: GetUserOperationReceiptReturnType,
   contractAddress: `0x${string}` | null,
+  runTimestamp: number,
 ): Promise<void> {
   const deploymentData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
 
@@ -116,18 +131,17 @@ export async function txToJson(
     deploymentData.receipt.contractAddress = contractAddress;
   }
 
-  // Create folder if doesn't exist
-  const folderName = './sponsored-transactions';
-  try {
-    // If successfull, folder should not be created
-    await fs.promises.access(folderName);
-  } catch {
-    await fs.promises.mkdir(folderName);
-  }
+  // Create main folder if doesn't exist
+  const mainFolderName = './sponsored-transactions';
+  await createFolderIfNotExists(mainFolderName);
+
+  // Create run subfolder if doesn't exist
+  const runFolderName = `${mainFolderName}/run-${runTimestamp}`;
+  await createFolderIfNotExists(runFolderName);
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const fileName = `${folderName}/sponsored_${timestamp}.json`;
-  const latestFileName = `${folderName}/sponsored_latest.json`;
+  const fileName = `${runFolderName}/sponsored_${timestamp}.json`;
+  const latestFileName = `${runFolderName}/sponsored_latest.json`;
 
   // Create the file with timestamp
   await fs.promises.writeFile(fileName, JSON.stringify(deploymentData, null, 2), {

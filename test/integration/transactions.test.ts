@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { useEnvironment } from '../helpers';
-import { TEST_TOKEN_ABI } from '../test-token-abi';
+import { TEST_TOKEN_ABI, tokenAddr, entryPoint } from '../test-constants';
 import 'dotenv/config';
 
 describe('Integration transactions', function () {

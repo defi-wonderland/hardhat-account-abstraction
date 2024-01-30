@@ -71,3 +71,5 @@ cache/
 
 
 test/fixture-projects/integration/artifacts/**/*
+src/abi/**/*
+!src/abi/BatchDeployAndTransferOwnership.sol

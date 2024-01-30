@@ -1,3 +1,4 @@
+import { randomBytes, toBeHex, toBigInt } from 'ethers';
 import { getSenderAddress } from './mock';
 import { concat, createPublicClient, encodeFunctionData } from 'viem';
 
@@ -95,9 +96,5 @@ export async function getSmartAccountData(
  * @returns The hexadecimal string
  */
 export function getRandomHex32ByteString(): `0x${string}` {
-  let hexString: `0x${string}` = '0x';
-  for (let i = 0; i < 64; i++) {
-    hexString += Math.floor(Math.random() * 16).toString(16);
-  }
-  return hexString;
+  return toBeHex(toBigInt(randomBytes(32))) as `0x${string}`;
 }

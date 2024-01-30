@@ -183,3 +183,7 @@ export const TEST_TOKEN_ABI = [
     type: 'function',
   },
 ];
+
+export const tokenAddr = '0x8A59017aF01F5bC6c73CFB6DeD9e162a5fFaA634';
+
+export const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';

@@ -60,4 +60,5 @@ jobs:
           E2E_BUNDLER_URL: ${{ secrets.E2E_BUNDLER_URL }}
           E2E_PAYMASTER_URL: ${{ secrets.E2E_PAYMASTER_URL }}
           E2E_PAYMASTER_TYPE: ${{ secrets.E2E_PAYMASTER_TYPE }}
+          E2E_SEPOLIA_RPC: ${{ secrets.E2E_SEPOLIA_RPC }}
 

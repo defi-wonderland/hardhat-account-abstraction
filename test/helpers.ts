@@ -46,16 +46,12 @@ export const mockSponsorReturnType: SponsorUserOperationReturnType = {
 export const mockEntryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
 export function useEnvironment(fixtureProjectName: string) {
-  before('Loading hardhat environment', function () {
+  before('Loading hardhat environment', async function () {
     process.chdir(path.join(__dirname, 'fixture-projects', fixtureProjectName));
 
     // If doing integration testing we need to compile the contracts
     if (fixtureProjectName === 'integration') {
-      exec('npx hardhat compile', (error) => {
-        if (error) {
-          throw new Error(`Execution error: ${error}`);
-        }
-      });
+      await compileHardhatProject();
     }
 
     this.hre = require('hardhat');
@@ -63,5 +59,21 @@ export function useEnvironment(fixtureProjectName: string) {
 
   after('Resetting hardhat', function () {
     resetHardhatContext();
+  });
+}
+
+function compileHardhatProject(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    exec('npx hardhat compile', (error, stdout, stderr) => {
+      if (error) {
+        throw new Error(`exec error: ${error}`);
+      }
+
+      if (stderr) {
+        throw new Error(`stderr: ${stderr}`);
+      }
+
+      resolve(stdout);
+    });
   });
 }

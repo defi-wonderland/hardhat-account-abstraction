@@ -102,12 +102,19 @@ export async function getSmartAccountData(
  * Saves the tx data to a JSON file
  * @param sponsoredUserOperation The sponsored user operation
  * @param receipt The receipt returned by the bundler
+ * @param contractAddress If not null, the contract address to override the receipt's contractAddress field
  */
 export async function txToJson(
   sponsoredUserOperation: UserOperation,
   receipt: GetUserOperationReceiptReturnType,
+  contractAddress: `0x${string}` | null,
 ): Promise<void> {
   const deploymentData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
+
+  // Override the contractAddress field
+  if (contractAddress !== null) {
+    deploymentData.receipt.contractAddress = contractAddress;
+  }
 
   // Create folder if doesn't exist
   const folderName = './sponsored-transactions';

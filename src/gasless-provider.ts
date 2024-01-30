@@ -230,7 +230,7 @@ export class GaslessProvider extends ProviderWrapper {
       });
     }
 
-    await txToJson(sponsoredUserOperation, receipt);
+    await txToJson(sponsoredUserOperation, receipt, this._latestDeploymentAddress);
 
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);

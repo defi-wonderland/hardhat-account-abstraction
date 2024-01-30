@@ -102,13 +102,42 @@ export async function getSmartAccountData(
  * Creates a folder if it doesn't exist
  * @param folderName The name of the folder to create
  */
-export async function createFolderIfNotExists(folderName: string): Promise<void> {
+async function createFolderIfNotExists(folderName: string): Promise<void> {
   try {
     // If successfull, folder should not be created
     await fs.promises.access(folderName);
   } catch {
     await fs.promises.mkdir(folderName);
   }
+}
+
+/**
+ * Writes data to a JSON file
+ * @param fileName Complete path to the file
+ * @param data Data to write
+ */
+async function writeJSON(fileName: string, data: unknown): Promise<void> {
+  // Create the file
+  await fs.promises.writeFile(fileName, JSON.stringify(data, null, 2), {
+    flag: 'w',
+  });
+}
+
+/**
+ * Writes the run data to a JSON file, along with a latest file
+ * @param runFolderName The name of the run folder
+ * @param fileName The name of the file (not the path, just the name)
+ * @param data Data to write
+ */
+async function writeRunToJSON(runFolderName: string, fileName: string, data: unknown): Promise<void> {
+  await createFolderIfNotExists(runFolderName);
+
+  // Create the file with timestamp
+  await writeJSON(fileName, data);
+
+  // Create the file with latest
+  const latestFileName = `${runFolderName}/sponsored_latest.json`;
+  await writeJSON(latestFileName, data);
 }
 
 /**
@@ -124,34 +153,27 @@ export async function txToJson(
   contractAddress: `0x${string}` | null,
   runTimestamp: number,
 ): Promise<void> {
-  const deploymentData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
+  const txData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
+  const timestamp = Math.floor(Date.now() / 1000);
 
   // Override the contractAddress field
   if (contractAddress !== null) {
-    deploymentData.receipt.contractAddress = contractAddress;
+    txData.receipt.contractAddress = contractAddress;
   }
 
   // Create main folder if doesn't exist
   const mainFolderName = './sponsored-transactions';
   await createFolderIfNotExists(mainFolderName);
 
-  // Create run subfolder if doesn't exist
+  // Create run subfolder if doesn't exist (with timestamp)
   const runFolderName = `${mainFolderName}/run-${runTimestamp}`;
-  await createFolderIfNotExists(runFolderName);
-
-  const timestamp = Math.floor(Date.now() / 1000);
   const fileName = `${runFolderName}/sponsored_${timestamp}.json`;
-  const latestFileName = `${runFolderName}/sponsored_latest.json`;
+  await writeRunToJSON(runFolderName, fileName, txData);
 
-  // Create the file with timestamp
-  await fs.promises.writeFile(fileName, JSON.stringify(deploymentData, null, 2), {
-    flag: 'w',
-  });
-
-  // Create the file with latest
-  await fs.promises.writeFile(latestFileName, JSON.stringify(deploymentData, null, 2), {
-    flag: 'w',
-  });
+  // Create latest subfolder if doesn't exist (latest)
+  const latestFolderName = `${mainFolderName}/run-latest`;
+  const latestFileName = `${latestFolderName}/sponsored_${timestamp}.json`;
+  await writeRunToJSON(latestFolderName, latestFileName, txData);
 }
 
 /**

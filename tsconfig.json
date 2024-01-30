@@ -16,5 +16,5 @@
   "include": [
     "./test",
     "./src"
-  ]
+, "test/fixture-projects/integration/artifacts"  ]
 }

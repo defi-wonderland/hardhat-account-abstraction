@@ -1,3 +1,4 @@
+import { randomBytes, toBeHex, toBigInt } from 'ethers';
 import { getSenderAddress } from './mock';
 import { concat, createPublicClient, encodeFunctionData } from 'viem';
 
@@ -88,4 +89,12 @@ export async function getSmartAccountData(
     initCode,
     senderAddress,
   };
+}
+
+/**
+ * Gets a random 32 byte hexadecimal string
+ * @returns The hexadecimal string
+ */
+export function getRandomHex32ByteString(): `0x${string}` {
+  return toBeHex(toBigInt(randomBytes(32))) as `0x${string}`;
 }

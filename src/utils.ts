@@ -1,4 +1,5 @@
 import { GetUserOperationReceiptReturnType, UserOperation } from 'permissionless';
+import { randomBytes, toBeHex, toBigInt } from 'ethers';
 import { getSenderAddress } from './mock';
 import { concat, createPublicClient, encodeFunctionData } from 'viem';
 import fs from 'fs';
@@ -130,4 +131,12 @@ export async function deploymentToJson(
   await fs.promises.writeFile(latestFileName, JSON.stringify(deploymentData, null, 2), {
     flag: 'w',
   });
+}
+
+/**
+ * Gets a random 32 byte hexadecimal string
+ * @returns The hexadecimal string
+ */
+export function getRandomHex32ByteString(): `0x${string}` {
+  return toBeHex(toBigInt(randomBytes(32))) as `0x${string}`;
 }

@@ -104,8 +104,6 @@ export class GaslessProvider extends ProviderWrapper {
    * @returns Unknown, as it depends on the request being made
    */
   public request(args: RequestArguments): Promise<unknown> {
-    console.log(args);
-
     if (args.method === 'sponsored_getSmartAccountAddress' && args.params !== undefined) {
       const params = this._getParams(args);
       return this._getSmartAccountAddress(params[0]);

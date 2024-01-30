@@ -68,3 +68,6 @@ typings/
 # Solidity compilation files
 out/
 cache/
+
+
+test/fixture-projects/integration/artifacts/**/*

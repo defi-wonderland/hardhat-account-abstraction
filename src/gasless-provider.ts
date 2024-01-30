@@ -104,6 +104,8 @@ export class GaslessProvider extends ProviderWrapper {
    * @returns Unknown, as it depends on the request being made
    */
   public request(args: RequestArguments): Promise<unknown> {
+    console.log(args);
+
     if (args.method === 'sponsored_getSmartAccountAddress' && args.params !== undefined) {
       const params = this._getParams(args);
       return this._getSmartAccountAddress(params[0]);
@@ -162,6 +164,9 @@ export class GaslessProvider extends ProviderWrapper {
    */
   private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
+
+    // Sanity marked as null, this is to prevent a normal transaction receipt potentially having a contractAddress field
+    this._latestDeploymentAddress = null;
 
     // Parse the transaction
     const parsedTxn = Transaction.from(tx);

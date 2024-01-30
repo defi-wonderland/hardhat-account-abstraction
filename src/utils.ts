@@ -99,18 +99,18 @@ export async function getSmartAccountData(
 }
 
 /**
- * Saves the deployment data to a JSON file
+ * Saves the tx data to a JSON file
  * @param sponsoredUserOperation The sponsored user operation
  * @param receipt The receipt returned by the bundler
  */
-export async function deploymentToJson(
+export async function txToJson(
   sponsoredUserOperation: UserOperation,
   receipt: GetUserOperationReceiptReturnType,
 ): Promise<void> {
   const deploymentData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
 
   // Create folder if doesn't exist
-  const folderName = './deployments';
+  const folderName = './sponsored-transactions';
   try {
     // If successfull, folder should not be created
     await fs.promises.access(folderName);

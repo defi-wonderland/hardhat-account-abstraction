@@ -11,7 +11,7 @@ import * as constants from './constants';
 import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/BatchDeployAndTransferOwnership.sol/BatchDeployAndTransferOwnership.json';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { deploymentToJson, getSmartAccountData, getRandomHex32ByteString } from './utils';
+import { txToJson, getSmartAccountData, getRandomHex32ByteString } from './utils';
 import { EstimateGasTxn } from './types';
 
 const log = init('hardhat:plugin:gasless');
@@ -228,9 +228,9 @@ export class GaslessProvider extends ProviderWrapper {
           this._latestDeploymentAddress = deployment;
         }
       });
-
-      await deploymentToJson(sponsoredUserOperation, receipt);
     }
+
+    await txToJson(sponsoredUserOperation, receipt);
 
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);

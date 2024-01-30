@@ -326,6 +326,11 @@ export class GaslessProvider extends ProviderWrapper {
     return { userOperation, to };
   }
 
+  /**
+   * Overrides the estimate gas method to use the bundler client and estimate based on the user operation
+   * @param tx The transaction to estimate gas for
+   * @returns The gas limit
+   */
   private async _estimateGas(tx: string): Promise<`0x${string}`> {
     const { userOperation } = await this._createUserOperation(tx);
     const gasConfig = await this.bundlerClient.estimateUserOperationGas({
@@ -336,6 +341,11 @@ export class GaslessProvider extends ProviderWrapper {
     return ('0x' + gasConfig.callGasLimit.toString(16)) as `0x${string}`;
   }
 
+  /**
+   * Overrides the get transaction receipt method to return a contractAddress field if needed
+   * @param hash The transaction hash
+   * @returns The updated receipt
+   */
   private async _getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
     const receipt: TransactionReceipt = (await this._wrappedProvider.request({
       method: 'eth_getTransactionReceipt',

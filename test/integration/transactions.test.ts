@@ -25,10 +25,6 @@ describe('Integration transactions', function () {
   it('Should transfer tokens from the smart account', async function () {
     const signer = await this.hre.ethers.provider.getSigner();
     const signerAddr = await signer.getAddress();
-    const smartAccount = await this.hre.network.provider.request({
-      method: 'sponsored_getSmartAccountAddress',
-      params: [signerAddr],
-    });
 
     const testToken = new this.hre.ethers.Contract(tokenAddr, TEST_TOKEN_ABI, signer);
     const amountToTransfer = this.hre.ethers.parseEther('1.0');

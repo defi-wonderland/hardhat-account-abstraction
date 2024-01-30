@@ -254,6 +254,13 @@ export class GaslessProvider extends ProviderWrapper {
     // Parse the transaction
     const parsedTxn = typeof tx === 'string' ? Transaction.from(tx) : tx;
 
+    const value =
+      typeof parsedTxn.value === 'string'
+        ? BigInt(parsedTxn.value)
+        : parsedTxn.value !== undefined
+          ? parsedTxn.value
+          : 0n;
+
     // Get gas prices
     const { maxFeePerGas, maxPriorityFeePerGas } = await this.publicClient.estimateFeesPerGas();
 
@@ -270,7 +277,7 @@ export class GaslessProvider extends ProviderWrapper {
 
       // Create the bytecode to deploy through the CreateXFactory and transfer ownership to the smart account if needed
       txnData = needsHandleOwnable
-        ? this._createOwnableDeploymentBytecode(originalCalldata, parsedTxn.value ?? 0n)
+        ? this._createOwnableDeploymentBytecode(originalCalldata, value)
         : this._createNonOwnableDeploymentBytecode(originalCalldata);
     } else {
       // Check if a bad deployment address is used in the calldata anywhere, and update to use the correct deployment address
@@ -301,7 +308,7 @@ export class GaslessProvider extends ProviderWrapper {
           type: 'function',
         },
       ],
-      args: [to, parsedTxn.value ?? 0n, txnData],
+      args: [to, value, txnData],
     });
 
     // Construct UserOperation

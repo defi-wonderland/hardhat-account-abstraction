@@ -42,5 +42,5 @@ export type EstimateGasTxn = {
   from?: `0x${string}`;
   to?: `0x${string}`;
   data?: `0x${string}`;
-  value?: bigint;
+  value?: bigint | `0x${string}`;
 };

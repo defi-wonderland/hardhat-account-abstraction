@@ -63,7 +63,7 @@ export function useEnvironment(fixtureProjectName: string) {
 }
 
 function compileHardhatProject(): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     exec('npx hardhat compile', (error, stdout, stderr) => {
       if (error) {
         throw new Error(`exec error: ${error}`);

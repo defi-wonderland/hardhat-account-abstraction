@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { useEnvironment } from '../helpers';
-import { TEST_TOKEN_ABI, tokenAddr } from '../test-constants';
+import { TEST_TOKEN_ABI, tokenAddr, entryPoint } from '../test-constants';
 import 'dotenv/config';
 
 describe('Integration transactions', function () {
@@ -17,8 +17,6 @@ describe('Integration transactions', function () {
     const amountToMint = this.hre.ethers.parseEther('6.9');
     const receipt = await testToken.mint(amountToMint);
     const balanceOf = await testToken.balanceOf(smartAccount);
-
-    const entryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
     assert.equal(receipt.to, entryPoint);
     assert.equal(balanceOf.toString(), amountToMint.toString());

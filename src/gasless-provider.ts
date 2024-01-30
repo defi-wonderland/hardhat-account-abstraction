@@ -11,7 +11,7 @@ import * as constants from './constants';
 import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/BatchDeployAndTransferOwnership.sol/BatchDeployAndTransferOwnership.json';
 import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
-import { txToJson, getSmartAccountData, getRandomHex32ByteString } from './utils';
+import { txToJson, getSmartAccountData, getRandomHex32ByteString, emptyFolder } from './utils';
 import { EstimateGasTxn } from './types';
 
 const log = init('hardhat:plugin:gasless');
@@ -44,6 +44,7 @@ export class GaslessProvider extends ProviderWrapper {
 
     this._expectedDeploymentsToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
     this._latestDeploymentAddress = null;
+
     // Save the current timestamp to be used when generating the run folder
     this._runTimestamp = Math.floor(Date.now() / 1000);
   }
@@ -67,6 +68,9 @@ export class GaslessProvider extends ProviderWrapper {
     simpleAccountFactoryAddress: `0x${string}`,
     smartAccount?: `0x${string}`,
   ) {
+    // Clear latest folder
+    await emptyFolder(constants.latestFolderName);
+
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
     const owner = privateKeyToAccount(_signerPk);

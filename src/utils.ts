@@ -2,7 +2,9 @@ import { GetUserOperationReceiptReturnType, UserOperation } from 'permissionless
 import { randomBytes, toBeHex, toBigInt } from 'ethers';
 import { getSenderAddress } from './mock';
 import { concat, createPublicClient, encodeFunctionData } from 'viem';
+import { latestFolderName, mainFolderName } from './constants';
 import fs from 'fs';
+import path from 'path';
 
 /**
  * Converts all BigInts in an object to strings because the nonce
@@ -141,6 +143,29 @@ async function writeRunToJSON(runFolderName: string, fileName: string, data: unk
 }
 
 /**
+ * Empties a folder
+ * @param folderName The name of the folder to empty (complete path)
+ */
+export async function emptyFolder(folderName: string): Promise<void> {
+  // Read all the files in the directory
+  fs.readdir(folderName, async (_, files) => {
+    // If empty just return
+    if (!files) {
+      return;
+    }
+
+    await Promise.all(
+      // For each file, unlink it (delete it)
+      files?.map((file) =>
+        fs.unlink(path.join(folderName, file), (err) => {
+          if (err) throw err;
+        }),
+      ),
+    );
+  });
+}
+
+/**
  * Saves the tx data to a JSON file
  * @param sponsoredUserOperation The sponsored user operation
  * @param receipt The receipt returned by the bundler
@@ -162,7 +187,6 @@ export async function txToJson(
   }
 
   // Create main folder if doesn't exist
-  const mainFolderName = './sponsored-transactions';
   await createFolderIfNotExists(mainFolderName);
 
   // Create run subfolder if doesn't exist (with timestamp)
@@ -171,7 +195,6 @@ export async function txToJson(
   await writeRunToJSON(runFolderName, fileName, txData);
 
   // Create latest subfolder if doesn't exist (latest)
-  const latestFolderName = `${mainFolderName}/run-latest`;
   const latestFileName = `${latestFolderName}/sponsored_${timestamp}.json`;
   await writeRunToJSON(latestFolderName, latestFileName, txData);
 }

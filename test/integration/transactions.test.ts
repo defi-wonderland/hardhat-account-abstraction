@@ -21,4 +21,18 @@ describe('Integration transactions', function () {
     assert.equal(receipt.to, entryPoint);
     assert.equal(balanceOf.toString(), amountToMint.toString());
   });
+
+  it('Should transfer tokens from the smart account', async function () {
+    const signer = await this.hre.ethers.provider.getSigner();
+    const signerAddr = await signer.getAddress();
+
+    const testToken = new this.hre.ethers.Contract(tokenAddr, TEST_TOKEN_ABI, signer);
+    const amountToTransfer = this.hre.ethers.parseEther('1.0');
+
+    const receipt = await testToken.transfer(signerAddr, amountToTransfer);
+    const balanceOf = await testToken.balanceOf(signerAddr);
+
+    assert.equal(receipt.to, entryPoint);
+    assert.equal(balanceOf.toString(), amountToTransfer.toString());
+  });
 });

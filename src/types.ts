@@ -37,3 +37,10 @@ export enum PaymasterType {
 export type PaymasterTypeLiteral = keyof {
   [K in keyof typeof PaymasterType as string]: K;
 };
+
+export type EstimateGasTxn = {
+  from?: `0x${string}`;
+  to?: `0x${string}`;
+  data?: `0x${string}`;
+  value?: bigint;
+};

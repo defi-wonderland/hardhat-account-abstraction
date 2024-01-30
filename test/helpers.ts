@@ -5,6 +5,7 @@ import { Hex } from 'viem';
 import { dummySignature } from '../src/constants';
 import { PartialUserOperation } from '../src/types';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
+import { exec } from 'child_process';
 
 declare module 'mocha' {
   interface Context {
@@ -47,6 +48,15 @@ export const mockEntryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 export function useEnvironment(fixtureProjectName: string) {
   before('Loading hardhat environment', function () {
     process.chdir(path.join(__dirname, 'fixture-projects', fixtureProjectName));
+
+    // If doing integration testing we need to compile the contracts
+    if (fixtureProjectName === 'integration') {
+      exec('npx hardhat compile', (error) => {
+        if (error) {
+          throw new Error(`Execution error: ${error}`);
+        }
+      });
+    }
 
     this.hre = require('hardhat');
   });

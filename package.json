@@ -16,9 +16,9 @@
   ],
   "scripts": {
     "format": "yarn run prettier:fix && yarn run lint:fix",
-    "test": "yarn compile:integration && mocha --exit --recursive 'test/**/*.test.ts'",
+    "test": "mocha --exit --recursive 'test/**/*.test.ts'",
     "test:unit": "mocha --exit --recursive 'test/unit/**/*.test.ts'",
-    "test:integration": "yarn compile:integration && mocha --exit --recursive 'test/integration/**/*.test.ts'",
+    "test:integration": "mocha --exit --recursive 'test/integration/**/*.test.ts'",
     "build": "forge compile && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "npm run build",
@@ -28,8 +28,7 @@
     "lint:test": "eslint ./test",
     "prepare": "husky install",
     "prettier": "prettier src test --check",
-    "prettier:fix": "yarn run prettier -- --write",
-    "compile:integration": "cd test/fixture-projects/integration && npx hardhat compile"
+    "prettier:fix": "yarn run prettier -- --write"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix",

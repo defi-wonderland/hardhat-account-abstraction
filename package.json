@@ -1,6 +1,6 @@
 {
   "name": "@defi-wonderland/sponsored-txs-hardhat-plugin",
-  "version": "0.0.2-canary.1",
+  "version": "0.0.2-canary.2",
   "description": "Hardhat TypeScript plugin for Sponsored Txs",
   "repository": "github:defi-wonderland/sponsored-txs-hardhat-plugin",
   "author": "Wonderland",

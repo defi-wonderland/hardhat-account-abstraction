@@ -9,13 +9,9 @@ This plugin sponsors any transaction the user sends through the power of account
 
 ## Installation
 
-> **⚠ WARNING: Currently the package is not deployed and the installation steps will not work, these are the steps you would take when it is deployed**
-
-<br>
-
 
 ```bash
-yarn install @defi-wonderland/sponsored-txs-hardhat-plugin [list of peer dependencies]
+yarn install @defi-wonderland/sponsored-txs-hardhat-plugin
 ```
 
 Import the plugin in your `hardhat.config.js`:
@@ -33,8 +29,12 @@ import "@defi-wonderland/sponsored-txs-hardhat-plugin";
 
 ## Required plugins
 
+> **NOTE: Only one of these packages is needed depending on what you are writing your scripts in**
+
+<br>
 
 - [@nomicfoundation/hardhat-ethers](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-ethers)
+- [@nomicfoundation/hardhat-viem](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-viem)
 
 ## Tasks
 

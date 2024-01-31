@@ -217,7 +217,7 @@ export class GaslessProvider extends ProviderWrapper {
       receipt = await this.bundlerClient.waitForUserOperationReceipt({ hash: userOperationHash, timeout: 120000 });
     } catch (e) {
       throw new Error(
-        `Failed to get user operation receipt! This usually fails when their is a problem bundling the useroperation, make sure your transaction is valid! The query reverted with:\n ${e}`,
+        `Failed to get user operation receipt! This usually fails when there is a problem bundling the UserOperation, make sure your transaction is valid! The query reverted with:\n ${e}`,
       );
     }
 

@@ -13,6 +13,7 @@ import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { txToJson, getSmartAccountData, getRandomHex32ByteString, emptyFolder } from './utils';
 import { EstimateGasTxn } from './types';
+import { GetUserOperationReceiptReturnType } from 'permissionless';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -209,7 +210,16 @@ export class GaslessProvider extends ProviderWrapper {
 
     // let's also wait for the userOperation to be included, by continually querying for the receipts
     log('Querying for receipts...');
-    const receipt = await this.bundlerClient.waitForUserOperationReceipt({ hash: userOperationHash });
+
+    let receipt: GetUserOperationReceiptReturnType;
+    try {
+      // Wait 2 minutes for a receipt if we still cant find one we assume something went wrong with the bundler and throw an error to avoid terminal hanging
+      receipt = await this.bundlerClient.waitForUserOperationReceipt({ hash: userOperationHash, timeout: 120000 });
+    } catch (e) {
+      throw new Error(
+        `Failed to get user operation receipt! This usually fails when their is a problem bundling the useroperation, make sure your transaction is valid! The query reverted with:\n ${e}`,
+      );
+    }
 
     // If it was a deployment call we need to get the deployed to address from the logs
     if (!parsedTxn.to) {

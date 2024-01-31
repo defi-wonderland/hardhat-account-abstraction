@@ -175,14 +175,14 @@ export async function emptyFolder(folderName: string): Promise<void> {
 export async function txToJson(
   sponsoredUserOperation: UserOperation,
   receipt: GetUserOperationReceiptReturnType,
-  contractAddress: `0x${string}` | null,
+  contractAddress: `0x${string}` | undefined,
   runTimestamp: number,
 ): Promise<void> {
   const txData = convertBigIntsToString(Object.assign(receipt, sponsoredUserOperation));
   const timestamp = Math.floor(Date.now() / 1000);
 
   // Override the contractAddress field
-  if (contractAddress !== null) {
+  if (contractAddress !== undefined) {
     txData.receipt.contractAddress = contractAddress;
   }
 

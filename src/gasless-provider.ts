@@ -24,7 +24,7 @@ const log = init('hardhat:plugin:gasless');
  */
 export class GaslessProvider extends ProviderWrapper {
   private _expectedDeploymentsToCreateXDeployments: Map<`0x${string}`, `0x${string}`>;
-  private _latestDeploymentAddress: `0x${string}` | null;
+  private _txnHashToDeployment: Map<`0x${string}`, `0x${string}`>;
   private _runTimestamp: number;
 
   constructor(
@@ -43,7 +43,7 @@ export class GaslessProvider extends ProviderWrapper {
     super(_wrappedProvider);
 
     this._expectedDeploymentsToCreateXDeployments = new Map<`0x${string}`, `0x${string}`>();
-    this._latestDeploymentAddress = null;
+    this._txnHashToDeployment = new Map<`0x${string}`, `0x${string}`>();
 
     // Save the current timestamp to be used when generating the run folder
     this._runTimestamp = Math.floor(Date.now() / 1000);
@@ -170,9 +170,6 @@ export class GaslessProvider extends ProviderWrapper {
   private async _sendGaslessTransaction(tx: string): Promise<string> {
     log('Transaction to be signed for sponsoring', tx);
 
-    // Sanity marked as null, this is to prevent a normal transaction receipt potentially having a contractAddress field
-    this._latestDeploymentAddress = null;
-
     // Parse the transaction
     const parsedTxn = Transaction.from(tx);
 
@@ -232,12 +229,17 @@ export class GaslessProvider extends ProviderWrapper {
           this._expectedDeploymentsToCreateXDeployments.set(expectedDeployment, deployment);
 
           // Set this so receipt fetchers will be able to see it in eth_getTransactionReceipt
-          this._latestDeploymentAddress = deployment;
+          this._txnHashToDeployment.set(receipt.receipt.transactionHash, deployment);
         }
       });
     }
 
-    await txToJson(sponsoredUserOperation, receipt, this._latestDeploymentAddress, this._runTimestamp);
+    await txToJson(
+      sponsoredUserOperation,
+      receipt,
+      this._txnHashToDeployment.get(receipt.receipt.transactionHash),
+      this._runTimestamp,
+    );
 
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);
@@ -362,15 +364,17 @@ export class GaslessProvider extends ProviderWrapper {
    * @param hash The transaction hash
    * @returns The updated receipt
    */
-  private async _getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
+  private async _getTransactionReceipt(hash: `0x${string}`): Promise<TransactionReceipt> {
     const receipt: TransactionReceipt = (await this._wrappedProvider.request({
       method: 'eth_getTransactionReceipt',
       params: [hash],
     })) as TransactionReceipt;
-    receipt.contractAddress = this._latestDeploymentAddress;
 
-    // Incase this is called for normal transactions too we want to reset this to null
-    this._latestDeploymentAddress = null;
+    const deployment = this._txnHashToDeployment.get(hash);
+
+    if (deployment !== undefined) {
+      receipt.contractAddress = deployment;
+    }
 
     return receipt;
   }

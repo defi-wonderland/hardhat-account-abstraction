@@ -241,7 +241,8 @@ export class GaslessProvider extends ProviderWrapper {
 
     const txHash = receipt.receipt.transactionHash;
     log('Transaction hash:', txHash);
-    console.log(`Transaction hash 🚀: https://jiffyscan.xyz/bundle/${txHash}`);
+
+    console.log(`Transaction mined successfully 🚀: https://jiffyscan.xyz/userOpHash/${userOperationHash}`);
 
     // Increment nonce for the next transaction
     this._nonce += 1n;

@@ -105,7 +105,7 @@ If you would like to add support for a new paymaster check out the [contributors
 #### Currently the list of supported chains is, but not limited to the following:
 
 1. Ethereum Sepolia
-1. Ethereum  Goerli
+1. Ethereum Goerli
 1. Polygon Mumbai
 1. Base Goerli
 1. Optimism Goerli

@@ -125,9 +125,9 @@ export function createPaymasterClient(
 
 1. Run `yarn link`
 
-1. Clone the [example repo](https://github.com/defi-wonderland/sponsored-txs-hardhat-example) and `cd` into it
+1. Clone the [example repo](https://github.com/defi-wonderland/hardhat-account-abstraction-example) and `cd` into it
 
-1. run `yarn link @defi-wonderland/sponsored-txs-hardhat-plugin`
+1. run `yarn link @defi-wonderland/hardhat-account-abstraction`
 
 1. Now open the example repo in your code editor of choice and navigate to the `hardhat.config.ts` file
 
@@ -143,7 +143,7 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_RPC_URL as string,
       accounts: [process.env.PRIVATE_KEY as string],
-      sponsoredTransactions: {
+      accountAbstraction: {
         bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
         paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
         paymasterType: 'example' // The type of paymaster it is

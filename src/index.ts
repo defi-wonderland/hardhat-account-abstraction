@@ -27,21 +27,21 @@ extendProvider(async (provider, config, networkName) => {
     return provider;
   }
 
-  const sponsoredTransaction = netConfig.sponsoredTransactions;
-  if (!sponsoredTransaction) {
+  const accountAbstraction = netConfig.accountAbstraction;
+  if (!accountAbstraction) {
     log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
 
   const simpleAccountFactoryAddress =
-    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
+    accountAbstraction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
 
   const publicClient = createPublicClient({
     transport: http(netConfig.url),
   });
 
   const bundlerClient = createPimlicoBundlerClient({
-    transport: http(sponsoredTransaction.bundlerUrl),
+    transport: http(accountAbstraction.bundlerUrl),
   });
 
   // Check if bundler and public client share same chain Id
@@ -54,10 +54,10 @@ extendProvider(async (provider, config, networkName) => {
   }
 
   const paymasterClient = createPaymasterClient(
-    sponsoredTransaction.paymasterType as PaymasterType,
-    sponsoredTransaction.paymasterUrl,
+    accountAbstraction.paymasterType as PaymasterType,
+    accountAbstraction.paymasterUrl,
     bundlerClient,
-    sponsoredTransaction.policyId,
+    accountAbstraction.policyId,
   );
 
   return await GaslessProvider.create(
@@ -67,6 +67,6 @@ extendProvider(async (provider, config, networkName) => {
     paymasterClient,
     publicClient,
     simpleAccountFactoryAddress,
-    sponsoredTransaction.smartAccount,
+    accountAbstraction.smartAccount,
   );
 });

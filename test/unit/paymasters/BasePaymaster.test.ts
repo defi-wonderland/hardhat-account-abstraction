@@ -16,7 +16,7 @@ describe('Base Paymaster', function () {
   const endpoint = 'http://localhost:3002';
 
   const paymasterClient = createPaymasterClient(
-    'base' as PaymasterType,
+    PaymasterType.Base,
     endpoint,
     bundlerClient,
     undefined,

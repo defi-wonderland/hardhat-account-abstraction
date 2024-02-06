@@ -14,7 +14,6 @@ const config: HardhatUserConfig = {
       accountAbstraction: {
         bundlerUrl: process.env.E2E_BUNDLER_URL as string,
         paymasterUrl: process.env.E2E_PAYMASTER_URL as string,
-        paymasterType: process.env.E2E_PAYMASTER_TYPE as string,
       },
     },
   },

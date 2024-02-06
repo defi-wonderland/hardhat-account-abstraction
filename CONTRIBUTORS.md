@@ -57,7 +57,7 @@ export * from './ExamplePaymaster';
 
 <br>
 
-4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum and update the natspec to reflect the changes, heres how we would do it with `ExamplePaymaster.ts`
+4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum and update the natspec to reflect the changes, heres how we would do it with `ExamplePaymaster.ts`. **It is important the value you set is unique to your API for our interpreter to properly parse it**. As you can see base is not set to `base` as there would be conflicts which providers that use it as a param to decide the chain so it is set to `paymaster.base` to be unique.
 
 <br>
 
@@ -72,7 +72,7 @@ export * from './ExamplePaymaster';
  */
 export enum PaymasterType {
   Pimlico = 'pimlico',
-  Base = 'base',
+  Base = 'paymaster.base',
   StackUp = 'stackup',
   Alchemy = 'alchemy',
   Example = 'example'
@@ -102,9 +102,6 @@ export function createPaymasterClient(
       return new Pm.AlchemyPaymaster(paymasterUrl, policyId);
     case PaymasterType.Example:
       return new Pm.ExamplePaymaster(paymasterUrl);
-
-    default:
-      throw new Error(`Unknown paymaster type ${paymasterType}`);
   }
 }
 ```
@@ -146,7 +143,6 @@ const config: HardhatUserConfig = {
       accountAbstraction: {
         bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
         paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
-        paymasterType: 'example' // The type of paymaster it is
       }
     }
   }
@@ -176,7 +172,6 @@ PRIVATE_KEY=YOUR_PK
 
 E2E_BUNDLER_URL=<bundler url>
 E2E_PAYMASTER_URL=<paymaster url we are adding>
-E2E_PAYMASTER_TYPE=<paymaster type>
 E2E_SEPOLIA_RPC=<rpc to sepolia>
 ```
 <br>

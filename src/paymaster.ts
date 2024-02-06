@@ -26,8 +26,5 @@ export function createPaymasterClient(
       return new Pm.BasePaymaster(paymasterUrl, bundlerClient);
     case PaymasterType.Alchemy:
       return new Pm.AlchemyPaymaster(paymasterUrl, policyId);
-
-    default:
-      throw new Error(`Unknown paymaster type ${paymasterType}`);
   }
 }

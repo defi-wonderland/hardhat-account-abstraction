@@ -11,7 +11,6 @@ const config: HardhatUserConfig = {
       accountAbstraction: {
         bundlerUrl: 'http://localhost:3000',
         paymasterUrl: 'http://localhost:3001',
-        paymasterType: 'pimlico',
       },
     },
   },

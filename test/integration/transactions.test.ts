@@ -1,7 +1,7 @@
+import 'dotenv/config';
 import { assert } from 'chai';
 import { useEnvironment } from '../helpers';
-import { TEST_TOKEN_ABI, tokenAddr, entryPoint } from '../test-constants';
-import 'dotenv/config';
+import { TEST_TOKEN_ABI, TOKEN_ADDR, ENTRY_POINT } from '../test-constants';
 
 describe('Integration transactions', function () {
   useEnvironment('integration');
@@ -13,12 +13,12 @@ describe('Integration transactions', function () {
       params: [await signer.getAddress()],
     });
 
-    const testToken = new this.hre.ethers.Contract(tokenAddr, TEST_TOKEN_ABI, signer);
+    const testToken = new this.hre.ethers.Contract(TOKEN_ADDR, TEST_TOKEN_ABI, signer);
     const amountToMint = this.hre.ethers.parseEther('6.9');
     const receipt = await testToken.mint(amountToMint);
     const balanceOf = await testToken.balanceOf(smartAccount);
 
-    assert.equal(receipt.to, entryPoint);
+    assert.equal(receipt.to, ENTRY_POINT);
     assert.equal(balanceOf.toString(), amountToMint.toString());
   });
 
@@ -26,13 +26,13 @@ describe('Integration transactions', function () {
     const signer = await this.hre.ethers.provider.getSigner();
     const signerAddr = await signer.getAddress();
 
-    const testToken = new this.hre.ethers.Contract(tokenAddr, TEST_TOKEN_ABI, signer);
+    const testToken = new this.hre.ethers.Contract(TOKEN_ADDR, TEST_TOKEN_ABI, signer);
     const amountToTransfer = this.hre.ethers.parseEther('1.0');
 
     const receipt = await testToken.transfer(signerAddr, amountToTransfer);
     const balanceOf = await testToken.balanceOf(signerAddr);
 
-    assert.equal(receipt.to, entryPoint);
+    assert.equal(receipt.to, ENTRY_POINT);
     assert.equal(balanceOf.toString(), amountToTransfer.toString());
   });
 });

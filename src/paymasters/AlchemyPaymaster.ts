@@ -1,6 +1,6 @@
+import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { Paymaster } from './Paymaster';
 import { PartialUserOperation } from '../types';
-import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { convertBigIntsToString } from '../utils';
 
 /**

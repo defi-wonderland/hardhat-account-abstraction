@@ -1,8 +1,8 @@
-import { Paymaster } from './Paymaster';
-import { PartialUserOperation } from '../types';
 import { http } from 'viem';
 import { createPimlicoPaymasterClient } from 'permissionless/clients/pimlico';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
+import { Paymaster } from './Paymaster';
+import { PartialUserOperation } from '../types';
 
 /**
  * Paymaster for Pimlico.

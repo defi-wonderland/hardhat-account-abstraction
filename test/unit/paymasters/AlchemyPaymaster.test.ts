@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 import { http } from 'viem';
+import { stub, SinonStub } from 'sinon';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { PaymasterType } from '../../../src/types';
 import { createPaymasterClient } from '../../../src/paymaster';
 import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../../helpers';
-import { stub, SinonStub } from 'sinon';
 import { AlchemyPaymaster } from '../../../src/paymasters/AlchemyPaymaster';
 import { convertBigIntsToString } from '../../../src/utils';
 

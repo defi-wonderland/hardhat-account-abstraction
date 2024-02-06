@@ -6,6 +6,7 @@ import { createPublicClient, encodeFunctionData, Hex, getCreateAddress, Transact
 import { privateKeyToAccount } from 'viem/accounts';
 import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { UserOperation } from 'permissionless/types';
+import { GetUserOperationReceiptReturnType } from 'permissionless';
 import { signUserOperationHashWithECDSA, getAccountNonce } from './mock';
 import * as constants from './constants';
 import { bytecode as batchDeployAndTransferOwnershipBytecode } from './abi/BatchDeployAndTransferOwnership.sol/BatchDeployAndTransferOwnership.json';
@@ -13,12 +14,8 @@ import { Paymaster } from './paymasters';
 import { PartialBy } from 'viem/types/utils';
 import { txToJson, getSmartAccountData, getRandomHex32ByteString, emptyFolder } from './utils';
 import { EstimateGasTxn } from './types';
-import { GetUserOperationReceiptReturnType } from 'permissionless';
 
 const log = init('hardhat:plugin:gasless');
-
-// TODO: Test this with value transfers
-// TODO: Test this with tx type 0, 1
 
 /**
  * Gasless Provider class that routes transactions through a bundler and paymaster, based on the ERC 4337 standard
@@ -70,7 +67,7 @@ export class GaslessProvider extends ProviderWrapper {
     smartAccount?: `0x${string}`,
   ) {
     // Clear latest folder
-    await emptyFolder(constants.latestFolderName);
+    await emptyFolder(constants.LATEST_FOLDER_NAME);
 
     // NOTE: Bundlers can support many entry points, but currently they only support one, we use this method so if they ever add a new one the entry point will still work
     const entryPoint = (await bundlerClient.supportedEntryPoints())[0];
@@ -112,52 +109,54 @@ export class GaslessProvider extends ProviderWrapper {
    * @returns Unknown, as it depends on the request being made
    */
   public request(args: RequestArguments): Promise<unknown> {
-    if (args.method === 'sponsored_getSmartAccountAddress' && args.params !== undefined) {
-      const params = this._getParams(args);
-      return this._getSmartAccountAddress(params[0]);
-    }
+    if (args.params !== undefined) {
+      if (args.method === 'sponsored_getSmartAccountAddress') {
+        const params = this._getParams(args);
+        return this._getSmartAccountAddress(params[0]);
+      }
 
-    // Need to override this for plugins that check receipt for deployment addresses
-    if (args.method === 'eth_getTransactionReceipt' && args.params !== undefined) {
-      const params = this._getParams(args);
-      return this._getTransactionReceipt(params[0]);
-    }
+      // Need to override this for plugins that check receipt for deployment addresses
+      if (args.method === 'eth_getTransactionReceipt') {
+        const params = this._getParams(args);
+        return this._getTransactionReceipt(params[0]);
+      }
 
-    if (args.method === 'eth_sendRawTransaction' && args.params !== undefined) {
-      const params = this._getParams(args);
-      return this._sendGaslessTransaction(params[0]);
-    }
+      if (args.method === 'eth_sendRawTransaction') {
+        const params = this._getParams(args);
+        return this._sendGaslessTransaction(params[0]);
+      }
 
-    if (args.method === 'sponsored_getDeploymentFor' && args.params !== undefined) {
-      const params = this._getParams(args);
-      return this._getDeploymentFor(params[0]);
-    }
+      if (args.method === 'sponsored_getDeploymentFor') {
+        const params = this._getParams(args);
+        return this._getDeploymentFor(params[0]);
+      }
 
-    if (args.method === 'eth_estimateGas' && args.params !== undefined) {
-      const params = this._getParams(args);
-      return this._estimateGas(params[0]);
-    }
+      if (args.method === 'eth_estimateGas') {
+        const params = this._getParams(args);
+        return this._estimateGas(params[0]);
+      }
 
-    // We need to partially overwrite eth_call incase the 'to' field uses an address that was deployed from us
-    if (args.method === 'eth_call' && args.params !== undefined) {
-      const params = this._getParams(args);
+      // We need to partially overwrite eth_call incase the 'to' field uses an address that was deployed from us
+      if (args.method === 'eth_call') {
+        const params = this._getParams(args);
 
-      const newParams = params.map((tx) => {
-        // Check if the address being called to was deployed by us
-        const deploymentFromCreateX = this._expectedDeploymentsToCreateXDeployments.get(
-          tx.to?.toLowerCase() as `0x${string}`,
-        );
+        const newParams = params.map((tx) => {
+          // Check if the address being called to was deployed by us
+          const deploymentFromCreateX = this._expectedDeploymentsToCreateXDeployments.get(
+            tx.to?.toLowerCase() as `0x${string}`,
+          );
 
-        // If it was deployed by us overrwrite tx.to with our address
-        if (deploymentFromCreateX !== undefined) {
-          tx.to = deploymentFromCreateX.toLowerCase();
-        }
+          // If it was deployed by us overrwrite tx.to with our address
+          if (deploymentFromCreateX !== undefined) {
+            tx.to = deploymentFromCreateX.toLowerCase();
+          }
 
-        // Return the new transaction
-        return tx;
-      });
+          // Return the new transaction
+          return tx;
+        });
 
-      return this._wrappedProvider.request({ method: 'eth_call', params: newParams });
+        return this._wrappedProvider.request({ method: 'eth_call', params: newParams });
+      }
     }
 
     return this._wrappedProvider.request(args);
@@ -190,7 +189,7 @@ export class GaslessProvider extends ProviderWrapper {
     });
     sponsoredUserOperation.signature = signature;
 
-    let userOperationHash;
+    let userOperationHash: `0x${string}`;
 
     try {
       // SUBMIT THE USER OPERATION TO BE BUNDLED
@@ -293,7 +292,7 @@ export class GaslessProvider extends ProviderWrapper {
 
     // If parsedTxn.to doesnt exist it is a deployment transaction and needs special functionality of sending a transaction to a factory
     if (!parsedTxn.to) {
-      to = constants.createXFactory;
+      to = constants.CREATEX_FACTORY;
 
       // If it is a contract deployment we will simulate if the contract is ownable by transferring ownership to the smart account, if transferOwnership fails we will do nothing
       const needsHandleOwnable = await this._simulateContractDeploymentIsOwnable(originalCalldata);
@@ -346,7 +345,7 @@ export class GaslessProvider extends ProviderWrapper {
       maxFeePerGas: maxFeePerGas as bigint,
       maxPriorityFeePerGas: maxPriorityFeePerGas as bigint,
       // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
-      signature: constants.dummySignature as Hex,
+      signature: constants.DUMMY_SIG as Hex,
       callGasLimit: 0n, // dummy value
       paymasterAndData: '0x', // dummy value
       preVerificationGas: 0n, // dummy value

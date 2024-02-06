@@ -1,8 +1,8 @@
 {
-  "name": "@defi-wonderland/sponsored-txs-hardhat-plugin",
-  "version": "0.0.2-canary.2",
-  "description": "Hardhat TypeScript plugin for Sponsored Txs",
-  "repository": "github:defi-wonderland/sponsored-txs-hardhat-plugin",
+  "name": "@defi-wonderland/hardhat-account-abstraction",
+  "version": "1.0.0",
+  "description": "Hardhat TypeScript plugin for Account Abstraction",
+  "repository": "github:defi-wonderland/hardhat-account-abstraction",
   "author": "Wonderland",
   "license": "MIT",
   "main": "dist/src/index.js",
@@ -63,10 +63,10 @@
     "typescript": "5.3.3"
   },
   "peerDependencies": {
-    "hardhat": "2.19.0"
+    "hardhat": "2.19.5"
   },
   "dependencies": {
-    "axios": "1.6.2",
+    "axios": "1.6.7",
     "debug": "4.3.4",
     "ethers": "6.9.0",
     "permissionless": "0.0.16",

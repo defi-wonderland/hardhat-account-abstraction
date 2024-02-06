@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 import { http } from 'viem';
+import { stub, SinonStub } from 'sinon';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { PaymasterType } from '../../../src/types';
 import { PimlicoPaymaster } from '../../../src/paymasters/PimlicoPaymaster';
 import { createPaymasterClient } from '../../../src/paymaster';
 import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../../helpers';
-import { stub, SinonStub } from 'sinon';
 
 describe('Pimlico Paymaster', function () {
   const bundlerClient = createPimlicoBundlerClient({

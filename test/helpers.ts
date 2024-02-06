@@ -2,10 +2,10 @@ import { resetHardhatContext } from 'hardhat/plugins-testing';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import path from 'path';
 import { Hex } from 'viem';
-import { dummySignature } from '../src/constants';
-import { PartialUserOperation } from '../src/types';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
 import { exec } from 'child_process';
+import { DUMMY_SIG } from '../src/constants';
+import { PartialUserOperation } from '../src/types';
 
 declare module 'mocha' {
   interface Context {
@@ -33,7 +33,7 @@ export const mockUserOperation: PartialUserOperation = {
   maxFeePerGas: 1n,
   maxPriorityFeePerGas: 1n,
   // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
-  signature: dummySignature as Hex,
+  signature: DUMMY_SIG as Hex,
 };
 
 export const mockSponsorReturnType: SponsorUserOperationReturnType = {

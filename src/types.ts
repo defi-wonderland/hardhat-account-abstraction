@@ -44,3 +44,14 @@ export type EstimateGasTxn = {
   data?: `0x${string}`;
   value?: bigint | `0x${string}`;
 };
+
+/**
+ * The typre for the getSmartAccountData function
+ * @property initCode The init code of the smart account
+ * @property senderAddress The sender address of the smart account
+ */
+
+export type GetSmartAccountDataReturnType = {
+  initCode: `0x${string}`;
+  senderAddress: `0x${string}`;
+};

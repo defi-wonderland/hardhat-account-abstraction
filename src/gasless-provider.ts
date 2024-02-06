@@ -254,9 +254,9 @@ export class GaslessProvider extends ProviderWrapper {
     log('Transaction hash:', txHash);
 
     if (receipt.success) {
-      console.log(`Transaction mined successfully 🚀: https://jiffyscan.xyz/userOpHash/${userOperationHash}`);
+      console.log(`Transaction mined successfully 🚀: ${constants.JIFFYSCAN_URL}/${userOperationHash}`);
     } else {
-      console.log(`Transaction reverted ❌: https://jiffyscan.xyz/userOpHash/${userOperationHash}`);
+      console.log(`Transaction reverted ❌: ${constants.JIFFYSCAN_URL}/${userOperationHash}`);
     }
 
     // Increment nonce for the next transaction

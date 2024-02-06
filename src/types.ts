@@ -46,7 +46,7 @@ export type EstimateGasTxn = {
 };
 
 /**
- * The typre for the getSmartAccountData function
+ * The type for the getSmartAccountData function
  * @property initCode The init code of the smart account
  * @property senderAddress The sender address of the smart account
  */

@@ -49,7 +49,7 @@ This plugin does not extend the hardhat runtime environment
 ## Configuration
 > **NOTE: Currently the plugin will only use the first private key in `accounts`**
 
-This plugin requires 3 new field inside a `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
+This plugin requires 23 new field inside an `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
 
 This is an example of how to set it:
 

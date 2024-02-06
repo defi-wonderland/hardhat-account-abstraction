@@ -1,5 +1,10 @@
 import { PaymasterType } from './types';
 
+/**
+ * Gets the paymaster type for a given url
+ * @param paymasterUrl The paymaster url
+ * @returns The paymaster type
+ */
 export function interpretPaymasterType(paymasterUrl: string): PaymasterType {
   if (!isValidUrl(paymasterUrl)) {
     throw new Error('Invalid paymaster url');

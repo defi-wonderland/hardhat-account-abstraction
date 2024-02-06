@@ -517,8 +517,9 @@ export class GaslessProvider extends ProviderWrapper {
       let index = calldata.indexOf(badDeploymentAddress);
       while (index !== -1) {
         // Replace only the specific section where the badDeploymentAddress is found
-        calldata =
-          calldata.substring(0, index) + value.slice(2) + calldata.substring(index + badDeploymentAddress.length);
+        calldata = (calldata.substring(0, index) +
+          value.slice(2) +
+          calldata.substring(index + badDeploymentAddress.length)) as `0x${string}`;
 
         // Update the index for the next occurrence
         index = calldata.indexOf(badDeploymentAddress, index + value.slice(2).length);

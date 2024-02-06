@@ -12,7 +12,7 @@ declare module 'hardhat/types/config' {
    * @property policyId The optional policy ID for the paymaster
    */
   export interface HttpNetworkUserConfig {
-    sponsoredTransactions?: {
+    accountAbstraction?: {
       bundlerUrl: string;
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;
@@ -31,7 +31,7 @@ declare module 'hardhat/types/config' {
    * @property policyId The optional policy ID for the paymaster
    */
   export interface HttpNetworkConfig {
-    sponsoredTransactions?: {
+    accountAbstraction?: {
       bundlerUrl: string;
       paymasterUrl: string;
       paymasterType: PaymasterTypeLiteral;

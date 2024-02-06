@@ -1,8 +1,8 @@
 {
-  "name": "@defi-wonderland/sponsored-txs-hardhat-plugin",
+  "name": "@defi-wonderland/hardhat-account-abstraction",
   "version": "1.0.0",
-  "description": "Hardhat TypeScript plugin for Sponsored Txs",
-  "repository": "github:defi-wonderland/sponsored-txs-hardhat-plugin",
+  "description": "Hardhat TypeScript plugin for Account Abstraction",
+  "repository": "github:defi-wonderland/hardhat-account-abstraction",
   "author": "Wonderland",
   "license": "MIT",
   "main": "dist/src/index.js",

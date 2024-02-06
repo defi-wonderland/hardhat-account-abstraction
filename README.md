@@ -9,13 +9,9 @@ This plugin sponsors any transaction the user sends through the power of account
 
 ## Installation
 
-> **⚠ WARNING: Currently the package is not deployed and the installation steps will not work, these are the steps you would take when it is deployed**
-
-<br>
-
 
 ```bash
-yarn install @defi-wonderland/sponsored-txs-hardhat-plugin [list of peer dependencies]
+yarn install @defi-wonderland/sponsored-txs-hardhat-plugin
 ```
 
 Import the plugin in your `hardhat.config.js`:
@@ -33,8 +29,12 @@ import "@defi-wonderland/sponsored-txs-hardhat-plugin";
 
 ## Required plugins
 
+> **NOTE: Only one of these packages is needed depending on what you are writing your scripts in**
+
+<br>
 
 - [@nomicfoundation/hardhat-ethers](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-ethers)
+- [@nomicfoundation/hardhat-viem](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-viem)
 
 ## Tasks
 
@@ -47,6 +47,7 @@ This plugin creates no additional tasks.
 This plugin does not extend the hardhat runtime environment
 
 ## Configuration
+> **NOTE: Currently the plugin will only use the first private key in `accounts`**
 
 This plugin requires 3 new field inside a `sponsoredTransaction` object which will be nested inside each hardhat network that is set in the config
 
@@ -96,12 +97,15 @@ If you would like to add support for a new paymaster check out the [contributors
 
 ### Supported Chains
 
-For a chain to be supported at the moment the only condition is the SimpleAccount Factory is deployed to the addres `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
+#### For a chain to be supported the conditions are:
 
-Currently the list of supported chains is, but not limited to the following:
+1. The SimpleAccount Factory is deployed to the address `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
+1. The [CreateXFactory](https://github.com/pcaversaccio/createx) needs to be deployed to its standard address
+<br>
+#### Currently the list of supported chains is, but not limited to the following:
 
 1. Ethereum Sepolia
-1. Ethereum  Goerli
+1. Ethereum Goerli
 1. Polygon Mumbai
 1. Base Goerli
 1. Optimism Goerli
@@ -132,7 +136,7 @@ Deploying contracts works just as any other transaction would, however due to th
 
 - **Contract addresses in scripts**
 
-    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#sponsored_getdeploymentfor)
+    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#sponsored_getdeploymentfor). This issue is only present with libraries that hardcode the predicted address such as ethers. Other libraries use the receipt to retrieve the contract address such as viem, for those libraries the address returned will be correct as we modify the receipts in our middleware.
 
     <br>
 
@@ -208,6 +212,7 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
     params: [lockContract.target] 
   });
   ```
+
 
 ## Contributors
 

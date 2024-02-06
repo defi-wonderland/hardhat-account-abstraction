@@ -9,7 +9,7 @@ describe('Integration deployments', function () {
     const nonOwnableContract = await this.hre.ethers.deployContract('NonOwnableContract');
 
     const deploymentAddress = await this.hre.network.provider.request({
-      method: 'sponsored_getDeploymentFor',
+      method: 'aa_getDeploymentFor',
       params: [nonOwnableContract.target],
     });
 
@@ -24,14 +24,14 @@ describe('Integration deployments', function () {
     const signer = await this.hre.ethers.provider.getSigner();
 
     const smartAccount = await this.hre.network.provider.request({
-      method: 'sponsored_getSmartAccountAddress',
+      method: 'aa_getSmartAccountAddress',
       params: [await signer.getAddress()],
     });
 
     const ownableContract = await this.hre.ethers.deployContract('OwnableContract');
 
     const deploymentAddress = await this.hre.network.provider.request({
-      method: 'sponsored_getDeploymentFor',
+      method: 'aa_getDeploymentFor',
       params: [ownableContract.target],
     });
 

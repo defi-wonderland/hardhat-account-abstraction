@@ -1,6 +1,6 @@
-# Sponsored Txns Hardhat Plugin
+# Hardhat Account Abstraction
 
-A plugin to send transactions to testnets without needing gas money!
+A plugin to send sponsored transactions utilizing account abstraction!
 
 
 ## What
@@ -11,19 +11,19 @@ This plugin sponsors any transaction the user sends through the power of account
 
 
 ```bash
-yarn install @defi-wonderland/sponsored-txs-hardhat-plugin
+yarn install @defi-wonderland/hardhat-account-abstraction
 ```
 
 Import the plugin in your `hardhat.config.js`:
 
 ```js
-require("@defi-wonderland/sponsored-txs-hardhat-plugin");
+require("@defi-wonderland/hardhat-account-abstraction");
 ```
 
 Or if you are using TypeScript, in your `hardhat.config.ts`:
 
 ```ts
-import "@defi-wonderland/sponsored-txs-hardhat-plugin";
+import "@defi-wonderland/hardhat-account-abstraction";
 ```
 
 
@@ -49,7 +49,7 @@ This plugin does not extend the hardhat runtime environment
 ## Configuration
 > **NOTE: Currently the plugin will only use the first private key in `accounts`**
 
-This plugin requires 3 new field inside a `sponsoredTransaction` object which will be nested inside each hardhat network that is set in the config
+This plugin requires 3 new field inside a `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
 
 This is an example of how to set it:
 
@@ -61,7 +61,7 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_RPC_URL as string,
       accounts: [process.env.PRIVATE_KEY as string],
-      sponsoredTransactions: {
+      accountAbstraction: {
         bundlerUrl: 'https://example.com',
         paymasterUrl: 'https://example.com',
         paymasterType: 'pimlico'
@@ -115,7 +115,7 @@ If you would like to add support for a new paymaster check out the [contributors
 
 > **⚠ WARNING: Any non-zero msg.value call will not work as intended as paymaster's dont sponsor this value, in order to use native transfers or interact with payable functions you will need the native token of your chain in the smart account wallet beforehand**
 
-After you have setup the configuration for the `sponsoredTransactions` and you are using a network that has them enable you are good to go, you can right a simple script below and your transactions will be mined on the testnet that you have configured!
+After you have setup the configuration for the `accountAbstraction` and you are using a network that has them enable you are good to go, you can right a simple script below and your transactions will be mined on the testnet that you have configured!
 
 ```js
 const signer = await ethers.provider.getSigner();
@@ -136,7 +136,7 @@ Deploying contracts works just as any other transaction would, however due to th
 
 - **Contract addresses in scripts**
 
-    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#sponsored_getdeploymentfor). This issue is only present with libraries that hardcode the predicted address such as ethers. Other libraries use the receipt to retrieve the contract address such as viem, for those libraries the address returned will be correct as we modify the receipts in our middleware.
+    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#aa_getdeploymentfor). This issue is only present with libraries that hardcode the predicted address such as ethers. Other libraries use the receipt to retrieve the contract address such as viem, for those libraries the address returned will be correct as we modify the receipts in our middleware.
 
     <br>
 
@@ -170,7 +170,7 @@ Deploying contracts works just as any other transaction would, however due to th
   console.log(lockContract.target); // Wrong address
 
   const lockContractAddress = await network.provider.request({
-    method: 'sponsored_getDeploymentFor',
+    method: 'aa_getDeploymentFor',
     params: [lockContract.target]
   });
 
@@ -183,7 +183,7 @@ Deploying contracts works just as any other transaction would, however due to th
 
 This plugin adds additional JSON-RPC methods to be able to interact and get data from our custom provider middleware.
 
-### `sponsored_getSmartAccountAddress`
+### `aa_getSmartAccountAddress`
 
 **Description:** Returns the address for the smart account that would be used if we deploy one for you, the user does not provide a smart account address, this will be deterministically generated from the provided signer address:
   - Parameters: 
@@ -191,13 +191,13 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
   - Example: 
   ```js
   const smartAccountAddress = await network.provider.request({
-      method: 'sponsored_getSmartAccountAddress',
+      method: 'aa_getSmartAccountAddress',
       params: [signer.address],
     });
     console.log(`Smart account address: ${smartAccountAddress}`);
   ```
 
-### `sponsored_getDeploymentFor`: 
+### `aa_getDeploymentFor`: 
 
 **Description:** Returns the address of which a contract was deployed through our middleware, [to learn more about why this is needed click here](#deploying-contracts)
   - Parameters:
@@ -208,7 +208,7 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
   const lockContract = await lock.deploy();
 
   const lockContractAddress = await network.provider.request({
-    method: 'sponsored_getDeploymentFor',
+    method: 'aa_getDeploymentFor',
     params: [lockContract.target] 
   });
   ```
@@ -220,12 +220,12 @@ If you want to learn how to add support for your own paymaster implementation ch
 
 <br>
 
-Sponsored Transaction was built with ❤️ by [Wonderland](https://defi.sucks).
+Hardhat Account Abstraction was built with ❤️ by [Wonderland](https://defi.sucks).
 
-Wonderland the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
+Wonderland the largest core development group in web3. Our commit ment is to a financial future that's open, decentralized, and accessible to all.
 
 [DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.
 
 ## Licensing
 
-The primary license for Sponsored Transactions is MIT, see [`LICENSE`](./LICENSE).
+The primary license for Hardhat Account Abstraction is MIT, see [`LICENSE`](./LICENSE).

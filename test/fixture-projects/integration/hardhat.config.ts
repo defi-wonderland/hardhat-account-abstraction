@@ -11,7 +11,7 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: process.env.E2E_SEPOLIA_RPC as string,
       accounts: [generatePrivateKey()],
-      sponsoredTransactions: {
+      accountAbstraction: {
         bundlerUrl: process.env.E2E_BUNDLER_URL as string,
         paymasterUrl: process.env.E2E_PAYMASTER_URL as string,
         paymasterType: process.env.E2E_PAYMASTER_TYPE as string,

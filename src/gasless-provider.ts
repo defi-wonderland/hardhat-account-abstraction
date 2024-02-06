@@ -110,7 +110,7 @@ export class GaslessProvider extends ProviderWrapper {
    */
   public request(args: RequestArguments): Promise<unknown> {
     if (args.params !== undefined) {
-      if (args.method === 'sponsored_getSmartAccountAddress') {
+      if (args.method === 'aa_getSmartAccountAddress') {
         const params = this._getParams(args);
         return this._getSmartAccountAddress(params[0]);
       }
@@ -126,7 +126,7 @@ export class GaslessProvider extends ProviderWrapper {
         return this._sendGaslessTransaction(params[0]);
       }
 
-      if (args.method === 'sponsored_getDeploymentFor') {
+      if (args.method === 'aa_getDeploymentFor') {
         const params = this._getParams(args);
         return this._getDeploymentFor(params[0]);
       }

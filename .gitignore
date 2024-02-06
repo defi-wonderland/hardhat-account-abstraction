@@ -76,3 +76,6 @@ test/fixture-projects/integration/artifacts/**/*
 
 # Sponsored transactions JSON files
 test/fixture-projects/integration/sponsored-transactions/
+
+# Ignore the sponsored deployments from integration tests
+sponsored-transactions/

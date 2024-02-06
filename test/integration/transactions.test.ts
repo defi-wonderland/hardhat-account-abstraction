@@ -20,7 +20,7 @@ describe('Integration transactions', function () {
 
   it('Should send a transaction', async function () {
     const smartAccount = await this.hre.network.provider.request({
-      method: 'sponsored_getSmartAccountAddress',
+      method: 'aa_getSmartAccountAddress',
       params: [signerAddress],
     });
 

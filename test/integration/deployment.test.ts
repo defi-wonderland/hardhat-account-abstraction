@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import { assert } from 'chai';
 import { useEnvironment } from '../helpers';
-import 'dotenv/config';
 
 describe('Integration deployments', function () {
   useEnvironment('integration');

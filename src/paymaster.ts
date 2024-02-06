@@ -1,7 +1,7 @@
+import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { PaymasterType } from './types';
 import { Paymaster } from './paymasters/Paymaster';
 import * as Pm from './paymasters';
-import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
 /**
  * Creates a paymaster based on the paymaster type.

@@ -2,9 +2,10 @@ import { GetUserOperationReceiptReturnType, UserOperation } from 'permissionless
 import { randomBytes, toBeHex, toBigInt } from 'ethers';
 import { getSenderAddress } from './mock';
 import { concat, createPublicClient, encodeFunctionData } from 'viem';
-import { latestFolderName, mainFolderName } from './constants';
 import fs from 'fs';
 import path from 'path';
+import { LATEST_FOLDER_NAME, MAIN_FOLDER_NAME } from './constants';
+import { GetSmartAccountDataReturnType } from './types';
 
 /**
  * Converts all BigInts in an object to strings because the nonce
@@ -66,10 +67,7 @@ export async function getSmartAccountData(
   simpleAccountFactoryAddress: `0x${string}`,
   owner: `0x${string}`,
   entryPoint: `0x${string}`,
-): Promise<{
-  initCode: `0x${string}`;
-  senderAddress: `0x${string}`;
-}> {
+): Promise<GetSmartAccountDataReturnType> {
   const initCode = concat([
     simpleAccountFactoryAddress,
     encodeFunctionData({
@@ -187,16 +185,16 @@ export async function txToJson(
   }
 
   // Create main folder if doesn't exist
-  await createFolderIfNotExists(mainFolderName);
+  await createFolderIfNotExists(MAIN_FOLDER_NAME);
 
   // Create run subfolder if doesn't exist (with timestamp)
-  const runFolderName = `${mainFolderName}/run-${runTimestamp}`;
+  const runFolderName = `${MAIN_FOLDER_NAME}/run-${runTimestamp}`;
   const fileName = `${runFolderName}/sponsored_${timestamp}.json`;
   await writeRunToJSON(runFolderName, fileName, txData);
 
   // Create latest subfolder if doesn't exist (latest)
-  const latestFileName = `${latestFolderName}/sponsored_${timestamp}.json`;
-  await writeRunToJSON(latestFolderName, latestFileName, txData);
+  const latestFileName = `${LATEST_FOLDER_NAME}/sponsored_${timestamp}.json`;
+  await writeRunToJSON(LATEST_FOLDER_NAME, latestFileName, txData);
 }
 
 /**

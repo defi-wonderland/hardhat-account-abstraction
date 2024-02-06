@@ -1,9 +1,9 @@
+import 'dotenv/config';
 import { assert } from 'chai';
-import { useEnvironment } from '../helpers';
-import { TEST_TOKEN_ABI, tokenAddr, entryPoint } from '../test-constants';
 import { Contract } from 'ethers';
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import 'dotenv/config';
+import { useEnvironment } from '../helpers';
+import { TEST_TOKEN_ABI, TOKEN_ADDR, ENTRY_POINT } from '../test-constants';
 
 describe('Integration transactions', function () {
   useEnvironment('integration');
@@ -15,7 +15,7 @@ describe('Integration transactions', function () {
   before(async function () {
     signer = await this.hre.ethers.provider.getSigner();
     signerAddress = await signer.getAddress();
-    testToken = new this.hre.ethers.Contract(tokenAddr, TEST_TOKEN_ABI, signer);
+    testToken = new this.hre.ethers.Contract(TOKEN_ADDR, TEST_TOKEN_ABI, signer);
   });
 
   it('Should send a transaction', async function () {
@@ -28,7 +28,7 @@ describe('Integration transactions', function () {
     const receipt = await testToken.mint(amountToMint);
     const balanceOf = await testToken.balanceOf(smartAccount);
 
-    assert.equal(receipt.to, entryPoint);
+    assert.equal(receipt.to, ENTRY_POINT);
     assert.equal(balanceOf.toString(), amountToMint.toString());
   });
 
@@ -38,7 +38,7 @@ describe('Integration transactions', function () {
     const receipt = await testToken.transfer(signerAddress, amountToTransfer);
     const balanceOf = await testToken.balanceOf(signerAddress);
 
-    assert.equal(receipt.to, entryPoint);
+    assert.equal(receipt.to, ENTRY_POINT);
     assert.equal(balanceOf.toString(), amountToTransfer.toString());
   });
 });

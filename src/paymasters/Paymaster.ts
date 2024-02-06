@@ -1,6 +1,6 @@
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
-import { PartialUserOperation } from '../types';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { PartialUserOperation } from '../types';
 
 /**
  * Base class for paymasters.

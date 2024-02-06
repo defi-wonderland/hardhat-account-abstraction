@@ -1,9 +1,9 @@
-import { Paymaster } from './Paymaster';
-import { PartialUserOperation } from '../types';
 import { http } from 'viem';
 import { createStackupPaymasterClient } from 'permissionless/clients/stackup';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/stackup';
 import { StackupPaymasterContext } from 'permissionless/types/stackup';
+import { Paymaster } from './Paymaster';
+import { PartialUserOperation } from '../types';
 
 /**
  * Paymaster for StackUp.

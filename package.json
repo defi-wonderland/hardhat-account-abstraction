@@ -60,13 +60,13 @@
     "prettier": "3.1.0",
     "sinon": "15.2.0",
     "ts-node": "10.9.1",
-    "typescript": "5.3.3"
+    "typescript": "5.0.4"
   },
   "peerDependencies": {
-    "hardhat": "2.19.0"
+    "hardhat": "2.19.5"
   },
   "dependencies": {
-    "axios": "1.6.2",
+    "axios": "1.6.7",
     "debug": "4.3.4",
     "ethers": "6.9.0",
     "permissionless": "0.0.16",

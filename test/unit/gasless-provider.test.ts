@@ -1,14 +1,14 @@
 import { assert } from 'chai';
-import { GaslessProvider } from '../../src/gasless-provider';
-import { stub, SinonStub } from 'sinon';
-import { createPaymasterClient } from '../../src/paymaster';
-import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from '../../src/constants';
-import { createPublicClient, http } from 'viem';
-import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
-import { PaymasterType } from '../../src/types';
 import { generatePrivateKey } from 'viem/accounts';
 import { EIP1193Provider } from 'hardhat/types';
 import { RequestArguments } from 'hardhat/types';
+import { stub, SinonStub } from 'sinon';
+import { createPublicClient, http } from 'viem';
+import { GaslessProvider } from '../../src/gasless-provider';
+import { createPaymasterClient } from '../../src/paymaster';
+import { SIMPLE_ACCOUNT_FACTORY_ADDRESS as constantSimpleAccountFactoryAddress } from '../../src/constants';
+import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { PaymasterType } from '../../src/types';
 import { mockTxn, mockSponsorResult } from '../helpers';
 import * as MockPermissionless from '../../src/mock';
 

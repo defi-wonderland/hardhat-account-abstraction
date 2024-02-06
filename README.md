@@ -11,19 +11,19 @@ This plugin sponsors any transaction the user sends through the power of account
 
 
 ```bash
-yarn install @defi-wonderland/hardhat-4337
+yarn install @defi-wonderland/hardhat-account-abstraction
 ```
 
 Import the plugin in your `hardhat.config.js`:
 
 ```js
-require("@defi-wonderland/hardhat-4337");
+require("@defi-wonderland/hardhat-account-abstraction");
 ```
 
 Or if you are using TypeScript, in your `hardhat.config.ts`:
 
 ```ts
-import "@defi-wonderland/hardhat-4337";
+import "@defi-wonderland/hardhat-account-abstraction";
 ```
 
 
@@ -220,7 +220,7 @@ If you want to learn how to add support for your own paymaster implementation ch
 
 <br>
 
-Hardhat 4337 was built with ❤️ by [Wonderland](https://defi.sucks).
+Hardhat Account Abstraction was built with ❤️ by [Wonderland](https://defi.sucks).
 
 Wonderland the largest core development group in web3. Our commit ment is to a financial future that's open, decentralized, and accessible to all.
 
@@ -228,4 +228,4 @@ Wonderland the largest core development group in web3. Our commit ment is to a f
 
 ## Licensing
 
-The primary license for Hardhat 4337 is MIT, see [`LICENSE`](./LICENSE).
+The primary license for Hardhat Account Abstraction is MIT, see [`LICENSE`](./LICENSE).

@@ -75,10 +75,7 @@ export class GaslessProvider extends ProviderWrapper {
 
     const { initCode, senderAddress } = !smartAccount
       ? await getSmartAccountData(publicClient, simpleAccountFactoryAddress, owner.address, entryPoint)
-      : ({ initCode: '0x', senderAddress: smartAccount } as {
-          initCode: `0x${string}`;
-          senderAddress: `0x${string}`;
-        });
+      : { initCode: '0x', senderAddress: smartAccount };
 
     const nonce = await getAccountNonce(publicClient, {
       sender: senderAddress,

@@ -21,6 +21,11 @@ export function interpretPaymasterType(paymasterUrl: string): PaymasterType {
   throw new Error(`Unknown paymaster type for url ${paymasterUrl}`);
 }
 
+/**
+ * Checks if a url is valid
+ * @param url The url to check
+ * @returns True if valid, false if it isnt
+ */
 function isValidUrl(url: string): boolean {
   try {
     new URL(url);

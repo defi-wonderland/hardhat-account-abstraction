@@ -49,7 +49,7 @@ This plugin does not extend the hardhat runtime environment
 ## Configuration
 > **NOTE: Currently the plugin will only use the first private key in `accounts`**
 
-This plugin requires 23 new field inside an `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
+This plugin requires 2 new fields inside an `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
 
 This is an example of how to set it:
 
@@ -182,14 +182,12 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
 
 ### `aa_getSmartAccountAddress`
 
-**Description:** Returns the address for the smart account that would be used if we deploy one for you, the user does not provide a smart account address, this will be deterministically generated from the provided signer address:
-  - Parameters: 
-    - `signerAddress: 0x${string}` - The signer of the transactions
+**Description:** Returns the address for the smart account that is being used by the provider.
   - Example: 
   ```js
   const smartAccountAddress = await network.provider.request({
       method: 'aa_getSmartAccountAddress',
-      params: [signer.address],
+      params: [],
     });
     console.log(`Smart account address: ${smartAccountAddress}`);
   ```

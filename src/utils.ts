@@ -107,7 +107,7 @@ async function createFolderIfNotExists(folderName: string): Promise<void> {
     // If successfull, folder should not be created
     await fs.promises.access(folderName);
   } catch {
-    await fs.promises.mkdir(folderName);
+    await fs.promises.mkdir(folderName, { recursive: true });
   }
 }
 

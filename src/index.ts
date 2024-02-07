@@ -1,13 +1,13 @@
 import 'dotenv/config';
+import init from 'debug';
 import { extendProvider } from 'hardhat/config';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { createPaymasterClient } from './paymaster';
 import { SIMPLE_ACCOUNT_FACTORY_ADDRESS as constantSimpleAccountFactoryAddress } from './constants';
 import { GaslessProvider } from './gasless-provider';
-import { PaymasterType } from './types';
-import init from 'debug';
 import './type-extensions';
+import { interpretPaymasterType } from './interpreter';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -52,8 +52,10 @@ extendProvider(async (provider, config, networkName) => {
     throw new Error(message);
   }
 
+  const paymasterType = interpretPaymasterType(accountAbstraction.paymasterUrl);
+
   const paymasterClient = createPaymasterClient(
-    accountAbstraction.paymasterType as PaymasterType,
+    paymasterType,
     accountAbstraction.paymasterUrl,
     bundlerClient,
     accountAbstraction.policyId,

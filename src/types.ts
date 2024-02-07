@@ -26,17 +26,10 @@ export type PartialUserOperation = {
  */
 export enum PaymasterType {
   Pimlico = 'pimlico',
-  Base = 'base',
+  Base = 'paymaster.base',
   StackUp = 'stackup',
   Alchemy = 'alchemy',
 }
-
-/**
- * Literal type of the paymaster types so input to the config can be a string
- */
-export type PaymasterTypeLiteral = keyof {
-  [K in keyof typeof PaymasterType as string]: K;
-};
 
 export type EstimateGasTxn = {
   from?: `0x${string}`;

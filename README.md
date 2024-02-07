@@ -49,7 +49,7 @@ This plugin does not extend the hardhat runtime environment
 ## Configuration
 > **NOTE: Currently the plugin will only use the first private key in `accounts`**
 
-This plugin requires 3 new field inside a `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
+This plugin requires 23 new field inside an `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
 
 This is an example of how to set it:
 
@@ -64,7 +64,6 @@ const config: HardhatUserConfig = {
       accountAbstraction: {
         bundlerUrl: 'https://example.com',
         paymasterUrl: 'https://example.com',
-        paymasterType: 'pimlico'
       }
     }
   }
@@ -77,20 +76,18 @@ const config: HardhatUserConfig = {
 | ------------------------------ | ---------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------  |
 | `bundlerUrl`                   | The bundler that the UserOperations will be sent to                                                  | Yes      | No default                                  |
 | `paymasterUrl`                 | The paymaster API that will be used for sponsoring transactions                                      | Yes      | No default                                  |
-| `paymasterType`                | The type of paymaster                                                                                | Yes      | No default                                  |
 | `simpleAccountFactoryAddress`  | The simple account factory address you want to use                                                   | No       | 0x9406cc6185a346906296840746125a0e44976454  |
 | `smartAccount`                 | Address of a smart account to use in your scripts                                                    | No       | Will deploy one for you                     |
 | `policyId`                     | The policy id to use if your paymaster has one                                                       | No       | No default                                  | 
 
 ### Supported Paymaster Types
 
-| Paymaster | Value     |
-| --------- | --------- |
-| Pimlico   | 'pimlico' |
-| Base      | 'base'    |
-| Alchemy   | 'alchemy' |
-| Stackup   | 'stackup' |
+The list of paymasters we currently support
 
+1. Pimlico
+1. Stackup
+1. Alchemy
+1. Base
 
 
 If you would like to add support for a new paymaster check out the [contributors guide](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin)

@@ -183,13 +183,11 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
 ### `aa_getSmartAccountAddress`
 
 **Description:** Returns the address for the smart account that is being used by the provider.
-  - Parameters: 
-    - `signerAddress: 0x${string}` - The signer of the transactions
   - Example: 
   ```js
   const smartAccountAddress = await network.provider.request({
       method: 'aa_getSmartAccountAddress',
-      params: [signer.address],
+      params: [],
     });
     console.log(`Smart account address: ${smartAccountAddress}`);
   ```

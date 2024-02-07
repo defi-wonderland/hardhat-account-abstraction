@@ -109,12 +109,11 @@ export class GaslessProvider extends ProviderWrapper {
    * @returns Unknown, as it depends on the request being made
    */
   public request(args: RequestArguments): Promise<unknown> {
-    if (args.params !== undefined) {
-      if (args.method === 'aa_getSmartAccountAddress') {
-        const params = this._getParams(args);
-        return this._getSmartAccountAddress(params[0]);
-      }
+    if (args.method === 'aa_getSmartAccountAddress') {
+      return this._getSmartAccountAddress();
+    }
 
+    if (args.params !== undefined) {
       // Need to override this for plugins that check receipt for deployment addresses
       if (args.method === 'eth_getTransactionReceipt') {
         const params = this._getParams(args);
@@ -540,11 +539,10 @@ export class GaslessProvider extends ProviderWrapper {
 
   /**
    * Determines address for a smart account already deployed or to be deployed
-   * @param owner The owner of the smart account
    * @returns A promise that resolves to sender address
    * @dev Needs to be async so it returns a promise for the request method
    */
-  private async _getSmartAccountAddress(owner: `0x${string}`): Promise<`0x${string}`> {
+  private async _getSmartAccountAddress(): Promise<`0x${string}`> {
     return this.senderAddress;
   }
 }

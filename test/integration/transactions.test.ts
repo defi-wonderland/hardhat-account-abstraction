@@ -21,7 +21,7 @@ describe('Integration transactions', function () {
   it('Should send a transaction', async function () {
     const smartAccount = await this.hre.network.provider.request({
       method: 'aa_getSmartAccountAddress',
-      params: [signerAddress],
+      params: [],
     });
 
     const amountToMint = this.hre.ethers.parseEther('6.9');

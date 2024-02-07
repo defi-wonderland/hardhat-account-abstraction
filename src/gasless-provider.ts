@@ -542,14 +542,9 @@ export class GaslessProvider extends ProviderWrapper {
    * Determines address for a smart account already deployed or to be deployed
    * @param owner The owner of the smart account
    * @returns A promise that resolves to sender address
+   * @dev Needs to be async so it returns a promise for the request method
    */
   private async _getSmartAccountAddress(owner: `0x${string}`): Promise<`0x${string}`> {
-    const { senderAddress } = await getSmartAccountData(
-      this.publicClient,
-      this._simpleAccountFactoryAddress,
-      owner,
-      this._entryPoint,
-    );
-    return senderAddress;
+    return this.senderAddress;
   }
 }

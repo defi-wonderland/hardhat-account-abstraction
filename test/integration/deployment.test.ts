@@ -21,8 +21,6 @@ describe('Integration deployments', function () {
   });
 
   it('Should deploy an ownable contract', async function () {
-    const signer = await this.hre.ethers.provider.getSigner();
-
     const smartAccount = await this.hre.network.provider.request({
       method: 'aa_getSmartAccountAddress',
       params: [],

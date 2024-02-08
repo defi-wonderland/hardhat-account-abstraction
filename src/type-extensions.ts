@@ -1,12 +1,38 @@
-import "hardhat/types/config";
-import "hardhat/types/runtime";
+import 'hardhat/types/config';
+import 'hardhat/types/runtime';
 
-declare module "hardhat/types/config" {
+declare module 'hardhat/types/config' {
+  /**
+   * The extended interface with the sponsored transactions field
+   * @property bundlerUrl  The URL of the bundler
+   * @property paymasterUrl  The URL of the paymaster
+   * @property simpleAccountFactoryAddress  The address of the simple account factory
+   * @property policyId The optional policy ID for the paymaster
+   */
   export interface HttpNetworkUserConfig {
-    sponsorUrl?: string;
+    accountAbstraction?: {
+      bundlerUrl: string;
+      paymasterUrl: string;
+      simpleAccountFactoryAddress?: `0x${string}`;
+      policyId?: string;
+      smartAccount?: `0x${string}`;
+    };
   }
 
+  /**
+   * The extended interface with the sponsored transactions field
+   * @property bundlerUrl  The URL of the bundler
+   * @property paymasterUrl  The URL of the paymaster
+   * @property simpleAccountFactoryAddress  The address of the simple account factory
+   * @property policyId The optional policy ID for the paymaster
+   */
   export interface HttpNetworkConfig {
-    sponsorUrl?: string;
+    accountAbstraction?: {
+      bundlerUrl: string;
+      paymasterUrl: string;
+      simpleAccountFactoryAddress?: `0x${string}`;
+      policyId?: string;
+      smartAccount?: `0x${string}`;
+    };
   }
 }

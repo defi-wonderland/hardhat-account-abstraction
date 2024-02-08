@@ -1,0 +1,8 @@
+node_modules
+coverage
+public
+build
+dist
+src/constants.ts
+src/abi/**
+test/fixture-projects/integration/artifacts/**

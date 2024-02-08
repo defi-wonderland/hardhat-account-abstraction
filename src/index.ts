@@ -1,33 +1,73 @@
-import { extendProvider } from "hardhat/config";
+import 'dotenv/config';
+import init from 'debug';
+import { extendProvider } from 'hardhat/config';
+import { createPublicClient, http } from 'viem';
+import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { createPaymasterClient } from './paymaster';
+import { SIMPLE_ACCOUNT_FACTORY_ADDRESS as constantSimpleAccountFactoryAddress } from './constants';
+import { GaslessProvider } from './gasless-provider';
+import './type-extensions';
+import { interpretPaymasterType } from './interpreter';
 
-import init from "debug";
+const log = init('hardhat:plugin:gasless');
 
-const log = init("hardhat:plugin:gasless");
-
-import "./type-extensions";
-import { GaslessProvider } from "./gasless-provider";
-
-extendProvider((provider, config, networkName) => {
+extendProvider(async (provider, config, networkName) => {
   log(`Extending provider for network ${networkName}`);
 
   const netConfig = config.networks[networkName];
-  // TODO: support mnemonics
   if (!Array.isArray(netConfig.accounts)) {
     log(`Mnemonics are not yet supported, skipping`);
     return provider;
   }
-  const signer: string = netConfig.accounts[0] as string;
+  const signer = netConfig.accounts[0] as `0x${string}`;
 
-  if (!("url" in netConfig)) {
+  if (!('url' in netConfig)) {
     log(`Hardhat Network detected, skipping`);
     return provider;
   }
 
-  const sponsorUrl = netConfig.sponsorUrl;
-  if (sponsorUrl === undefined) {
-    log(`No sponsor url, skipping`);
+  const accountAbstraction = netConfig.accountAbstraction;
+  if (!accountAbstraction) {
+    log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
 
-  return new GaslessProvider(signer, provider, sponsorUrl);
+  const simpleAccountFactoryAddress =
+    accountAbstraction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
+
+  const publicClient = createPublicClient({
+    transport: http(netConfig.url),
+  });
+
+  const bundlerClient = createPimlicoBundlerClient({
+    transport: http(accountAbstraction.bundlerUrl),
+  });
+
+  // Check if bundler and public client share same chain Id
+  const bundlerChainId = await bundlerClient.chainId();
+  const publicChainId = await publicClient.getChainId();
+  if (bundlerChainId !== publicChainId) {
+    const message = `Bundler chain id ${bundlerChainId} does not match public chain id ${publicChainId} for network ${networkName}`;
+    log(message);
+    throw new Error(message);
+  }
+
+  const paymasterType = interpretPaymasterType(accountAbstraction.paymasterUrl);
+
+  const paymasterClient = createPaymasterClient(
+    paymasterType,
+    accountAbstraction.paymasterUrl,
+    bundlerClient,
+    accountAbstraction.policyId,
+  );
+
+  return await GaslessProvider.create(
+    signer,
+    provider,
+    bundlerClient,
+    paymasterClient,
+    publicClient,
+    simpleAccountFactoryAddress,
+    accountAbstraction.smartAccount,
+  );
 });

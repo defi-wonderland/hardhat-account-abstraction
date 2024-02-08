@@ -1,0 +1,8 @@
+node_modules
+coverage
+public
+build
+dist
+
+src/constants.ts
+test/fixture-projects

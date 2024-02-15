@@ -1,3 +1,6 @@
+[![Version](https://img.shields.io/npm/v/@defi-wonderland/hardhat-account-abstraction?label=Version)](https://www.npmjs.com/package/@defi-wonderland/hardhat-account-abstraction)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/defi-wonderland/hardhat-account-abstraction/blob/main/LICENSE)
+
 # Hardhat Account Abstraction
 
 A plugin to send sponsored transactions utilizing account abstraction!
@@ -86,7 +89,7 @@ When you use a `PRIVATE_KEY` and no set `smartAccount` in the config we will dep
 <br>
 
 This smart contract that gets deployed acts as a wallet that will be used to make transactions, all transactions require your signer's signature, to go deeper into the ERC-4337 standard [check out this article from cointelegraph](https://cointelegraph.com/learn/account-abstraction-guide-to-ethereums-erc-4337-standard).
- 
+
 <br>
 We use your signer address as a salt when deploying the smart account so it will be unique to your signer and reuseable no matter how many times you run the scripts. 
 

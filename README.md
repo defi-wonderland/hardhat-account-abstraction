@@ -1,3 +1,6 @@
+[![Version](https://img.shields.io/npm/v/@defi-wonderland/hardhat-account-abstraction?label=Version)](https://www.npmjs.com/package/@defi-wonderland/hardhat-account-abstraction)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/defi-wonderland/hardhat-account-abstraction/blob/main/LICENSE)
+
 # Hardhat Account Abstraction
 
 A plugin to send sponsored transactions utilizing account abstraction!
@@ -80,6 +83,16 @@ const config: HardhatUserConfig = {
 | `smartAccount`                 | Address of a smart account to use in your scripts                                                    | No       | Will deploy one for you                     |
 | `policyId`                     | The policy id to use if your paymaster has one                                                       | No       | No default                                  | 
 
+### How does default smart account deployment work?
+
+When you use a `PRIVATE_KEY` and no set `smartAccount` in the config we will deploy a smart account for you, your signer will be the owner of the smart account, however the sender address for all interactions will be the `smartAccount` not the signer. 
+<br>
+
+This smart contract that gets deployed acts as a wallet that will be used to make transactions, all transactions require your signer's signature, to go deeper into the ERC-4337 standard [check out this article from cointelegraph](https://cointelegraph.com/learn/account-abstraction-guide-to-ethereums-erc-4337-standard).
+
+<br>
+We use your signer address as a salt when deploying the smart account so it will be unique to your signer and reuseable no matter how many times you run the scripts. 
+
 ### Supported Paymaster Types
 
 The list of paymasters we currently support
@@ -98,15 +111,21 @@ If you would like to add support for a new paymaster check out the [contributors
 
 1. The SimpleAccount Factory is deployed to the address `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
 1. The [CreateXFactory](https://github.com/pcaversaccio/createx) needs to be deployed to its standard address
+
 <br>
+
 #### Currently the list of supported chains is, but not limited to the following:
 
 1. Ethereum Sepolia
-1. Ethereum Goerli
 1. Polygon Mumbai
-1. Base Goerli
-1. Optimism Goerli
-1. Arbitrum Goerli
+1. Base Sepolia
+1. Optimism Sepolia
+1. Arbitrum Sepolia
+1. Mantle Testnet
+1. Avalanche Testnet (Fuji)
+1. Binance Smart Chain Testnet
+
+And more!
 
 ## Usage
 

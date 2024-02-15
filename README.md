@@ -82,7 +82,7 @@ const config: HardhatUserConfig = {
 
 ### How does default smart account deployment work?
 
-When you use a `PRIVATE_KEY` and no set `smartAccount` in the config we will deploy a smart account for you, your signer will be the owner of the smart account, however the sender address for all interactions will be the `smartAccount` not the signer. We use your signer address as a salt when deploying the smart account so it will be unique to your signer and reuseable no matter how many times you run the scripts.
+When you use a `PRIVATE_KEY` and no set `smartAccount` in the config we will deploy a smart account for you, your signer will be the owner of the smart account, however the sender address for all interactions will be the `smartAccount` not the signer. This smart account acts as a wallet that is a smart contract that will be used to make transactions, all transactions require your signer's signature, to go deeper into the ERC-4337 standard [check out this article from cointelegraph](https://cointelegraph.com/learn/account-abstraction-guide-to-ethereums-erc-4337-standard). We use your signer address as a salt when deploying the smart account so it will be unique to your signer and reuseable no matter how many times you run the scripts. 
 
 ### Supported Paymaster Types
 

@@ -39,6 +39,39 @@ import "@defi-wonderland/hardhat-account-abstraction";
 - [@nomicfoundation/hardhat-ethers](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-ethers)
 - [@nomicfoundation/hardhat-viem](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-viem)
 
+## Quick Start
+
+1. Install the plugin from the [installation guide](#installation)
+
+1. Next we will need to get a bundler and paymaster to sponsor our transactions, for this example we will use [pimlico](https://docs.pimlico.io/) but this will work with any bundler and supported paymaster
+
+1. Navigate to your [pimlico dashboard](https://dashboard.pimlico.io/apikeys) and get your api key
+
+1. Now we can add this to our config and we should be good to go, for more custom configuration see [here](#configuration)
+
+```typescript
+import { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-ethers'; // Can also be viem if you are using viem
+import '@defi-wonderland/hardhat-account-abstraction';
+
+const config: HardhatUserConfig = {
+  solidity: '0.8.19',
+  defaultNetwork: 'sepolia',
+  networks: {
+    sepolia: {
+      url: "<RPC_URL>",
+      accounts: ["<PRIVATE_KEY>"],
+      accountAbstraction: {
+        bundlerUrl: "https://api.pimlico.io/v1/sepolia/rpc?apikey=<API_KEY>",
+        paymasterUrl: "https://api.pimlico.io/v2/sepolia/rpc?apikey=<API_KEY>",
+      }
+    }
+  }
+};
+
+export default config;
+```
+
 ## Tasks
 
 

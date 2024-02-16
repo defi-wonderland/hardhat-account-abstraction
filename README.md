@@ -47,7 +47,7 @@ import "@defi-wonderland/hardhat-account-abstraction";
 
 1. Navigate to your [pimlico dashboard](https://dashboard.pimlico.io/apikeys) and get your api key
 
-1. Now we can add this to our config and we should be good to go for more custom configuration see [here](#configuration)
+1. Now we can add this to our config and we should be good to go, for more custom configuration see [here](#configuration)
 
 ```typescript
 import { HardhatUserConfig } from 'hardhat/config';

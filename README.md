@@ -234,6 +234,11 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
   });
   ```
 
+## Contributions
+
+We appreciate any contribution. If you find a bug or have any suggestions, feel free to open an issue or submit a pull request [here](https://github.com/defi-wonderland/hardhat-account-abstraction/pulls).
+
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change. You can learn more about how you can contribute to this project in the [Contribution Guide](docs/CONTRIBUTING.md).
 
 ## Contributors
 

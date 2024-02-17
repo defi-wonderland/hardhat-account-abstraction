@@ -12,6 +12,13 @@ This plugin sponsors any transaction the user sends through the power of account
 
 ## Installation
 
+npm:
+
+```bash
+npm i @defi-wonderland/hardhat-account-abstraction
+```
+
+yarn:
 
 ```bash
 yarn add @defi-wonderland/hardhat-account-abstraction

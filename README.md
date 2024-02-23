@@ -6,7 +6,7 @@
 A plugin to send sponsored transactions utilizing account abstraction!
 
 
-## What
+## Introduction
 
 This plugin sponsors any transaction the user sends through the power of account abstraction. Through seemless integration after the configuration is set just submit any transaction, and you can see it get mined on the testnets without costing the signer any gas! 
 

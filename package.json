@@ -4,7 +4,7 @@
   "description": "Hardhat TypeScript plugin for Account Abstraction",
   "repository": "github:defi-wonderland/hardhat-account-abstraction",
   "author": "Wonderland",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "keywords": [

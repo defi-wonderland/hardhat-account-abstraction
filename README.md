@@ -258,4 +258,4 @@ Wonderland the largest core development group in web3. Our commit ment is to a f
 
 ## Licensing
 
-The primary license for Hardhat Account Abstraction is MIT, see [`LICENSE`](./LICENSE).
+The primary license for Hardhat Account Abstraction is GNU Affero General Public License v3.0, (`AGPL-3.0-only`), see [LICENSE](./LICENSE).

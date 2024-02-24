@@ -236,7 +236,7 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
 
 ## Contributors
 
-If you want to learn how to add support for your own paymaster implementation checkout our guide [here](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!
+If you want to learn how to add support for your own paymaster implementation checkout our guide [here](docs/CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!
 
 ### Code Contributors
 

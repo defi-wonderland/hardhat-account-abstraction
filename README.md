@@ -6,15 +6,22 @@
 A plugin to send sponsored transactions utilizing account abstraction!
 
 
-## What
+## Introduction
 
 This plugin sponsors any transaction the user sends through the power of account abstraction. Through seemless integration after the configuration is set just submit any transaction, and you can see it get mined on the testnets without costing the signer any gas! 
 
 ## Installation
 
+npm:
 
 ```bash
-yarn install @defi-wonderland/hardhat-account-abstraction
+npm i @defi-wonderland/hardhat-account-abstraction
+```
+
+yarn:
+
+```bash
+yarn add @defi-wonderland/hardhat-account-abstraction
 ```
 
 Import the plugin in your `hardhat.config.js`:
@@ -260,10 +267,19 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
   });
   ```
 
-
 ## Contributors
 
-If you want to learn how to add support for your own paymaster implementation checkout our guide [here](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!
+If you want to learn how to add support for your own paymaster implementation checkout our guide [here](docs/CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin) to learn how to add it to the plugin!
+
+### Code Contributors
+
+This project exists thanks to all the people who [contribute.](https://github.com/defi-wonderland/hardhat-account-abstraction/graphs/contributors)
+
+### Contributions
+
+We appreciate any contribution. If you find a bug or have any suggestions, feel free to open an issue or submit a pull request [here](https://github.com/defi-wonderland/hardhat-account-abstraction/pulls).
+
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change. You can learn more about how you can contribute to this project in the [Contribution Guide](docs/CONTRIBUTING.md).
 
 <br>
 

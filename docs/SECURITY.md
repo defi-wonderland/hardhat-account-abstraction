@@ -2,9 +2,9 @@
 
 ## Reporting a Vulnerability
 
-The `DeFi Wonderland` contributors and community take all security bugs in `hardhat-account-abstraction` seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
+The `Wonderland` contributors and community take all security bugs in `hardhat-account-abstraction` seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
 
-To report a security vulnerability, please use [DeFi Wonderland GitHub](https://github.com/defi-wonderland). To coordinate the issue and solve it.
+To report a security vulnerability, please use [Wonderland GitHub](https://github.com/defi-wonderland). To coordinate the issue and solve it.
 
 The contributors will send a response indicating the next steps in handling your report. After the initial reply to your report, the security team will endeavor to keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
 

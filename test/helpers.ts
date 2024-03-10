@@ -2,9 +2,10 @@ import { resetHardhatContext } from 'hardhat/plugins-testing';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import path from 'path';
 import { Hex } from 'viem';
-import { dummySignature } from '../src/constants';
-import { PartialUserOperation } from '../src/types';
 import { SponsorUserOperationReturnType } from 'permissionless/actions/pimlico';
+import { exec } from 'child_process';
+import { DUMMY_SIG } from '../src/constants';
+import { PartialUserOperation } from '../src/types';
 
 declare module 'mocha' {
   interface Context {
@@ -32,7 +33,7 @@ export const mockUserOperation: PartialUserOperation = {
   maxFeePerGas: 1n,
   maxPriorityFeePerGas: 1n,
   // dummy signature, needs to be there so the SimpleAccount doesn't immediately revert because of invalid signature length
-  signature: dummySignature as Hex,
+  signature: DUMMY_SIG as Hex,
 };
 
 export const mockSponsorReturnType: SponsorUserOperationReturnType = {
@@ -45,13 +46,34 @@ export const mockSponsorReturnType: SponsorUserOperationReturnType = {
 export const mockEntryPoint = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
 export function useEnvironment(fixtureProjectName: string) {
-  beforeEach('Loading hardhat environment', function () {
+  before('Loading hardhat environment', async function () {
     process.chdir(path.join(__dirname, 'fixture-projects', fixtureProjectName));
+
+    // If doing integration testing we need to compile the contracts
+    if (fixtureProjectName === 'integration') {
+      await compileHardhatProject();
+    }
 
     this.hre = require('hardhat');
   });
 
-  afterEach('Resetting hardhat', function () {
+  after('Resetting hardhat', function () {
     resetHardhatContext();
+  });
+}
+
+async function compileHardhatProject(): Promise<void> {
+  return new Promise((resolve) => {
+    exec('npx hardhat compile', (error, _, stderr) => {
+      if (error) {
+        throw new Error(`exec error: ${error}`);
+      }
+
+      if (stderr) {
+        throw new Error(`stderr: ${stderr}`);
+      }
+
+      resolve();
+    });
   });
 }

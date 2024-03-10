@@ -28,5 +28,37 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Run unit tests
-        run: yarn test
+        run: yarn test:unit
+
+  integration:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out github repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+          
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: 18.x
+            cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Run integration tests
+        run: yarn test:integration
+        env:
+          E2E_BUNDLER_URL: ${{ secrets.E2E_BUNDLER_URL }}
+          E2E_PAYMASTER_URL: ${{ secrets.E2E_PAYMASTER_URL }}
+          E2E_PAYMASTER_TYPE: ${{ secrets.E2E_PAYMASTER_TYPE }}
+          E2E_SEPOLIA_RPC: ${{ secrets.E2E_SEPOLIA_RPC }}
 

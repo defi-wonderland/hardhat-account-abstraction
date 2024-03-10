@@ -1,13 +1,13 @@
+import 'dotenv/config';
+import init from 'debug';
 import { extendProvider } from 'hardhat/config';
 import { createPublicClient, http } from 'viem';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { createPaymasterClient } from './paymaster';
-import { simpleAccountFactoryAddress as constantSimpleAccountFactoryAddress } from './constants';
+import { SIMPLE_ACCOUNT_FACTORY_ADDRESS as constantSimpleAccountFactoryAddress } from './constants';
 import { GaslessProvider } from './gasless-provider';
-import { PaymasterType } from './types';
-import init from 'debug';
-import 'dotenv/config';
 import './type-extensions';
+import { interpretPaymasterType } from './interpreter';
 
 const log = init('hardhat:plugin:gasless');
 
@@ -15,7 +15,6 @@ extendProvider(async (provider, config, networkName) => {
   log(`Extending provider for network ${networkName}`);
 
   const netConfig = config.networks[networkName];
-  // TODO: support mnemonics
   if (!Array.isArray(netConfig.accounts)) {
     log(`Mnemonics are not yet supported, skipping`);
     return provider;
@@ -27,21 +26,21 @@ extendProvider(async (provider, config, networkName) => {
     return provider;
   }
 
-  const sponsoredTransaction = netConfig.sponsoredTransactions;
-  if (!sponsoredTransaction) {
+  const accountAbstraction = netConfig.accountAbstraction;
+  if (!accountAbstraction) {
     log(`No configuration for sponsored transactions set, skipping`);
     return provider;
   }
 
   const simpleAccountFactoryAddress =
-    sponsoredTransaction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
+    accountAbstraction.simpleAccountFactoryAddress ?? constantSimpleAccountFactoryAddress;
 
   const publicClient = createPublicClient({
     transport: http(netConfig.url),
   });
 
   const bundlerClient = createPimlicoBundlerClient({
-    transport: http(sponsoredTransaction.bundlerUrl),
+    transport: http(accountAbstraction.bundlerUrl),
   });
 
   // Check if bundler and public client share same chain Id
@@ -53,11 +52,13 @@ extendProvider(async (provider, config, networkName) => {
     throw new Error(message);
   }
 
+  const paymasterType = interpretPaymasterType(accountAbstraction.paymasterUrl);
+
   const paymasterClient = createPaymasterClient(
-    sponsoredTransaction.paymasterType as PaymasterType,
-    sponsoredTransaction.paymasterUrl,
+    paymasterType,
+    accountAbstraction.paymasterUrl,
     bundlerClient,
-    sponsoredTransaction.policyId,
+    accountAbstraction.policyId,
   );
 
   return await GaslessProvider.create(
@@ -67,6 +68,6 @@ extendProvider(async (provider, config, networkName) => {
     paymasterClient,
     publicClient,
     simpleAccountFactoryAddress,
-    sponsoredTransaction.smartAccount,
+    accountAbstraction.smartAccount,
   );
 });

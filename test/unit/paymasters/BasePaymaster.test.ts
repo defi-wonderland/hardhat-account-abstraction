@@ -1,12 +1,12 @@
 import { assert } from 'chai';
 import { http } from 'viem';
-import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
-import { PaymasterType } from '../../src/types';
-import { BasePaymaster } from '../../src/paymasters/BasePaymaster';
-import { createPaymasterClient } from '../../src/paymaster';
-import { mockUserOperation, mockEntryPoint } from '../helpers';
 import { stub, SinonStub } from 'sinon';
-import { convertBigIntsToString } from '../../src/utils';
+import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { PaymasterType } from '../../../src/types';
+import { BasePaymaster } from '../../../src/paymasters/BasePaymaster';
+import { createPaymasterClient } from '../../../src/paymaster';
+import { mockUserOperation, mockEntryPoint } from '../../helpers';
+import { convertBigIntsToString } from '../../../src/utils';
 
 describe('Base Paymaster', function () {
   const bundlerClient = createPimlicoBundlerClient({
@@ -16,7 +16,7 @@ describe('Base Paymaster', function () {
   const endpoint = 'http://localhost:3002';
 
   const paymasterClient = createPaymasterClient(
-    'base' as PaymasterType,
+    PaymasterType.Base,
     endpoint,
     bundlerClient,
     undefined,

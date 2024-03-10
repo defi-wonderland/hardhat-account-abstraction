@@ -1,10 +1,10 @@
 import { assert } from 'chai';
-import { createPaymasterClient } from '../src/paymaster';
-import { PaymasterType } from './types';
 import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { http } from 'viem';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import * as Pm from '../src/paymasters';
+import { createPaymasterClient } from '../../src/paymaster';
+import { PaymasterType } from '../../src/types';
+import * as Pm from '../../src/paymasters';
 
 describe('Paymaster Construction', function () {
   const bundlerClient = createPimlicoBundlerClient({
@@ -36,7 +36,7 @@ describe('Paymaster Construction', function () {
   });
 
   it('Should create a  base paymaster client', function () {
-    const paymasterClient = createPaymasterClient('base' as PaymasterType, endpoint, bundlerClient, undefined);
+    const paymasterClient = createPaymasterClient(PaymasterType.Base, endpoint, bundlerClient, undefined);
 
     assert.isTrue(paymasterClient instanceof Pm.BasePaymaster);
     assert.isTrue(paymasterClient.endpoint instanceof JsonRpcProvider);
@@ -61,11 +61,5 @@ describe('Paymaster Construction', function () {
     assert.throws(() => {
       createPaymasterClient('alchemy' as PaymasterType, endpoint, bundlerClient, undefined);
     }, 'Policy ID is required for Alchemy Paymaster');
-  });
-
-  it('Should fail to  create a  unknown paymaster client', function () {
-    assert.throws(() => {
-      createPaymasterClient('unknown' as PaymasterType, endpoint, bundlerClient, undefined);
-    }, 'Unknown paymaster type unknown');
   });
 });

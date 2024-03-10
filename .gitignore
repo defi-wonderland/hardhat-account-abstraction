@@ -68,3 +68,14 @@ typings/
 # Solidity compilation files
 out/
 cache/
+src/abi/**/*
+!src/abi/BatchDeployAndTransferOwnership.sol
+
+# Hardhat artifacts
+test/fixture-projects/integration/artifacts/**/*
+
+# Sponsored transactions JSON files
+test/fixture-projects/integration/sponsored-transactions/
+
+# Ignore the sponsored deployments from integration tests
+sponsored-transactions/

@@ -1,6 +1,9 @@
-# Sponsored Txns Hardhat Plugin
+[![Version](https://img.shields.io/npm/v/@defi-wonderland/hardhat-account-abstraction?label=Version)](https://www.npmjs.com/package/@defi-wonderland/hardhat-account-abstraction)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/defi-wonderland/hardhat-account-abstraction/blob/main/LICENSE)
 
-A plugin to send transactions to testnets without needing gas money!
+# Hardhat Account Abstraction
+
+A plugin to send sponsored transactions utilizing account abstraction!
 
 
 ## What
@@ -9,32 +12,65 @@ This plugin sponsors any transaction the user sends through the power of account
 
 ## Installation
 
-> **⚠ WARNING: Currently the package is not deployed and the installation steps will not work, these are the steps you would take when it is deployed**
-
-<br>
-
 
 ```bash
-yarn install @defi-wonderland/sponsored-txs-hardhat-plugin [list of peer dependencies]
+yarn install @defi-wonderland/hardhat-account-abstraction
 ```
 
 Import the plugin in your `hardhat.config.js`:
 
 ```js
-require("@defi-wonderland/sponsored-txs-hardhat-plugin");
+require("@defi-wonderland/hardhat-account-abstraction");
 ```
 
 Or if you are using TypeScript, in your `hardhat.config.ts`:
 
 ```ts
-import "@defi-wonderland/sponsored-txs-hardhat-plugin";
+import "@defi-wonderland/hardhat-account-abstraction";
 ```
 
 
 ## Required plugins
 
+> **NOTE: Only one of these packages is needed depending on what you are writing your scripts in**
+
+<br>
 
 - [@nomicfoundation/hardhat-ethers](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-ethers)
+- [@nomicfoundation/hardhat-viem](https://github.com/NomicFoundation/hardhat/tree/main/packages/hardhat-viem)
+
+## Quick Start
+
+1. Install the plugin from the [installation guide](#installation)
+
+1. Next we will need to get a bundler and paymaster to sponsor our transactions, for this example we will use [pimlico](https://docs.pimlico.io/) but this will work with any bundler and supported paymaster
+
+1. Navigate to your [pimlico dashboard](https://dashboard.pimlico.io/apikeys) and get your api key
+
+1. Now we can add this to our config and we should be good to go, for more custom configuration see [here](#configuration)
+
+```typescript
+import { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-ethers'; // Can also be viem if you are using viem
+import '@defi-wonderland/hardhat-account-abstraction';
+
+const config: HardhatUserConfig = {
+  solidity: '0.8.19',
+  defaultNetwork: 'sepolia',
+  networks: {
+    sepolia: {
+      url: "<RPC_URL>",
+      accounts: ["<PRIVATE_KEY>"],
+      accountAbstraction: {
+        bundlerUrl: "https://api.pimlico.io/v1/sepolia/rpc?apikey=<API_KEY>",
+        paymasterUrl: "https://api.pimlico.io/v2/sepolia/rpc?apikey=<API_KEY>",
+      }
+    }
+  }
+};
+
+export default config;
+```
 
 ## Tasks
 
@@ -47,8 +83,9 @@ This plugin creates no additional tasks.
 This plugin does not extend the hardhat runtime environment
 
 ## Configuration
+> **NOTE: Currently the plugin will only use the first private key in `accounts`**
 
-This plugin requires 3 new field inside a `sponsoredTransaction` object which will be nested inside each hardhat network that is set in the config
+This plugin requires 2 new fields inside an `accountAbstraction` object which will be nested inside each hardhat network that is set in the config
 
 This is an example of how to set it:
 
@@ -60,10 +97,9 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_RPC_URL as string,
       accounts: [process.env.PRIVATE_KEY as string],
-      sponsoredTransactions: {
+      accountAbstraction: {
         bundlerUrl: 'https://example.com',
         paymasterUrl: 'https://example.com',
-        paymasterType: 'pimlico'
       }
     }
   }
@@ -76,42 +112,59 @@ const config: HardhatUserConfig = {
 | ------------------------------ | ---------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------  |
 | `bundlerUrl`                   | The bundler that the UserOperations will be sent to                                                  | Yes      | No default                                  |
 | `paymasterUrl`                 | The paymaster API that will be used for sponsoring transactions                                      | Yes      | No default                                  |
-| `paymasterType`                | The type of paymaster                                                                                | Yes      | No default                                  |
 | `simpleAccountFactoryAddress`  | The simple account factory address you want to use                                                   | No       | 0x9406cc6185a346906296840746125a0e44976454  |
 | `smartAccount`                 | Address of a smart account to use in your scripts                                                    | No       | Will deploy one for you                     |
 | `policyId`                     | The policy id to use if your paymaster has one                                                       | No       | No default                                  | 
 
+### How does default smart account deployment work?
+
+When you use a `PRIVATE_KEY` and no set `smartAccount` in the config we will deploy a smart account for you, your signer will be the owner of the smart account, however the sender address for all interactions will be the `smartAccount` not the signer. 
+<br>
+
+This smart contract that gets deployed acts as a wallet that will be used to make transactions, all transactions require your signer's signature, to go deeper into the ERC-4337 standard [check out this article from cointelegraph](https://cointelegraph.com/learn/account-abstraction-guide-to-ethereums-erc-4337-standard).
+
+<br>
+We use your signer address as a salt when deploying the smart account so it will be unique to your signer and reuseable no matter how many times you run the scripts. 
+
 ### Supported Paymaster Types
 
-| Paymaster | Value     |
-| --------- | --------- |
-| Pimlico   | 'pimlico' |
-| Base      | 'base'    |
-| Alchemy   | 'alchemy' |
-| Stackup   | 'stackup' |
+The list of paymasters we currently support
 
+1. Pimlico
+1. Stackup
+1. Alchemy
+1. Base
 
 
 If you would like to add support for a new paymaster check out the [contributors guide](./CONTRIBUTORS.md#adding-a-new-paymaster-to-the-plugin)
 
 ### Supported Chains
 
-For a chain to be supported at the moment the only condition is the SimpleAccount Factory is deployed to the addres `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
+#### For a chain to be supported the conditions are:
 
-Currently the list of supported chains is, but not limited to the following:
+1. The SimpleAccount Factory is deployed to the address `0x9406cc6185a346906296840746125a0e44976454` or alternatively entered as an optional parameter in the config
+1. The [CreateXFactory](https://github.com/pcaversaccio/createx) needs to be deployed to its standard address
+
+<br>
+
+#### Currently the list of supported chains is, but not limited to the following:
 
 1. Ethereum Sepolia
-1. Ethereum  Goerli
 1. Polygon Mumbai
-1. Base Goerli
-1. Optimism Goerli
-1. Arbitrum Goerli
+1. Base Sepolia
+1. Optimism Sepolia
+1. Arbitrum Sepolia
+1. Mantle Testnet
+1. Avalanche Testnet (Fuji)
+1. Binance Smart Chain Testnet
+
+And more!
 
 ## Usage
 
 > **⚠ WARNING: Any non-zero msg.value call will not work as intended as paymaster's dont sponsor this value, in order to use native transfers or interact with payable functions you will need the native token of your chain in the smart account wallet beforehand**
 
-After you have setup the configuration for the `sponsoredTransactions` and you are using a network that has them enable you are good to go, you can right a simple script below and your transactions will be mined on the testnet that you have configured!
+After you have setup the configuration for the `accountAbstraction` and you are using a network that has them enable you are good to go, you can right a simple script below and your transactions will be mined on the testnet that you have configured!
 
 ```js
 const signer = await ethers.provider.getSigner();
@@ -132,7 +185,7 @@ Deploying contracts works just as any other transaction would, however due to th
 
 - **Contract addresses in scripts**
 
-    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#sponsored_getdeploymentfor)
+    Scripting with deployed contracts works pretty much out of the box with one caveat, the address that ethers provides for your address is wrong. This is because ethers predicts the deployment address by the default `CREATE` opcode standards which takes the transaction's `from` and `nonce` values, these values do not match that of our middlewares deployment so we expose a [custom method to get this address](#aa_getdeploymentfor). This issue is only present with libraries that hardcode the predicted address such as ethers. Other libraries use the receipt to retrieve the contract address such as viem, for those libraries the address returned will be correct as we modify the receipts in our middleware.
 
     <br>
 
@@ -166,7 +219,7 @@ Deploying contracts works just as any other transaction would, however due to th
   console.log(lockContract.target); // Wrong address
 
   const lockContractAddress = await network.provider.request({
-    method: 'sponsored_getDeploymentFor',
+    method: 'aa_getDeploymentFor',
     params: [lockContract.target]
   });
 
@@ -179,21 +232,19 @@ Deploying contracts works just as any other transaction would, however due to th
 
 This plugin adds additional JSON-RPC methods to be able to interact and get data from our custom provider middleware.
 
-### `sponsored_getSmartAccountAddress`
+### `aa_getSmartAccountAddress`
 
-**Description:** Returns the address for the smart account that would be used if we deploy one for you, the user does not provide a smart account address, this will be deterministically generated from the provided signer address:
-  - Parameters: 
-    - `signerAddress: 0x${string}` - The signer of the transactions
+**Description:** Returns the address for the smart account that is being used by the provider.
   - Example: 
   ```js
   const smartAccountAddress = await network.provider.request({
-      method: 'sponsored_getSmartAccountAddress',
-      params: [signer.address],
+      method: 'aa_getSmartAccountAddress',
+      params: [],
     });
     console.log(`Smart account address: ${smartAccountAddress}`);
   ```
 
-### `sponsored_getDeploymentFor`: 
+### `aa_getDeploymentFor`: 
 
 **Description:** Returns the address of which a contract was deployed through our middleware, [to learn more about why this is needed click here](#deploying-contracts)
   - Parameters:
@@ -204,10 +255,11 @@ This plugin adds additional JSON-RPC methods to be able to interact and get data
   const lockContract = await lock.deploy();
 
   const lockContractAddress = await network.provider.request({
-    method: 'sponsored_getDeploymentFor',
+    method: 'aa_getDeploymentFor',
     params: [lockContract.target] 
   });
   ```
+
 
 ## Contributors
 
@@ -215,12 +267,12 @@ If you want to learn how to add support for your own paymaster implementation ch
 
 <br>
 
-Sponsored Transaction was built with ❤️ by [Wonderland](https://defi.sucks).
+Hardhat Account Abstraction was built with ❤️ by [Wonderland](https://defi.sucks).
 
-Wonderland the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
+Wonderland the largest core development group in web3. Our commit ment is to a financial future that's open, decentralized, and accessible to all.
 
 [DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.
 
 ## Licensing
 
-The primary license for Sponsored Transactions is MIT, see [`LICENSE`](./LICENSE).
+The primary license for Hardhat Account Abstraction is MIT, see [`LICENSE`](./LICENSE).

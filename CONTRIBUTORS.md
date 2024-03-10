@@ -57,7 +57,7 @@ export * from './ExamplePaymaster';
 
 <br>
 
-4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum and update the natspec to reflect the changes, heres how we would do it with `ExamplePaymaster.ts`
+4. Next we will register your new paymaster as a type for users to select in their hardhat config. Go to `src/type.ts` and add your paymaster info to the `PaymasterType` enum and update the natspec to reflect the changes, heres how we would do it with `ExamplePaymaster.ts`. **It is important the value you set is unique to your API for our interpreter to properly parse it**. As you can see base is not set to `base` as there would be conflicts which providers that use it as a param to decide the chain so it is set to `paymaster.base` to be unique.
 
 <br>
 
@@ -72,7 +72,7 @@ export * from './ExamplePaymaster';
  */
 export enum PaymasterType {
   Pimlico = 'pimlico',
-  Base = 'base',
+  Base = 'paymaster.base',
   StackUp = 'stackup',
   Alchemy = 'alchemy',
   Example = 'example'
@@ -102,9 +102,6 @@ export function createPaymasterClient(
       return new Pm.AlchemyPaymaster(paymasterUrl, policyId);
     case PaymasterType.Example:
       return new Pm.ExamplePaymaster(paymasterUrl);
-
-    default:
-      throw new Error(`Unknown paymaster type ${paymasterType}`);
   }
 }
 ```
@@ -125,9 +122,9 @@ export function createPaymasterClient(
 
 1. Run `yarn link`
 
-1. Clone the [example repo](https://github.com/defi-wonderland/sponsored-txs-hardhat-example) and `cd` into it
+1. Clone the [example repo](https://github.com/defi-wonderland/hardhat-account-abstraction-example) and `cd` into it
 
-1. run `yarn link @defi-wonderland/sponsored-txs-hardhat-plugin`
+1. run `yarn link @defi-wonderland/hardhat-account-abstraction`
 
 1. Now open the example repo in your code editor of choice and navigate to the `hardhat.config.ts` file
 
@@ -143,10 +140,9 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_RPC_URL as string,
       accounts: [process.env.PRIVATE_KEY as string],
-      sponsoredTransactions: {
+      accountAbstraction: {
         bundlerUrl: 'https://example.com', // The bundler that the UserOperations will be sent to
         paymasterUrl: 'https://example.com', // The paymaster API that will be used for sponsoring transactions
-        paymasterType: 'example' // The type of paymaster it is
       }
     }
   }
@@ -165,3 +161,19 @@ PRIVATE_KEY=YOUR_PK
 9. Now we can test everything by running `npx hardhat run scripts/deploy.ts`
 
 10. Assuming all goes well and you are done testing your implementation feel free to make a PR to the official plugin with a description on how the reviewer can test your new paymaster and we will do our best to review it in a timely manner!
+
+### Running the integration tests
+
+1. When adding a paymaster we need to also run our integration tests inside the plugin's repository to do so follow these steps
+
+1. Set the environment variables:
+```
+# NOTE: Environment variables are only needed if you are running integration tests
+
+E2E_BUNDLER_URL=<bundler url>
+E2E_PAYMASTER_URL=<paymaster url we are adding>
+E2E_SEPOLIA_RPC=<rpc to sepolia>
+```
+<br>
+
+3. Run `yarn test:integration` and observe thne results

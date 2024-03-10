@@ -1,7 +1,7 @@
+import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 import { PaymasterType } from './types';
 import { Paymaster } from './paymasters/Paymaster';
 import * as Pm from './paymasters';
-import { PimlicoBundlerClient } from 'permissionless/clients/pimlico';
 
 /**
  * Creates a paymaster based on the paymaster type.
@@ -26,8 +26,5 @@ export function createPaymasterClient(
       return new Pm.BasePaymaster(paymasterUrl, bundlerClient);
     case PaymasterType.Alchemy:
       return new Pm.AlchemyPaymaster(paymasterUrl, policyId);
-
-    default:
-      throw new Error(`Unknown paymaster type ${paymasterType}`);
   }
 }

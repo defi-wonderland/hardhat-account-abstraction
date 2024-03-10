@@ -26,14 +26,25 @@ export type PartialUserOperation = {
  */
 export enum PaymasterType {
   Pimlico = 'pimlico',
-  Base = 'base',
+  Base = 'paymaster.base',
   StackUp = 'stackup',
   Alchemy = 'alchemy',
 }
 
+export type EstimateGasTxn = {
+  from?: `0x${string}`;
+  to?: `0x${string}`;
+  data?: `0x${string}`;
+  value?: bigint | `0x${string}`;
+};
+
 /**
- * Literal type of the paymaster types so input to the config can be a string
+ * The type for the getSmartAccountData function
+ * @property initCode The init code of the smart account
+ * @property senderAddress The sender address of the smart account
  */
-export type PaymasterTypeLiteral = keyof {
-  [K in keyof typeof PaymasterType as string]: K;
+
+export type GetSmartAccountDataReturnType = {
+  initCode: `0x${string}`;
+  senderAddress: `0x${string}`;
 };

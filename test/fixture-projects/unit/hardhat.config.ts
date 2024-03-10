@@ -8,10 +8,9 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     localhost: {
-      sponsoredTransactions: {
+      accountAbstraction: {
         bundlerUrl: 'http://localhost:3000',
         paymasterUrl: 'http://localhost:3001',
-        paymasterType: 'pimlico',
       },
     },
   },

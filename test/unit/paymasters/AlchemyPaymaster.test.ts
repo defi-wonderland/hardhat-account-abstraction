@@ -1,12 +1,12 @@
 import { assert } from 'chai';
 import { http } from 'viem';
-import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
-import { PaymasterType } from '../../src/types';
-import { createPaymasterClient } from '../../src/paymaster';
-import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../helpers';
 import { stub, SinonStub } from 'sinon';
-import { AlchemyPaymaster } from '../../src/paymasters/AlchemyPaymaster';
-import { convertBigIntsToString } from '../../src/utils';
+import { createPimlicoBundlerClient } from 'permissionless/clients/pimlico';
+import { PaymasterType } from '../../../src/types';
+import { createPaymasterClient } from '../../../src/paymaster';
+import { mockUserOperation, mockEntryPoint, mockSponsorReturnType } from '../../helpers';
+import { AlchemyPaymaster } from '../../../src/paymasters/AlchemyPaymaster';
+import { convertBigIntsToString } from '../../../src/utils';
 
 describe('Alchemy Paymaster', function () {
   const bundlerClient = createPimlicoBundlerClient({
